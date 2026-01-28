@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ fantasy_name }}</title>
+
+<!-- DataTables CSS -->
+
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css"
+/>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+ <link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"
+/>
+
+<!-- Buttons JS and dependencies -->
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+</head>
+<body>
+
+<h2>{{ fantasy_name }}</h2>
+
+<table id="data" class="display nowrap" style="width:100%">
+  <thead>
+    <tr>
+      {% for col in columns %}
+        <th>{{ col }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+      <tr>
+        {% for cell in row %}
+          {% if cell is number %}
+            {% if cell != cell %}  {# NaN check: NaN != NaN is True #}
+                <td data-order="-999999999">{{ cell }}</td>
+            {% else %}
+                <td data-order="{{ cell  | int | float}}">{{ cell }}</td>
+            {% endif %}
+             
+        {% else %}
+            <td data-order="{{ cell  | string | lower}}">{{ cell }}</td>
+        {% endif %}
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+$(document).ready(function () {
+    var table = $('#data').DataTable({
+        scrollX: true,           // enable horizontal scrolling
+        scrollY: '500px',        // vertical scroll height
+        scrollCollapse: true,
+        pageLength: 100,
+        columnDefs: [
+        { type: 'string', targets: [0,1] },  // numeric column indexes
+        { type: 'num', targets: '_all' } // all other columns
+    ],
+        dom: 'Bfrtip',       // This tells DataTables to show buttons
+        buttons: [
+            {
+                extend: 'csvHtml5',
+                text: 'Download CSV',
+                title: 'MyData', // filename when downloading
+                exportOptions: {
+                    columns: ':visible' // export all visible columns
+                }
+            }
+        ]
+    });
+
+    // Freeze the top row
+    new $.fn.dataTable.FixedHeader(table);
+
+    // Freeze the first 4 columns
+    new $.fn.dataTable.FixedColumns(table, {
+        leftColumns: 3
+    });
+});
+</script>
+
+
+</body>
+</html>

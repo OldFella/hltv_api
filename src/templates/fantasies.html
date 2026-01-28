@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Available Fantasies</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input { margin-bottom: 20px; padding: 5px; width: 300px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+    a { text-decoration: none; color: #007BFF; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<h2>Available Fantasy Spreadsheets</h2>
+
+<input type="text" id="searchInput" placeholder="Search fantasies...">
+
+<ul id="folderList">
+  {% for folder, fantasy_name in folders.items() %}
+    <li>
+      <a href="/spreadsheet/{{ folder | urlencode }}">{{ fantasy_name }}</a>
+    </li>
+  {% endfor %}
+</ul>
+
+<script>
+  const input = document.getElementById('searchInput');
+  const ul = document.getElementById('folderList');
+  const liList = ul.getElementsByTagName('li');
+
+  input.addEventListener('keyup', function() {
+    const filter = input.value.toLowerCase();
+    for (let i = 0; i < liList.length; i++) {
+      const text = liList[i].innerText.toLowerCase();
+      liList[i].style.display = text.includes(filter) ? '' : 'none';
+    }
+  });
+</script>
+
+</body>
+</html>

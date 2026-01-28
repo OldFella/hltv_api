@@ -9,3 +9,4 @@ SQLAlchemy==2.0.13
 python-dotenv
 uvicorn==0.22.0 
 pydantic
+odfpy
