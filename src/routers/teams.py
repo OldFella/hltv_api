@@ -18,6 +18,17 @@ def get_db_values():
 
 TEAM_NAMES, TEAM_IDS = get_db_values()
 
+@router.get("/all/")
+async def read_item() -> list[item]:
+    query = select(teams.teamid, teams.name)
+    values = []
+    keys = ['id', 'name']
+    with engine.connect() as con:
+        results = np.array(con.execute(query).fetchall()).squeeze()
+        for result in results:
+            values.append(dict(zip(keys,list(result))))
+    return values
+
 @router.get("/id/{teamid}")
 async def read_item(teamid) -> item:
     if teamid not in TEAM_IDS:
