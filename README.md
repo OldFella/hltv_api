@@ -8,29 +8,29 @@ The API will be read-only, therefore most request will be GET requests.
 
  - teams: 
     - GET all teams:
-        """bash
+        ```bash
         curl '<url>/teams/all/'
-        """
+        ```
     - GET `teamid` by `name`:
-        """bash
+        ```bash
         curl '<url>/teams/name/<teamname>'
-        """
+        ```
     - GET `name` by `teamid`:
-        """bash
+        ```bash
         curl '<url>/teams/id/<teamid>'
-        """
+        ```
     
     - GET matchhistory of a `team` (optional against a specific opponent):
-        """bash
+        ```bash
         curl '<url>/teams/matchhistory/<teamname1>?vs=<teamname2>'
-        """
+        ```
 
 -  matches:
     - GET all matches:
-         """bash
+         ```bash
         curl '<url>/matches/all/'
-        """
+        ```
     - GET match:
-         """bash
+         ```bash
         curl '<url>/matches/<matchid>'
-        """
+        ```
