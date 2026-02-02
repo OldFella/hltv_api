@@ -1,6 +1,8 @@
-from ..db.classes import matches
-from ..db.session import engine 
-from ..db.models import match
+import sys
+sys.path.append('../')
+from db.classes import matches
+from db.session import engine 
+from db.models import match
 from fastapi import APIRouter
 from sqlalchemy import select
 

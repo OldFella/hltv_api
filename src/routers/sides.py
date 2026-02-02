@@ -1,8 +1,10 @@
-from ..db.classes import sides
-from ..db.session import engine 
+import sys
+sys.path.append('../')
+from db.classes import sides
+from db.session import engine 
 from fastapi import APIRouter
 from sqlalchemy import select
-from ..db.models import item
+from db.models import item
 
 
 router = APIRouter(prefix = '/sides',

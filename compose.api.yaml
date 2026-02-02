@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: hltv_api
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"  # Expose FastAPI to host if needed
+    environment:
+      DB_HOST: db
+      DB_NAME: hltv
+      DB_USER: user_read_only
+      DB_PASSWORD: readerpass
+
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    external: true

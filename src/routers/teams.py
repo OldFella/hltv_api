@@ -1,6 +1,8 @@
-from ..db.classes import teams, sides, maps, matches
-from ..db.session import engine 
-from ..db.models import item, matchhistory
+import sys
+sys.path.append('../')
+from db.classes import teams, sides, maps, matches
+from db.session import engine 
+from db.models import item, matchhistory
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, and_
 import numpy as np
