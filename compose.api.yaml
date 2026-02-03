@@ -1,25 +1,31 @@
-version: '3.9'
-
 services:
   web:
     build: .
     container_name: hltv_api
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: ["/app/src/wait-for-it.sh", "db:5432", "--", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
-      - .:/app
-    ports:
-      - "8000:8000"  # Expose FastAPI to host if needed
-    environment:
-      DB_HOST: db
-      DB_NAME: hltv
-      DB_USER: user_read_only
-      DB_PASSWORD: readerpass
-
+      - ./src:/app/src
+    env_file:
+      - .env
     networks:
       - internal
-
-volumes:
-  postgres_data:
+    expose:
+      - "8000"  # Internal only; Nginx will proxy
+    environment:
+        PYTHONPATH: /app
+  nginx:
+    image: nginx:alpine
+    container_name: hltv_nginx
+    ports:
+      - "80:80"      # HTTP redirect
+      #- "443:443"    # HTTPS
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certs:/etc/letsencrypt
+    depends_on:
+      - web
+    networks:
+      - internal
 
 networks:
   internal:
