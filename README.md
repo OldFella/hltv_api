@@ -96,10 +96,10 @@ http://localhost:8000
 ## 🧪 Examples
 ### Using curl (Live API)
 
-# Get all teams
+#### Get all teams
 curl http://csapi.de/teams/all/
 
-# Get a specific match
+#### Get a specific match
 curl http://csapi.de/matches/12345
 
 ---
