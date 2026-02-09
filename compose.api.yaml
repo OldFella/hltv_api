@@ -13,20 +13,38 @@ services:
       - "8000"  # Internal only; Nginx will proxy
     environment:
         PYTHONPATH: /app
+        
   nginx:
     image: nginx:alpine
     container_name: hltv_nginx
     ports:
       - "80:80"      # HTTP redirect
-      #- "443:443"    # HTTPS
+      - "443:443"    # HTTPS
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./certs:/etc/letsencrypt
+      - ./nginx/html:/var/www/certbot
     depends_on:
       - web
     networks:
       - internal
 
+  certbot:
+    image: certbot/certbot
+    container_name: hltv_certbot
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./nginx/html:/var/www/certbot
+    entrypoint: ""
+    command: >
+      sh -c "trap exit TERM;
+             while :; do
+               certbot renew --webroot -w /var/www/certbot --quiet;
+               sleep 12h;
+             done"
+    restart: unless-stopped
+
 networks:
   internal:
     external: true
+
