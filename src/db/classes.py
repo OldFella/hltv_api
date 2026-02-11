@@ -21,6 +21,12 @@ class maps(Base):
     mapid = Column(Integer, primary_key=True)
     name = Column(String)
 
+class match_overview(Base):
+    __tablename__ = 'match_overview'
+    matchid = Column(Integer, primary_key = True)
+    event = Column(String)
+    date = Column(Date)
+
 class matches(Base):
     __tablename__ = 'matches'
     matchid = Column(Integer, primary_key = True)
@@ -28,7 +34,6 @@ class matches(Base):
     mapid = Column(Integer, primary_key = True)
     sideid = Column(Integer, primary_key = True)
     score = Column(Integer)
-    date = Column(Date)
 
 class player_stats(Base):
     matchid= Column(Integer, primary_key = True)

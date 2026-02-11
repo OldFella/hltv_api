@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../')
-from db.classes import teams, sides, maps, matches
+from db.classes import teams, sides, maps, matches, match_overview
 from db.session import engine 
 from db.models import item, matchhistory
 from fastapi import APIRouter, HTTPException
@@ -72,9 +72,11 @@ async def read_item(team, vs = None ,side = 'total', map = 'All') -> list[matchh
                                 m1.score,
                                 m2.score,
                                 m2.teamid,
-                                m1.date).join(m2,
-                                                and_(m1.matchid == m2.matchid, 
-                                                     m1.teamid != m2.teamid)).where(m1.teamid == teamid)
+                                match_overview.date,
+                                match_overview.event).join(m2,
+                                                and_(m1.matchid == m2.matchid,
+                                                    m1.teamid != m2.teamid)).where(m1.teamid == teamid)
+        get_matchhistory = get_matchhistory.join(match_overview, m1.matchid == match_overview.matchid)
         get_matchhistory = get_matchhistory.where(and_(m1.sideid == m2.sideid, m1.mapid == m2.mapid))
         get_matchhistory = get_matchhistory.where(and_(m1.sideid == sideid, m1.mapid == mapid))
         if vs != None:
@@ -82,7 +84,7 @@ async def read_item(team, vs = None ,side = 'total', map = 'All') -> list[matchh
             vsid = np.array(con.execute(get_vsid).fetchone()).item()
             get_vsid
             get_matchhistory = get_matchhistory.where(m2.teamid == vsid)
-        get_matchhistory= get_matchhistory.order_by(m1.date.desc())
+        get_matchhistory= get_matchhistory.order_by(match_overview.date.desc())
         matchhistory = np.array(con.execute(get_matchhistory).fetchall())
     
         result = []
@@ -94,7 +96,8 @@ async def read_item(team, vs = None ,side = 'total', map = 'All') -> list[matchh
                      'score':m[1],
                      'opponent':vs,
                      'score_opponent':m[2],
-                     'date': m[4]}
+                     'date': m[4],
+                     'event': m[5]}
             if vs == None:
                 get_vsname = select(teams.name).where(teams.teamid == m[3])
                 vs_name = np.array(con.execute(get_vsname).fetchone()).item()

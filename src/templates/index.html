@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CS API</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  body {
+    margin: 0;
+    background: #020617;
+    color: #e5e7eb;
+    font-family: system-ui, sans-serif;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: auto;
+    padding: 16px;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    gap: 8px;
+  }
+
+  a.home-logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #22c55e;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: #0d1117;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  a.home-logo:hover {
+    background: #22c55e;
+    color: #020617;
+  }
+
+  a.button {
+    color: #020617;
+    background: #22c55e;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  a.button:hover {
+    background: #16a34a;
+  }
+
+  .card {
+    background: #020617;
+    border-radius: 12px;
+    border: 1px solid #1f2933;
+    padding: 16px;
+  }
+
+  .card-title {
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .match {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    border-bottom: 1px solid #1f2933;
+    gap: 8px;
+  }
+
+  .match-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  /* === 40 / 20 / 40 SCORE LAYOUT === */
+  .match-scores {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .team {
+    flex: 0 0 46%;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .team-left {
+    text-align: right;
+    padding-right: 4px;
+  }
+
+  .team-right {
+    text-align: left;
+    padding-left: 4px;
+  }
+
+  .score-center {
+    flex: 0 0 8%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+  }
+
+  .green-score { color: #22c55e; }
+  .red-score { color: #ef4444; }
+  .neutral-score { color: #e5e7eb; }
+
+  .match-event-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile layout */
+  @media (max-width: 600px) {
+    .match-scores {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .team,
+    .score-center {
+      flex: none;
+      width: 100%;
+      text-align: center;
+      padding: 0;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <a href="/" class="home-logo">CS API</a>
+    <div>
+      <a class="button" href="/docs">API Docs →</a>
+      <a class="button" href="/spreadsheet/">Spreadsheet →</a>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2 class="card-title">Latest Results</h2>
+    <div id="results">Loading…</div>
+  </div>
+</div>
+
+<script>
+fetch("/results/latest")
+  .then(r => r.json())
+  .then(data => {
+    const el = document.getElementById("results");
+
+    if (!data.length) {
+      el.textContent = "No results available.";
+      return;
+    }
+
+    el.innerHTML = "";
+
+    data.forEach(m => {
+      const row = document.createElement("div");
+      row.className = "match";
+
+      const teamColor =
+        m.score > m.score_opponent ? "green-score" :
+        m.score < m.score_opponent ? "red-score" :
+        "neutral-score";
+
+      const oppColor =
+        m.score_opponent > m.score ? "green-score" :
+        m.score_opponent < m.score ? "red-score" :
+        "neutral-score";
+
+      row.innerHTML = `
+        <div class="match-left">
+          <div class="match-scores">
+            <div class="team team-left">${m.team}</div>
+
+            <div class="score-center">
+              <span class="${teamColor}">${m.score}</span>
+              <span>-</span>
+              <span class="${oppColor}">${m.score_opponent}</span>
+            </div>
+
+            <div class="team team-right">${m.opponent}</div>
+          </div>
+
+          <div class="match-event-date">
+            <span>${m.event}</span>
+            <span>${m.date}</span>
+          </div>
+        </div>
+      `;
+
+      el.appendChild(row);
+    });
+  })
+  .catch(err => {
+    console.error("Failed to fetch results:", err);
+    document.getElementById("results").textContent =
+      "Could not load results.";
+  });
+</script>
+</body>
+</html>
+
