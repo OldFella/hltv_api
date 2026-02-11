@@ -1,26 +1,49 @@
-version: '3.9'
-
 services:
   web:
     build: .
     container_name: hltv_api
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: ["/app/src/wait-for-it.sh", "db:5432", "--", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
-      - .:/app
-    ports:
-      - "8000:8000"  # Expose FastAPI to host if needed
+      - ./src:/app/src
+    env_file:
+      - .env
+    networks:
+      - internal
+    expose:
+      - "8000"  # Internal only; Nginx will proxy
     environment:
-      DB_HOST: db
-      DB_NAME: hltv
-      DB_USER: user_read_only
-      DB_PASSWORD: readerpass
-
+        PYTHONPATH: /app
+  nginx:
+    image: nginx:alpine
+    container_name: hltv_nginx
+    ports:
+      - "80:80"      # HTTP redirect
+      - "443:443"    # HTTPS
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certs:/etc/letsencrypt
+      - ./nginx/html:/var/www/certbot
+    depends_on:
+      - web
     networks:
       - internal
 
-volumes:
-  postgres_data:
+  certbot:
+    image: certbot/certbot
+    container_name: hltv_certbot
+    volumes:
+      - ./certs:/etc/letsencrypt
+      - ./nginx/html:/var/www/certbot
+    entrypoint: ""
+    command: >
+      sh -c "trap exit TERM;
+             while :; do
+               certbot renew --webroot -w /var/www/certbot --quiet;
+               sleep 12h;
+             done"
+    restart: unless-stopped
 
 networks:
   internal:
     external: true
+

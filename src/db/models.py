@@ -13,6 +13,7 @@ class match(BaseModel):
     sideid: int
     score: int
     date: date
+    event: str
 
 class matchhistory(BaseModel):
     matchid: int
@@ -23,3 +24,4 @@ class matchhistory(BaseModel):
     opponent: str
     score_opponent: int
     date: date
+    event: str

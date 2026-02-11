@@ -4,6 +4,10 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app/src
 
+# Install netcat (required for wait-for-it.sh)
+RUN apt-get update && apt-get install -y netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy requirements first (for caching)
 COPY ./requirements.txt .
 
