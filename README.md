@@ -3,7 +3,8 @@
 A RESTful API for exposing Counter-Strike match and team data gathered with an HLTV scraper.  
 Built in Python, this API provides structured endpoints for accessing HLTV.org–derived data for use in analytics tools, bots, dashboards, or other applications.
 
-> **Live API:** http://csapi.de  
+> **Website:** https://www.csapi.de  
+> **Live API:** https://api.csapi.de  
 > **Status:** Active, read-only API
 
 ---
@@ -14,12 +15,12 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 - Get a list of all teams
 - Look up a team name by ID
 - Look up a team ID by name
-- Retrieve a team’s match history
-- Filter match history by opponent
 
 ### Matches
 - Retrieve all matches
 - Retrieve a specific match by ID
+- Retrieve match maps with scores
+- Get match winner information
 
 ### API Design
 - Read-only (GET requests only)
@@ -37,13 +38,13 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 - **Data Source:** HLTV.org
 - **API Style:** REST
 - **Response Format:** JSON
-- **Deployment:** Self-hosted (Linux server)
+- **Deployment:** Self-hosted (Linux server + Docker)
 - **Version Control:** Git + GitHub
 
 ---
 
 ## 🌍 Base URL
-http://csapi.de/
+https://www.csapi.de/
 
 ---
 
@@ -63,8 +64,7 @@ pip install -r requirements.txt
 
 Run the API locally:
 
-python app.py
-
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 
 By default, the local API will be available at:
 
@@ -78,18 +78,40 @@ http://localhost:8000
 
 | Endpoint                               | Description                       |
 | -------------------------------------- | --------------------------------- |
-| `/teams/all/`                          | Get all teams                     |
+| `/teams/<?teamname>`                   | Get all teams                     |
 | `/teams/id/<teamid>`                   | Get team name by ID               |
-| `/teams/name/<teamname>`               | Get team ID by name               |
-| `/teams/matchhistory/<team>`           | Get match history for a team      |
-| `/teams/matchhistory/<team>?vs=<team>` | Get match history vs another team |
 
 ### Matches
 
-| Endpoint             | Description       |
-| -------------------- | ----------------- |
-| `/matches/all/`      | Get all matches   |
-| `/matches/<matchid>` | Get a match by ID |
+| Endpoint                                         | Description                 |
+| ------------------------------------------------ | --------------------------- |
+| `/matches/`                                      | Get all matches             |
+| `/matches/matches/?limit=<limit>&offset=<offset>`| Get all matches with paging |
+| `/matches/<matchid>`                             | Get a match result by ID    |
+| `/matches/<matchid>/maps`                        | Get a map results by ID     |
+
+---
+
+## 📄 Example Responses
+### Match with maps and winner
+
+```json
+{
+  "id": 2389666,
+  "team1": {"id": 8297, "name": "FURIA", "score": 1},
+  "team2": {"id": 9565, "name": "Vitality", "score": 3},
+  "date": "2026-02-08",
+  "event": "IEM Kraków 2026",
+  "maps": [
+    {"id": 2, "name": "ovp", "team1_score": 10, "team2_score": 13},
+    {"id": 5, "name": "nuke", "team1_score": 2, "team2_score": 13},
+    {"id": 6, "name": "mrg", "team1_score": 13, "team2_score": 11},
+    {"id": 7, "name": "inf", "team1_score": 8, "team2_score": 13}
+  ],
+  "best_of": 5,
+  "winner": {"id": 9565, "name": "Vitality"}
+}
+```
 
 ---
 
@@ -97,10 +119,24 @@ http://localhost:8000
 ### Using curl (Live API)
 
 #### Get all teams
-curl http://csapi.de/teams/all/
+curl https://api.csapi.de/teams/
 
 #### Get a specific match
-curl http://csapi.de/matches/12345
+curl https://api.csapi.de/matches/2389666
+
+#### Get match maps
+curl https://api.csapi.de/matches/2389666/maps
+
+#### Get paginated matches
+curl "https://api.csapi.de/matches/all/?limit=20&offset=0"
+
+---
+
+## ⚠️ TODO
+
+- Add **player stats for the matches** (per match/map performance)
+- Add **player stats** (overall player info, rankings, etc.)
+- Add pagination and filtering for `/matches/`
 
 ---
 
