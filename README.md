@@ -63,9 +63,9 @@ pip install -r requirements.txt
 ## 🛠 Usage
 
 Run the API locally:
-
-`uvicorn src.main:app --reload --host 0.0.0.0 --port 8000`
-
+```sh
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
 By default, the local API will be available at:
 
 http://localhost:8000
@@ -119,17 +119,24 @@ http://localhost:8000
 ### Using curl (Live API)
 
 #### Get all teams
-`curl https://api.csapi.de/teams/`
+```sh 
+curl https://api.csapi.de/teams/
+```
 
 #### Get a specific match
-`curl https://api.csapi.de/matches/2389666`
+```sh
+curl https://api.csapi.de/matches/2389666
+```
 
 #### Get match maps
-`curl https://api.csapi.de/matches/2389666/maps`
+```sh
+curl https://api.csapi.de/matches/2389666/maps
+```
 
 #### Get paginated matches
-`curl "https://api.csapi.de/matches/all/?limit=20&offset=0"`
-
+```sh
+curl "https://api.csapi.de/matches/all/?limit=20&offset=0"
+```
 ---
 
 ## ⚠️ TODO
