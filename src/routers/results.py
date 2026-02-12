@@ -9,7 +9,8 @@ from sqlalchemy.sql.expression import func
 import numpy as np
 from sqlalchemy.orm import aliased
 
-router = APIRouter(prefix="/results")
+router = APIRouter(prefix = '/results',
+                   tags = ['results'])
 
 @router.get("/latest")
 async def get_latest_results() -> list[MatchHistory]:

@@ -44,7 +44,8 @@ async def get_map_results(matchid)-> MapResponse:
         }
         map_list.append(map_dict)
     result['maps'] = map_list
-    result['best_of']= best_of
+    result['best_of']= m['best_of']
+    result['winner'] = m['winner']
     return result
 
 

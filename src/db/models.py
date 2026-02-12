@@ -55,3 +55,4 @@ class MapResponse(BaseModel):
     event: str
     maps: list[MapScore]
     best_of: int
+    winner: Item

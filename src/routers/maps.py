@@ -1,20 +1,20 @@
 import sys
 sys.path.append('../')
-from db.classes import sides
+from db.classes import maps
 from db.session import engine 
 from fastapi import APIRouter
 from sqlalchemy import select
 from db.models import Item
 import numpy as np
 
+router = APIRouter(prefix = '/maps',
+                   tags = ['map'])
 
-router = APIRouter(prefix = '/sides',
-                   tags = ['sides'])
 
 
 @router.get("/")
-async def get_sides()->list[Item]:
-    statement = select(sides.sideid,sides.name)
+async def get_maps()->list[Item]:
+    statement = select(maps.mapid,maps.name)
     with engine.connect() as con:
 
         results = np.array(con.execute(statement).fetchall())
@@ -23,11 +23,10 @@ async def get_sides()->list[Item]:
 
     return value
 
-
-@router.get("/{sideid}")
-async def get_side_name(sideid)->Item:
-    statement = select(sides.name).where(sides.sideid == sideid)
-    value = {'id':sideid}
+@router.get("/{mapid}")
+async def get_map_name(mapid)->Item:
+    statement = select(maps.name).where(maps.mapid == mapid)
+    value = {'id':mapid}
     with engine.connect() as con:
 
         results = con.execute(statement).all()

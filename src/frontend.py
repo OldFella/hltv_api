@@ -5,7 +5,7 @@ from fastapi.requests import Request
 from core.config import settings
 from db.session import engine 
 from db.base_class import Base
-from routers import spreadsheets, results, download, teams, matches
+from routers import spreadsheets, results, download#, teams, matches
 
 
 def create_tables():
@@ -24,8 +24,8 @@ app = start_application()
 app.include_router(spreadsheets.router)
 app.include_router(results.router)
 app.include_router(download.router)
-app.include_router(teams.router)
-app.include_router(matches.router)
+# app.include_router(teams.router)
+# app.include_router(matches.router)
 
 
 
