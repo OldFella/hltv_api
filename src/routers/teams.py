@@ -2,11 +2,12 @@ import sys
 sys.path.append('../')
 from db.classes import teams, sides, maps, matches, match_overview
 from db.session import engine 
-from db.models import item, matchhistory
-from fastapi import APIRouter, HTTPException
+from db.models import Item
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, and_
 import numpy as np
 from sqlalchemy.orm import aliased
+from typing import List, Optional
 
 router = APIRouter(prefix = '/teams',
                    tags = ['teams'])
@@ -20,19 +21,23 @@ def get_db_values():
 
 TEAM_NAMES, TEAM_IDS = get_db_values()
 
-@router.get("/all/")
-async def read_item() -> list[item]:
+@router.get("/", response_model=List[Item])
+async def get_teams(name: Optional[str] = Query(None, description="Filter by team name")) -> list[Item]:
     query = select(teams.teamid, teams.name)
+    if name:
+        if name not in TEAM_NAMES:
+            raise HTTPException(status_code=404, detail="Item not found")
+        query = query.where(teams.name == name)
     values = []
     keys = ['id', 'name']
     with engine.connect() as con:
-        results = np.array(con.execute(query).fetchall()).squeeze()
+        results = np.array(con.execute(query).fetchall())
         for result in results:
             values.append(dict(zip(keys,list(result))))
     return values
 
-@router.get("/id/{teamid}")
-async def read_item(teamid) -> item:
+@router.get("/{teamid}")
+async def get_team_name(teamid) -> Item:
     if teamid not in TEAM_IDS:
         raise HTTPException(status_code=404, detail="Item not found")
     statement = select(teams.name).where(teams.teamid == teamid)
@@ -41,66 +46,3 @@ async def read_item(teamid) -> item:
         result = np.array(con.execute(statement).fetchone()).squeeze()
         value['name'] = str(result)
     return value
-
-@router.get("/name/{team}")
-async def read_item(team)->item:
-    if team not in TEAM_NAMES:
-        raise HTTPException(status_code=404, detail="Item not found")
-    statement = select(teams.teamid).where(teams.name == team)
-    value = {}
-    with engine.connect() as con:
-        result = np.array(con.execute(statement).fetchone()).squeeze()
-        value['id']= str(result)
-    value['name'] = team
-    return value
-
-
-@router.get("/matchhistory/{team}")
-async def read_item(team, vs = None ,side = 'total', map = 'All') -> list[matchhistory]:
-    get_teamid = select(teams.teamid).where(teams.name == team)
-    get_sideid = select(sides.sideid).where(sides.name == side)
-    get_mapid = select(maps.mapid).where(maps.name == map)
-
-    with engine.connect() as con:
-        teamid = np.array(con.execute(get_teamid).fetchone()).item()
-        sideid = np.array(con.execute(get_sideid).fetchone()).item()
-        mapid = np.array(con.execute(get_mapid).fetchone()).item()
-
-        m1 = aliased(matches)
-        m2 = aliased(matches)
-        get_matchhistory = select(m1.matchid,
-                                m1.score,
-                                m2.score,
-                                m2.teamid,
-                                match_overview.date,
-                                match_overview.event).join(m2,
-                                                and_(m1.matchid == m2.matchid,
-                                                    m1.teamid != m2.teamid)).where(m1.teamid == teamid)
-        get_matchhistory = get_matchhistory.join(match_overview, m1.matchid == match_overview.matchid)
-        get_matchhistory = get_matchhistory.where(and_(m1.sideid == m2.sideid, m1.mapid == m2.mapid))
-        get_matchhistory = get_matchhistory.where(and_(m1.sideid == sideid, m1.mapid == mapid))
-        if vs != None:
-            get_vsid = select(teams.teamid).where(teams.name == vs)
-            vsid = np.array(con.execute(get_vsid).fetchone()).item()
-            get_vsid
-            get_matchhistory = get_matchhistory.where(m2.teamid == vsid)
-        get_matchhistory= get_matchhistory.order_by(match_overview.date.desc())
-        matchhistory = np.array(con.execute(get_matchhistory).fetchall())
-    
-        result = []
-        for m in matchhistory:
-            match = {'matchid':m[0],
-                     'map': map,
-                     'side':side,
-                     'team':team,
-                     'score':m[1],
-                     'opponent':vs,
-                     'score_opponent':m[2],
-                     'date': m[4],
-                     'event': m[5]}
-            if vs == None:
-                get_vsname = select(teams.name).where(teams.teamid == m[3])
-                vs_name = np.array(con.execute(get_vsname).fetchone()).item()
-                match['opponent'] = vs_name
-            result.append(match)
-    return result

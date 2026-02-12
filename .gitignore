@@ -4,4 +4,6 @@ __pycache__/
 .env
 *.ods
 certs/
-nginx/
+src/nginx/
+*.conf
+default.conf

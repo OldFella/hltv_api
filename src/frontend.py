@@ -5,8 +5,7 @@ from fastapi.requests import Request
 from core.config import settings
 from db.session import engine 
 from db.base_class import Base
-from routers import sides, matches, teams, spreadsheets, results, download
-from fastapi.middleware.cors import CORSMiddleware
+from routers import spreadsheets, results, download, teams, matches
 
 
 def create_tables():
@@ -22,22 +21,19 @@ def start_application():
 
 app = start_application()
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["https://csapi.de"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-app.include_router(sides.router)
-app.include_router(matches.router)
-app.include_router(teams.router)
+app.include_router(spreadsheets.router)
 app.include_router(results.router)
+app.include_router(download.router)
+app.include_router(teams.router)
+app.include_router(matches.router)
 
 
 
-@app.get("/")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
 async def homepage(request: Request):
-    return {'':'Welcome to my api service!',
-            'docs': 'api.csapi.de/docs'}
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request},
+    )

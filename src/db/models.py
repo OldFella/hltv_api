@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date
 
 
-class item(BaseModel):
+class Item(BaseModel):
     id: int
     name: str
 
@@ -15,7 +15,7 @@ class match(BaseModel):
     date: date
     event: str
 
-class matchhistory(BaseModel):
+class MatchHistory(BaseModel):
     matchid: int
     map: str
     side: str
@@ -25,3 +25,33 @@ class matchhistory(BaseModel):
     score_opponent: int
     date: date
     event: str
+
+class TeamScore(BaseModel):
+    id: int
+    name: str
+    score: int
+
+class MatchResponse(BaseModel):
+    id: int
+    maps: list[Item]
+    team1: TeamScore
+    team2: TeamScore
+    best_of: int
+    date: date
+    event: str
+    winner: Item
+
+class MapScore(Item):
+    team1_score: int
+    team2_score: int
+
+
+
+class MapResponse(BaseModel):
+    id: int
+    team1: TeamScore
+    team2: TeamScore
+    date: date
+    event: str
+    maps: list[MapScore]
+    best_of: int

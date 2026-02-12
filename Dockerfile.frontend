@@ -1,0 +1,24 @@
+# Use official Python image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app/src
+
+# Install netcat (required for wait-for-it.sh)
+RUN apt-get update && apt-get install -y netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first (for caching)
+COPY ./requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the app
+COPY src/ .
+
+# Expose port FastAPI will run on
+EXPOSE 8000
+
+# Run the app with Uvicorn
+CMD ["uvicorn", "frontend:app", "--host", "0.0.0.0", "--port", "8000"]
