@@ -41,4 +41,4 @@ app.include_router(results.router)
 @app.get("/")
 async def homepage(request: Request):
     return {'Hello':'Welcome to my api service!',
-            'docs': 'api.csapi.de/docs'}
+            'docs': "https://api.csapi.de/docs"}
