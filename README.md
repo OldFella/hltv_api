@@ -29,7 +29,7 @@ Built in Python, this API provides structured endpoints for accessing HLTV.orgâ€
 
 ### Update Frequency
 
-All data provided by this API is refreshed once per day, so recent matches or roster changes may take up to 24 hours to appear.
+>All data provided by this API is refreshed once per day, so recent matches or roster changes may take up to 24 hours to appear.
 
 ---
 
