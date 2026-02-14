@@ -4,10 +4,11 @@ from db.classes import teams, sides, maps, matches, match_overview
 from db.session import engine 
 from db.models import Item, match, MatchResponse, MapResponse
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, or_
 import numpy as np
 from sqlalchemy.orm import aliased
 from typing import List, Optional
+from sqlalchemy import func
 
 import numpy as np
 
@@ -27,102 +28,164 @@ async def get_match_results(matchid) -> MatchResponse:
 
 @router.get("/{matchid}/maps")
 async def get_map_results(matchid)-> MapResponse:
-    m = get_matches(matchid = matchid)[0]
-    maps = m['maps']
-    result = m
-    result.pop('maps')
-    map_list = []
-    for map in maps:
-        if map['id'] == 0:
-            continue
-        r = get_matches(matchid, team= None, sideid = 0, mapid = map['id'])[0]
-        map_dict = {
-            'id':map['id'],
-            'name':map['name'],
-            'team1_score': r['team1']['score'],
-            'team2_score': r['team2']['score']
-        }
-        map_list.append(map_dict)
-    result['maps'] = map_list
-    result['best_of']= m['best_of']
-    result['winner'] = m['winner']
+    return get_matches(matchid = matchid, mapid = None)[0]
+    
+
+
+def get_matches(
+    matchid = None,
+    teamid = None, 
+    vsid=None, 
+    sideid = 0, 
+    mapid = None, 
+    limit = 100, 
+    offset = 0):
+
+
+    m1 = aliased(matches)
+    m2 = aliased(matches)
+
+    t1 = aliased(teams)
+    t2 = aliased(teams)
+
+    
+
+    filters = [
+        m1.sideid == sideid,
+        m1.mapid == m2.mapid
+    ]
+
+    if matchid is not None:
+        filters.append(m1.matchid == matchid)
+    
+    if mapid is not None:
+        filters.append(m1.mapid == mapid)
+    
+    if teamid is not None:
+        filters.append(
+            m1.teamid == teamid,
+        )
+
+        if vsid is not None:
+            filters.append(
+                m2.teamid == vsid
+            )
+    else:
+        filters.append(m1.teamid < m2.teamid)
+            
+    
+    if sideid != 0:
+        filters.append(and_(m2.sideid != sideid, m2.sideid != 0))
+
+    else:
+        filters.append(m1.sideid == m2.sideid)
+
+
+
+    stmnt = (
+        select(
+            m1.matchid.label('match_id'),
+            m1.teamid.label('team1_id'),
+            t1.name.label('team1_name'),
+            m2.teamid.label('team2_id'),
+            t2.name.label('team2_name'),
+            match_overview.date.label('date'),
+            match_overview.event.label('event'),
+            func.array_agg(
+                func.json_build_object(
+                'id', maps.mapid,
+                'name', maps.name,
+                'team1_score', m1.score,
+                'team2_score', m2.score
+                )
+            ).label('maps')
+            )
+            .join(
+                m2,
+                and_(
+                    m1.matchid == m2.matchid,
+                    m1.teamid != m2.teamid
+                    )
+            )
+            .join(t1, m1.teamid == t1.teamid)
+            .join(t2, m2.teamid == t2.teamid)
+            .join(match_overview, m1.matchid == match_overview.matchid)
+            .join(maps, maps.mapid == m1.mapid)
+            .group_by(
+                m1.matchid, m1.teamid, t1.name,
+                m2.teamid, t2.name,
+                match_overview.date, match_overview.event
+            )
+            .where(*filters)
+            .order_by(match_overview.date.desc())
+            .offset(offset)
+            .limit(limit)
+    )
+    
+
+
+    with engine.connect() as con:
+        rows = con.execute(stmnt).mappings().all()
+    result = []
+    for row in rows:
+        map_list = []
+        team1_score = team2_score = None
+
+        for m in row['maps']:
+            if m['id'] == 0:
+                team1_score = m['team1_score']
+                team2_score = m['team2_score']
+            else:
+                map_list.append(m)
+
+        best_of = (2 * max(team1_score, team2_score)) - 1
+        if len(map_list) == 1:
+            best_of = 1
+
+        winner = {'id': row['team1_id'],
+                 'name': row['team1_name']}
+        if team2_score > team1_score:
+            winner = {'id': row['team2_id'],
+                      'name': row['team2_name']}
+
+        match = {'id':row['match_id'],
+                    'maps': map_list,
+                    'team1': {'id': row['team1_id'],
+                            'name': row['team1_name'],
+                            'score': team1_score},
+                    'team2': {'id': row['team2_id'],
+                            'name': row['team2_name'],
+                            'score': team2_score},
+                    'best_of': best_of,
+                    'date': row['date'],
+                    'event': row['event'],
+                    'winner': winner}
+        result.append(match)
     return result
 
+# def get_maps(matchid):
+#     get_maps = (
+#         select(
+#         maps.name.label('map_name'),
+#         matches.mapid.label('map_id')
+#         )
+#         .distinct()
+#         .join(
+#             maps,
+#             matches.mapid == maps.mapid 
+#         )
+#         .where(
+#             matches.matchid == matchid,
+#             maps.mapid != 0
+#         )
+#         .order_by(matches.mapid)
+#     )
 
-def get_matches(matchid = None, team = None,vs=None ,sideid = 0, mapid = 0, limit = 100, offset = 0):
-    with engine.connect() as con:
-        m1 = aliased(matches)
-        m2 = aliased(matches)
-        get_matchhistory = select(m1.matchid,
-                                m1.teamid,
-                                m1.score,
-                                m2.teamid,
-                                m2.score,
-                                match_overview.date,
-                                match_overview.event).join(m2,
-                                                and_(m1.matchid == m2.matchid,
-                                                    m1.teamid != m2.teamid))
-        if matchid != None:
-            get_matchhistory = get_matchhistory.where(m1.matchid == matchid)
-        get_matchhistory = get_matchhistory.join(match_overview, m1.matchid == match_overview.matchid)
-        get_matchhistory = get_matchhistory.where(m1.sideid == sideid)
-        
-        if sideid != 0:
-            get_matchhistory = get_matchhistory.where(and_(m2.sideid != sideid, m2.sideid != 0))
-        else:
-            get_matchhistory = get_matchhistory.where(m1.sideid == m2.sideid)
-        get_matchhistory = get_matchhistory.where(m1.mapid == mapid)
-        get_matchhistory = get_matchhistory.where(m1.mapid == m2.mapid)
-        get_matchhistory = get_matchhistory.where(m1.teamid < m2.teamid)
-        get_matchhistory= get_matchhistory.order_by(match_overview.date.desc())
-        get_matchhistory = get_matchhistory.offset(offset).limit(limit)
-        matchhistory = np.array(con.execute(get_matchhistory).fetchall())
-        result = []
-        for m in matchhistory:
-            best_of = (2 * max(m[2], m[4])) - 1
-            match = {'id':m[0],
-                     'maps': get_maps(m[0]),
-                     'team1': {'id': m[1],
-                               'name': get_name(m[1]),
-                               'score':m[2]},
-                     'team2': {'id': m[3],
-                               'name': get_name(m[3]),
-                               'score':m[4]},
-                     'best_of': best_of,
-                     'date': m[5],
-                     'event': m[6]}
-            winner = match['team1']
-            if m[4] > m[2]:
-                winner = match['team2']
-            match['winner'] = {
-                'id': winner['id'],
-                'name':winner['name']
-                }
-            result.append(match)
-    return result
+#     with engine.connect() as con:
+#         rows = con.execute(get_maps).mappings().all()
 
-def get_name(teamid):
-    get_name = select(teams.name).where(teams.teamid == teamid)
-    with engine.connect() as con:
-        name = np.array(con.execute(get_name).fetchone()).item()
-    return name
-
-def get_maps(matchid):
-    get_maps = select(
-        maps.name,
-        matches.mapid
-        ).distinct().join(
-            maps,
-            matches.mapid == maps.mapid 
-            ).where(
-                matches.matchid == matchid
-                ).order_by(matches.mapid)
-
-    with engine.connect() as con:
-        rows = np.array(con.execute(get_maps).fetchall())
-
-        map_list = [{'id':int(r[1]),'name':r[0]} for r in rows]
-    return map_list
+#         map_list = [{'id':int(r['map_id']),'name':r['map_name']} for r in rows]
+#     return map_list
 
 def match_handler(matchid = None,teamid = None, sideid = None, mapid = None):
     statement = select(

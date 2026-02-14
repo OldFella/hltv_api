@@ -2,12 +2,13 @@ import sys
 sys.path.append('../')
 from db.classes import teams, sides, maps, matches, match_overview
 from db.session import engine 
-from db.models import Item
+from db.models import Item, MatchResponse
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, and_
 import numpy as np
 from sqlalchemy.orm import aliased
 from typing import List, Optional
+from .matches import get_matches
 
 router = APIRouter(prefix = '/teams',
                    tags = ['teams'])
@@ -46,3 +47,9 @@ async def get_team_name(teamid) -> Item:
         result = np.array(con.execute(statement).fetchone()).squeeze()
         value['name'] = str(result)
     return value
+
+@router.get("/{teamid}/matchhistory")
+async def get_matchhistory(teamid) -> list[MatchResponse]:
+    if teamid not in TEAM_IDS:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return get_matches(teamid=teamid, limit = 5)

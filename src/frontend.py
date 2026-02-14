@@ -9,7 +9,6 @@ from routers import spreadsheets, results, download#, teams, matches
 
 
 def create_tables():
-    print('creating Base')   
     Base.metadata.create_all(bind=engine)
         
 

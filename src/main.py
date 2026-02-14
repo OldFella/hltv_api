@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 def create_tables():
-    print('creating Base')   
     Base.metadata.create_all(bind=engine)
         
 

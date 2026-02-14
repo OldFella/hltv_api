@@ -26,26 +26,22 @@ class MatchHistory(BaseModel):
     date: date
     event: str
 
-class TeamScore(BaseModel):
-    id: int
-    name: str
+class TeamScore(Item):
     score: int
-
-class MatchResponse(BaseModel):
-    id: int
-    maps: list[Item]
-    team1: TeamScore
-    team2: TeamScore
-    best_of: int
-    date: date
-    event: str
-    winner: Item
 
 class MapScore(Item):
     team1_score: int
     team2_score: int
 
-
+class MatchResponse(BaseModel):
+    id: int
+    team1: TeamScore
+    team2: TeamScore
+    maps: list[MapScore]
+    best_of: int
+    date: date
+    event: str
+    winner: Item
 
 class MapResponse(BaseModel):
     id: int
