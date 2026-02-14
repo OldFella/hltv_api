@@ -14,7 +14,7 @@
   }
 
   .wrap {
-    max-width: 900px;
+    max-width: 1200px;
     margin: auto;
     padding: 16px;
   }
@@ -58,11 +58,19 @@
     background: #16a34a;
   }
 
+  .cards-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
   .card {
     background: #020617;
     border-radius: 12px;
     border: 1px solid #1f2933;
     padding: 16px;
+    flex: 1;
+    min-width: 280px;
   }
 
   .card-title {
@@ -135,13 +143,33 @@
     font-size: 0.9rem;
   }
 
+  /* API box links */
+  .api-links a {
+    display: block;
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: #1f2933;
+    color: #22c55e;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .api-links a:hover {
+    background: #22c55e;
+    color: #020617;
+  }
+
   /* Mobile layout */
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
+    .cards-container {
+      flex-direction: column;
+    }
     .match-scores {
       flex-direction: column;
       gap: 6px;
     }
-
     .team,
     .score-center {
       flex: none;
@@ -150,6 +178,7 @@
       padding: 0;
     }
   }
+  
 </style>
 </head>
 
@@ -157,16 +186,178 @@
 <div class="wrap">
   <header>
     <a href="/" class="home-logo">CS API</a>
+    <div style="display:flex; align-items:center; gap:8px;">
+    <!-- Work in Progress Badge -->
+    <span style="
+      background:#f59e0b; 
+      color:#020617; 
+      font-weight:600; 
+      padding:4px 8px; 
+      border-radius:6px; 
+      font-size:0.85rem;
+    ">
+      Work in Progress
+    </span>
     <div>
-      <a class="button" href="/docs">API Docs →</a>
+      <a class="button" href="https://api.csapi.de/docs">API Docs →</a>
       <a class="button" href="/spreadsheet/">Spreadsheet →</a>
     </div>
   </header>
 
-  <div class="card">
-    <h2 class="card-title">Latest Results</h2>
-    <div id="results">Loading…</div>
+    <!-- Hero / API Introduction -->
+  <div class="card" style="margin-bottom:24px; border: 1px solid #16a34a; background:#0d1117;">
+    <h2 class="card-title">CS API — Public Counter-Strike Pro Play Data  [REST]</h2>
+    <p style="text-align:center; color:#9ca3af; font-size:1rem; line-height:1.5rem; margin:0;">
+      CS API provides free, public access to Counter-Strike Pro Play match data, teams and player information 
+      of the top 100 teams. <strong>No API key is required</strong> — simply call the endpoints to get JSON responses in seconds.
+    </p>
   </div>
+
+  <div class="cards-container">
+    <!-- API GET Requests -->
+    <div class="card">
+      
+      <h2 class="card-title">Endpoints</h2>
+      <div style="text-align:center; margin-bottom:12px; color:#22c55e; font-weight:600;">
+        Available at <a href="https://api.csapi.de" target="_blank" style="color:#22c55e; text-decoration:underline;">api.csapi.de</a>
+      </div>
+      <div style="text-align:center; margin-bottom:16px; color:#9ca3af; font-size:0.95rem;">
+        🌍 Public API &nbsp;•&nbsp; 🔓 No API key required
+      </div>
+      <div style="color:#22c55e; font-weight:600; margin-bottom:6px;">
+          Example Request
+        </div>
+        <details>
+          <summary style="
+            cursor:pointer;
+            background:#0d1117;
+            padding:12px;
+            border-radius:8px;
+            overflow-x:auto;
+            font-size:0.85rem;
+            color:#22c55e;
+            margin-bottom:12px;
+          ">
+            curl "https://api.csapi.de/matches/2389666"
+          </summary>
+
+          <pre style="
+            background:#0d1117;
+            padding:16px;
+            border-radius:8px;
+            overflow-x:auto;
+            font-size:0.85rem;
+            color:#22c55e;
+            margin-top:8px;
+          ">
+      {
+        "id": 2389666,
+        "team1": {
+          "id": 8297,
+          "name": "FURIA",
+          "score": 1
+        },
+        "team2": {
+          "id": 9565,
+          "name": "Vitality",
+          "score": 3
+        },
+        "maps": [
+          {
+            "id": 2,
+            "name": "ovp",
+            "team1_score": 10,
+            "team2_score": 13
+          },
+          {
+            "id": 5,
+            "name": "nuke",
+            "team1_score": 2,
+            "team2_score": 13
+          },
+          {
+            "id": 7,
+            "name": "inf",
+            "team1_score": 8,
+            "team2_score": 13
+          },
+          {
+            "id": 6,
+            "name": "mrg",
+            "team1_score": 13,
+            "team2_score": 11
+          }
+        ],
+        "best_of": 5,
+        "date": "2026-02-08",
+        "event": "IEM Kraków 2026",
+        "winner": {
+          "id": 9565,
+          "name": "Vitality"
+        }
+      }
+          </pre>
+        </details>
+      <div class="api-links">
+        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Matches</h3>
+        <a href="https://api.csapi.de/matches/latest" target="_blank">GET /matches/latest — Returns latest pro CS results</a>
+        <a href="https://api.csapi.de/matches/2389666" target="_blank">GET /matches/2389666 — Search Match with ID</a>
+        <div style="margin-top:16px;">
+
+      </div>
+
+        
+        <h3 style="margin-top:12px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Teams</h3>
+        <a href="https://api.csapi.de/teams" target="_blank">GET /teams — Returns all pro CS team names and IDs</a>
+        <a href="https://api.csapi.de/teams/?name=Vitality" target="_blank">GET /teams/?name=Vitality — Search Team with name</a>
+        <a href="https://api.csapi.de/teams/9565" target="_blank">GET /teams/9565 — Search Team with ID</a>
+        <a href="https://api.csapi.de/teams/9565/matchhistory" target="_blank">GET /teams/9565/matchhistory — Returns the last recent matches</a>
+
+        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Maps</h3>
+        <a href="https://api.csapi.de/maps" target="_blank">GET /maps — Returns all Map names and IDs</a>
+
+        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Sides</h3>
+        <a href="https://api.csapi.de/sides" target="_blank">GET /sides — Returns all Side names and IDs</a>
+        
+        <h3 style="margin-top:12px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Players (coming soon)</h3>
+        <a href="https://api.csapi.de/players" target="_blank">GET /players (coming soon)</a>
+      </div>
+    </div>
+     <!-- Latest Results -->
+    <div class="card">
+      <h2 class="card-title">Latest Results</h2>
+      <div id="results">Loading…</div>
+    </div>
+  </div>
+  <footer style="
+      text-align:center;
+      margin-top:48px;
+      padding:24px 16px;
+      color:#9ca3af;
+      font-size:0.9rem;
+      border-top:1px solid #1f2933;
+    ">
+      <div style="margin-bottom:8px;">
+        CS API — Public Counter-Strike Data API
+      </div>
+
+      <div style="margin-bottom:8px;">
+        This API is public and does not require authentication.
+      </div>
+
+      <div style="margin-bottom:8px;">
+        Not affiliated with 
+        <a href="https://www.hltv.org" target="_blank" style="color:#22c55e; text-decoration:underline;">
+          HLTV.org
+        </a>,
+        Valve, or any tournament organizer.
+      </div>
+
+      <div style="font-size:0.8rem; color:#6b7280;">
+        © 2026 CSAPI.de
+      </div>
+    </footer>
+
 </div>
 
 <script>
@@ -228,4 +419,3 @@ fetch("/results/latest")
 </script>
 </body>
 </html>
-

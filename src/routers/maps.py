@@ -1,10 +1,8 @@
-import sys
-sys.path.append('../')
-from db.classes import maps
-from db.session import engine 
+from src.db.classes import maps
+from src.db.session import engine 
 from fastapi import APIRouter
 from sqlalchemy import select
-from db.models import Item
+from src.db.models import Item
 import numpy as np
 
 router = APIRouter(prefix = '/maps',

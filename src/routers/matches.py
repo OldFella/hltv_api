@@ -1,16 +1,13 @@
-import sys
-sys.path.append('../')
-from db.classes import teams, sides, maps, matches, match_overview
-from db.session import engine 
-from db.models import Item, match, MatchResponse, MapResponse
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, and_, or_
-import numpy as np
-from sqlalchemy.orm import aliased
-from typing import List, Optional
-from sqlalchemy import func
+from src.db.classes import teams, sides, maps, matches, match_overview
+from src.db.session import engine 
+from src.db.models import Item, match, MatchResponse, MapResponse
 
-import numpy as np
+from typing import List, Optional
+
+from fastapi import APIRouter, Query
+from sqlalchemy import select, and_, or_, func
+from sqlalchemy.orm import aliased
+
 
 router = APIRouter(prefix = '/matches',
                    tags = ['matches'])
@@ -18,8 +15,17 @@ router = APIRouter(prefix = '/matches',
 
 
 @router.get("/")
-async def get_matches(limit: Optional[int] = Query(100, description="Limit number of entries"),
-                    offset: Optional[int] = Query(0, description="Limit number of entries")) -> list[MatchResponse]:
+async def get_matches(
+    limit: Optional[int] = Query(100, description="Limit number of entries"),
+    offset: Optional[int] = Query(0, description="Limit number of entries")
+) -> list[MatchResponse]:
+    return get_matches(limit = limit, offset = offset)
+
+@router.get("/latest")
+async def get_matches(
+    limit: Optional[int] = Query(10, description="Limit number of entries"),
+    offset: Optional[int] = Query(0, description="Limit number of entries")
+) -> list[MatchResponse]:
     return get_matches(limit = limit, offset = offset)
 
 @router.get("/{matchid}")
@@ -148,76 +154,24 @@ def get_matches(
             winner = {'id': row['team2_id'],
                       'name': row['team2_name']}
 
-        match = {'id':row['match_id'],
-                    'maps': map_list,
-                    'team1': {'id': row['team1_id'],
-                            'name': row['team1_name'],
-                            'score': team1_score},
-                    'team2': {'id': row['team2_id'],
-                            'name': row['team2_name'],
-                            'score': team2_score},
-                    'best_of': best_of,
-                    'date': row['date'],
-                    'event': row['event'],
-                    'winner': winner}
+        match = {
+            'id':row['match_id'],
+            'maps': map_list,
+            'team1': {
+                'id': row['team1_id'],
+                'name': row['team1_name'],
+                'score': team1_score
+                },
+            'team2': {
+                'id': row['team2_id'],
+                'name': row['team2_name'],
+                'score': team2_score
+                },
+            'best_of': best_of,
+            'date': row['date'],
+            'event': row['event'],
+            'winner': winner
+            }
+
         result.append(match)
     return result
-
-# def get_maps(matchid):
-#     get_maps = (
-#         select(
-#         maps.name.label('map_name'),
-#         matches.mapid.label('map_id')
-#         )
-#         .distinct()
-#         .join(
-#             maps,
-#             matches.mapid == maps.mapid 
-#         )
-#         .where(
-#             matches.matchid == matchid,
-#             maps.mapid != 0
-#         )
-#         .order_by(matches.mapid)
-#     )
-
-#     with engine.connect() as con:
-#         rows = con.execute(get_maps).mappings().all()
-
-#         map_list = [{'id':int(r['map_id']),'name':r['map_name']} for r in rows]
-#     return map_list
-
-def match_handler(matchid = None,teamid = None, sideid = None, mapid = None):
-    statement = select(
-        matches.matchid,
-        matches.teamid,
-        matches.mapid,
-        matches.sideid,
-        matches.score,
-        match_overview.date,
-        match_overview.event
-        )
-    statement = statement.join(match_overview, matches.matchid == match_overview.matchid)
-    if matchid != None:
-        statement = statement.where(matches.matchid == matchid)
-
-    if teamid != None:
-        statement = statement.where(matches.teamid == teamid)
-
-    if sideid != None:
-        statement = statement.where(matches.sideid == sideid)
-
-    if mapid != None:
-        statement = statement.where(matches.mapid == mapid)
-    statement = statement.limit(100)
-    statement = statement.order_by(match_overview.date.desc())
-    result = []
-    keys = ['matchid', 'teamid', 'mapid', 'sideid', 'score', 'date', 'event']
-    with engine.connect() as con:
-
-        query = con.execute(statement).all()
-        for q in query:
-            result.append(dict(zip(keys, list(q))))
-    
-    return result
-
