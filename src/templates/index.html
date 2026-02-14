@@ -162,7 +162,7 @@
   }
 
   /* Mobile layout */
-  @media (max-width: 900px) {
+  @media (max-width: 600px) {
     .cards-container {
       flex-direction: column;
     }
@@ -184,11 +184,12 @@
 
 <body>
 <div class="wrap">
-  <header>
-    <a href="/" class="home-logo">CS API</a>
-    <div style="display:flex; align-items:center; gap:8px;">
+<header>
+  <a href="/" class="home-logo">CS API</a>
+
+  <div class="header-right" style="display:flex; align-items:center; gap:8px;">
     <!-- Work in Progress Badge -->
-    <span style="
+    <span class="wip-badge" style="
       background:#f59e0b; 
       color:#020617; 
       font-weight:600; 
@@ -198,11 +199,13 @@
     ">
       Work in Progress
     </span>
-    <div>
-      <a class="button" href="https://api.csapi.de/docs">API Docs →</a>
-      <a class="button" href="/spreadsheet/">Spreadsheet →</a>
-    </div>
-  </header>
+
+    <!-- Buttons -->
+    <a class="button" href="https://api.csapi.de/docs">API Docs →</a>
+    <a class="button" href="/spreadsheet/">Spreadsheet →</a>
+  </div>
+</header>
+
 
     <!-- Hero / API Introduction -->
   <div class="card" style="margin-bottom:24px; border: 1px solid #16a34a; background:#0d1117;">

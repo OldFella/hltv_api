@@ -5,7 +5,7 @@ from fastapi.requests import Request
 from core.config import settings
 from db.session import engine 
 from db.base_class import Base
-from routers import sides,results, teams, matches, maps
+from routers import sides,results, teams, matches, maps, goat
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -34,6 +34,7 @@ app.include_router(maps.router)
 app.include_router(matches.router)
 app.include_router(teams.router)
 app.include_router(results.router)
+app.include_router(goat.router)
 
 
 
