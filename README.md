@@ -148,6 +148,7 @@ curl "https://api.csapi.de/matches/all/?limit=20&offset=0"
 - Add **player stats for the matches** (per match/map performance)
 - Add **player stats** (overall player info, rankings, etc.)
 - Add pagination and filtering for `/matches/`
+- Build Fantasy Spreadsheets on the fly
 
 ---
 
