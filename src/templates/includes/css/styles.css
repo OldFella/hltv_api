@@ -134,3 +134,28 @@ footer a {
   color: #9ca3af;
   font-size: 0.95rem;
 }
+
+/* ===== INFO / EXPLANATION BOX ===== */
+.info-box {
+  background: #0d1117;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+}
+
+
+.info-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #22c55e;
+  margin-bottom: 8px;
+}
+
+.info-text {
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: #9ca3af;
+  margin: 0;
+}
