@@ -52,3 +52,21 @@ class MapResponse(BaseModel):
     maps: list[MapScore]
     best_of: int
     winner: Item
+
+class PlayerStats(Item):
+    k: float
+    d: float
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+
+class PlayerAverageStats(Item):
+    k: float
+    d: float
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+    maps_played: int
+    

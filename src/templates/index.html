@@ -228,7 +228,7 @@
         🌍 Public API &nbsp;•&nbsp; 🔓 No API key required
       </div>
       <div style="color:#22c55e; font-weight:600; margin-bottom:6px;">
-          Example Request
+          Example Requests
         </div>
         <details>
           <summary style="
@@ -253,55 +253,100 @@
             color:#22c55e;
             margin-top:8px;
           ">
-      {
-        "id": 2389666,
-        "team1": {
-          "id": 8297,
-          "name": "FURIA",
-          "score": 1
-        },
-        "team2": {
-          "id": 9565,
-          "name": "Vitality",
-          "score": 3
-        },
-        "maps": [
-          {
-            "id": 2,
-            "name": "ovp",
-            "team1_score": 10,
-            "team2_score": 13
-          },
-          {
-            "id": 5,
-            "name": "nuke",
-            "team1_score": 2,
-            "team2_score": 13
-          },
-          {
-            "id": 7,
-            "name": "inf",
-            "team1_score": 8,
-            "team2_score": 13
-          },
-          {
-            "id": 6,
-            "name": "mrg",
-            "team1_score": 13,
-            "team2_score": 11
-          }
-        ],
-        "best_of": 5,
-        "date": "2026-02-08",
-        "event": "IEM Kraków 2026",
-        "winner": {
-          "id": 9565,
-          "name": "Vitality"
-        }
-      }
+{
+  "id": 2389666,
+  "team1": {
+    "id": 8297,
+    "name": "FURIA",
+    "score": 1
+  },
+  "team2": {
+    "id": 9565,
+    "name": "Vitality",
+    "score": 3
+  },
+  "maps": [
+    {
+      "id": 2,
+      "name": "ovp",
+      "team1_score": 10,
+      "team2_score": 13
+    },
+    {
+      "id": 5,
+      "name": "nuke",
+      "team1_score": 2,
+      "team2_score": 13
+    },
+    {
+      "id": 7,
+      "name": "inf",
+      "team1_score": 8,
+      "team2_score": 13
+    },
+    {
+      "id": 6,
+      "name": "mrg",
+      "team1_score": 13,
+      "team2_score": 11
+    }
+  ],
+  "best_of": 5,
+  "date": "2026-02-08",
+  "event": "IEM Kraków 2026",
+  "winner": {
+    "id": 9565,
+    "name": "Vitality"
+  }
+}
           </pre>
         </details>
+      <details>
+          <summary style="
+            cursor:pointer;
+            background:#0d1117;
+            padding:12px;
+            border-radius:8px;
+            overflow-x:auto;
+            font-size:0.85rem;
+            color:#22c55e;
+            margin-bottom:12px;
+          ">
+            curl "https://api.csapi.de/players/21167/stats"
+          </summary>
+
+          <pre style="
+            background:#0d1117;
+            padding:16px;
+            border-radius:8px;
+            overflow-x:auto;
+            font-size:0.85rem;
+            color:#22c55e;
+            margin-top:8px;
+          ">
+{
+  "id": 21167,
+  "name": "donk",
+  "k": 20.711,
+  "d": 15.6,
+  "swing": 2.645,
+  "adr": 94.331,
+  "kast": 76.056,
+  "rating": 1.405,
+  "maps_played": 45
+}
+        </pre>
+      </details>
+
       <div class="api-links">
+
+        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Maps</h3>
+        <a href="https://api.csapi.de/maps" target="_blank">GET /maps — Returns all Map names and IDs</a>
+
+        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Sides</h3>
+        <a href="https://api.csapi.de/sides" target="_blank">GET /sides — Returns all Side names and IDs</a>
+        
+
         <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Matches</h3>
         <a href="https://api.csapi.de/matches/latest" target="_blank">GET /matches/latest — Returns latest pro CS results</a>
         <a href="https://api.csapi.de/matches/2389666" target="_blank">GET /matches/2389666 — Search Match with ID</a>
@@ -316,14 +361,16 @@
         <a href="https://api.csapi.de/teams/9565" target="_blank">GET /teams/9565 — Search Team with ID</a>
         <a href="https://api.csapi.de/teams/9565/matchhistory" target="_blank">GET /teams/9565/matchhistory — Returns the last recent matches</a>
 
-        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Maps</h3>
-        <a href="https://api.csapi.de/maps" target="_blank">GET /maps — Returns all Map names and IDs</a>
+        <h3 style="margin-top:12px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Players</h3>
+        <a href="https://api.csapi.de/players/?offset=0&limit=20" target="_blank">GET /players/?offset=0&limit=20 — Returns all Player names and IDs</a>
+        <a href="https://api.csapi.de/players/21167" target="_blank">GET /players/21167 — Returns a Players' name and ID</a>
+        <a href="https://api.csapi.de/players/21167/stats" target="_blank">GET /players/21167/stats — Returns a Players' average stats per map</a>
+        <a href="https://api.csapi.de/players/21167/stats/maps" target="_blank">GET /players/21167/stats/maps — Returns a list of a Players' average stats for all maps</a>
+        <a href="https://api.csapi.de/players/21167/stats/sides" target="_blank">GET /players/21167/stats/sides — Returns a list of a Players' average stats for both sides</a>
 
-        <h3 style="margin-top:8px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Sides</h3>
-        <a href="https://api.csapi.de/sides" target="_blank">GET /sides — Returns all Side names and IDs</a>
-        
-        <h3 style="margin-top:12px; margin-bottom:4px; font-size:1.1rem; font-weight:600; color:#e5e7eb;">Players (coming soon)</h3>
-        <a href="https://api.csapi.de/players" target="_blank">GET /players (coming soon)</a>
+
+
+
       </div>
     </div>
      <!-- Latest Results -->

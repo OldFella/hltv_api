@@ -48,6 +48,7 @@ class player_stats(Base):
     roundswing = Column(Float)
     adr = Column(Float)
     eadr = Column(Float)
+    kast = Column(Float)
     ekast = Column(Float)
     rating = Column(Float)
 
