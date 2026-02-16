@@ -1,0 +1,66 @@
+/* ===== API LINKS ===== */
+.api-links a {
+  display: block;
+  padding: 8px 12px;
+  margin: 4px 0;
+  background: #1f2933;
+  color: #22c55e;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.api-links a:hover {
+  background: #22c55e;
+  color: #020617;
+}
+
+/* ===== CODE EXAMPLES ===== */
+
+details {
+  margin-bottom: 12px;
+}
+
+details summary {
+  cursor: pointer;
+  background: #0d1117;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  color: #22c55e;
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::after {
+  content: " ▼";
+  font-size: 0.75rem;
+}
+
+details[open] summary::after {
+  content: " ▲";
+}
+
+pre {
+  background: #0d1117;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  color: #22c55e;
+  margin-top: 8px;
+}
+
+.endpoint-category {
+  margin-top: 12px;
+  margin-bottom: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+

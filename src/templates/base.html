@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}CS API{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    {% include "includes/css/styles.css" %}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="wrap">
+
+  {% include "includes/header.html" %}
+
+  {% block content %}{% endblock %}
+
+  {% include "includes/footer.html" %}
+
+</div>
+
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

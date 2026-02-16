@@ -1,0 +1,38 @@
+:root {
+  --bg: #020617;
+  --border: #1f2933;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #22c55e;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tab-button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.tab-content {
+  display: none;
+  height: 100%;
+}
+
+.tab-content.active {
+  display: block;
+}

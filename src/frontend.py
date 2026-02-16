@@ -6,6 +6,9 @@ from core.config import settings
 from db.session import engine 
 from db.base_class import Base
 from routers import spreadsheets, results, download
+from fastapi.staticfiles import StaticFiles
+from src.config.endpoints import endpoints
+from src.config.hero_card import hero_card
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
@@ -19,7 +22,6 @@ def start_application():
 
 app = start_application()
 
-
 app.include_router(spreadsheets.router)
 app.include_router(results.router)
 app.include_router(download.router)
@@ -27,10 +29,15 @@ app.include_router(download.router)
 
 
 templates = Jinja2Templates(directory="templates")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 @app.get("/", response_class=HTMLResponse)
 async def homepage(request: Request):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request},
+        {"request": request,
+        "api_base": "https://api.csapi.de",
+        "endpoints": endpoints,
+        "hero_card": hero_card},
     )

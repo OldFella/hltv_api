@@ -1,140 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Available Fantasies</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      margin: 0;
-      background: #020617;
-      color: #e5e7eb;
-      font-family: system-ui, sans-serif;
-    }
+{% extends "base.html" %}
 
-    .wrap {
-      max-width: 900px;
-      margin: auto;
-      padding: 32px;
-    }
+{% block extra_css %}
+<style>
+    {% include "includes/css/fantasies.css" %}
+</style>
+{% endblock %}
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-    }
 
-    /* Home button / logo */
-    a.home-logo {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #22c55e;
-      text-decoration: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      background: #0d1117;
-      transition: background 0.2s, color 0.2s;
-    }
+{% block title %}Available Fantasies{% endblock %}
 
-    a.home-logo:hover {
-      background: #22c55e;
-      color: #020617;
-    }
+{% block content %}
+<div class="wrap">
+  <div class="card">
+    <h2>Available Fantasy Spreadsheets</h2>
 
-    a.button {
-      color: #020617;
-      background: #22c55e;
-      padding: 8px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-left: 8px;
-      transition: background 0.2s;
-    }
+    <input type="text" id="searchInput" placeholder="Search fantasies...">
 
-    a.button:hover {
-      background: #16a34a;
-    }
-
-    .card {
-      background: #020617;
-      border-radius: 12px;
-      border: 1px solid #1f2933;
-      padding: 24px;
-    }
-
-    input {
-      padding: 8px;
-      width: 100%;
-      margin-bottom: 16px;
-      border-radius: 6px;
-      border: 1px solid #1f2933;
-      background: #0d1117;
-      color: #e5e7eb;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      padding: 8px 0;
-      border-bottom: 1px solid #1f2933;
-    }
-
-    li a {
-      color: #22c55e;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    li a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <!-- CS API as a larger, modern home button/logo -->
-      <a href="/" class="home-logo">CS API</a>
-
-      <div>
-        <a class="button" href="/docs">API Docs →</a>
-        <a class="button" href="/spreadsheet/">Spreadsheet →</a>
-      </div>
-    </header>
-
-    <div class="card">
-      <h2>Available Fantasy Spreadsheets</h2>
-
-      <input type="text" id="searchInput" placeholder="Search fantasies...">
-
-      <ul id="folderList">
-        {% for folder, fantasy_name in folders.items() %}
-          <li>
-            <a href="/spreadsheet/{{ folder | urlencode }}">{{ fantasy_name }}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
+    <ul id="folderList">
+      {% for folder, fantasy_name in folders.items() %}
+        <li>
+          <a href="/spreadsheet/{{ folder | urlencode }}">{{ fantasy_name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
   </div>
+</div>
+{% endblock %}
 
-  <script>
-    const input = document.getElementById('searchInput');
-    const ul = document.getElementById('folderList');
-    const liList = ul.getElementsByTagName('li');
+{% block scripts %}
 
-    input.addEventListener('keyup', function() {
-      const filter = input.value.toLowerCase();
-      for (let i = 0; i < liList.length; i++) {
-        const text = liList[i].innerText.toLowerCase();
-        liList[i].style.display = text.includes(filter) ? '' : 'none';
-      }
-    });
-  </script>
-</body>
-</html>
+<script>
+  {% include "includes/js/fantasies.js" %}
+</script>
+{% endblock %}

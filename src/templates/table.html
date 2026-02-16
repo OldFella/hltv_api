@@ -1,351 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>{{ fantasy_name }}</title>
+{% extends "base.html" %}
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"/>
+{% block title %}{{ fantasy_name }}{% endblock %}
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-
-<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css"/>
-<script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
-
-
-<style>
-:root {
-  --bg: #020617;
-  --border: #1f2933;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --accent: #22c55e;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, sans-serif;
-  overflow-y: hidden;
-}
-
-.my-button {
-    background: var(--accent);
-    color: var(--bg) !important;
-    border: 1px solid var(--border);
-    border-radius: 8px !important;
-    padding: 6px 12px;
-    margin: 10px 0;
-    cursor: pointer;
-    text-align: center;
-}
-.my-button:hover {
-    background: var(--bg);
-    color: var(--text) !important;
-}
-
-.topbar {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.sidebar-toggle {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.home-link {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.layout {
-  display: flex;
-  height: 100%;
-}
-
-.sidebar {
-  width: 260px;
-  border-right: 1px solid var(--border);
-  padding: 16px;
-  transition: width 0.25s ease, padding 0.25s ease;
-  overflow-y: auto;
-}
-
-.sidebar.collapsed {
-  width: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-.sidebar a {
-  display: block;
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.sidebar a.active-file {
-  background: var(--accent);
-  color: var(--bg);
-  font-weight: 700;
-}
-
-.main {
-  flex: 1;
-  padding: 20px;
-  overflow: auto;
-  height: calc(100vh - 56px); /* full viewport minus topbar */
-}
-
-.table-wrapper {
-  height: auto; /* vertical scroll space */
-  overflow-x: visible;             /* horizontal scroll */
-  overflow-y: auto;           /* vertical scroll handled by DataTables */
-}
-
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.tab-button {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.tab-button.active {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-.tab-content {
-  display: none;
-  height: 100%;
-}
-
-.tab-content.active {
-  display: block;
-}
-
-/* ===== DataTables fixes ===== */
-
-
-table.dataTable {
-  width: max-content !important; /* allow table to be wider than container */
-  min-width: 100%;              /* fallback */
-  table-layout: auto !important; /* allow columns to size naturally */
-}
-
-/* Allow multi-line headers */
-table.dataTable thead th {
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
-    border-bottom: 1px solid var(--border);
-    white-space: Normal !important;
-    word-break: break-word;
-    line-height: 1.25;
-    padding: 8px 6px;
-}
-
-table.dataTable tbody td {
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
-    white-space: nowrap;
-}
-
-.dataTables_wrapper,
-.dataTables_scroll {
-  height: 100%;
-}
-
-
-.dataTables_scrollBody {
-  overflow-x: auto !important;  /* horizontal scroll */
-  overflow-y: auto !important;  /* vertical scroll */
-  width: 100% !important;
-}
-
-.dt-button {
-  background: var(--accent) !important;
-  color: var(--bg) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  padding: 6px 12px !important;
-  margin: 5px 5px 15px 0 !important;
-  cursor: pointer !important;
-  font-weight: bold;
-}
-.dt-button:hover {
-  background: var(--bg) !important;
-  color: var(--text) !important;
-}
-
-.dtfc-right-top-blocker {
-    background-color: var(--bg) !important;
-}
-
+{% block extra_css %}
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"/>
+  <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css"/>
+  <style>
+    {% include "includes/css/sidebar.css" %}
+    {% include "includes/css/tabs.css" %}
+    {% include "includes/css/table.css" %}
 </style>
-</head>
+{% endblock %}
 
-<body>
+{% block content %}
 
-<div class="topbar">
-  <button id="sidebarToggle" class="sidebar-toggle">☰</button>
-  <a href="/" class="home-link">CS API</a>
+<!-- Page content -->
+<h1 style="text-align:center">{{ fantasy_name }}</h1>
+
+<div style="text-align: center; margin-bottom: 12px;">
+    <a href="/download/{{ fantasyid }}.ods" class="button">Download Full Spreadsheet</a>
 </div>
 
-<div class="layout">
-
-  <aside class="sidebar collapsed" id="sidebar">
-    {% for f_id, f_name in fantasy_map.items() %}
-      <a href="/spreadsheet/{{ f_id }}"
-         class="{% if f_id == fantasyid %}active-file{% endif %}">
-        {{ f_name }}
-      </a>
-    {% endfor %}
-  </aside>
-
-  <main class="main">
-    <h1 style="text-align:center">{{ fantasy_name }}</h1>
-    <div style="text-align: center; margin-bottom: 12px;">
-        <a href="/download/{{ fantasyid }}.ods" class="my-button">Download Full Spreadsheet</a>
-    </div>
-
-    <div class="tabs">
-      {% for sheet_name in sheets.keys() %}
-        <button class="tab-button {% if loop.first %}active{% endif %}"
-                data-tab="{{ loop.index0 }}">
-          {{ sheet_name }}
-        </button>
-      {% endfor %}
-    </div>
-
-    {% for sheet_name, sheet in sheets.items() %}
-    <div id="tab_{{ loop.index0 }}"
-         class="tab-content {% if loop.first %}active{% endif %}">
-
-      <!-- FIX: wrapper -->
-      <div class="table-wrapper">
-        <table id="table_{{ loop.index0 }}" class="display nowrap">
-          <thead>
-            <tr>
-              {% for col in sheet.columns %}
-                <th>{{ col }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-                {% set prev_team = None %}
-                {% for row in sheet.rows %}
-                {% set team_name = team_col and row[sheet.columns.index(team_col)] %}
-                {% set row_class = '' %}
-                {% if prev_team is not none and team_name != prev_team %}
-                    {% set row_class = 'team-separator' %}
-                {% endif %}
-                <tr class="{{ row_class }}">
-                    {% for cell in row %}
-                        {% if cell is number %}
-                            {% if cell != cell %}
-                                <td data-order="-999999999">-</td>
-                            {% else %}
-                                <td data-order="{{ cell }}">{{ cell | round(4) }}</td>
-                            {% endif %}
-                        {% else %}
-                            <td data-order="{{ cell | string | lower }}">{{ cell }}</td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                {% set prev_team = team_name %}
-                {% endfor %}
-            </tbody>
-        </table>
-      </div>
-    </div>
-    {% endfor %}
-  </main>
-</div>
-
-<script>
-const tables = {};
-const fixedColsSettings = [3, 1, 2]; // First, second, third tab
-
-$(document).ready(function () {
-{% for sheet_name, sheet in sheets.items() %}  
-  tables["{{ loop.index0 }}"] = $('#table_{{ loop.index0 }}').DataTable({
-    scrollX: true,
-    scrollY: '70vh',
-    scrollCollapse: true,
-    paging: false,
-    autoWidth: false,
-    dom: 'Bfrtip',
-    buttons: [
-      { extend: 'csvHtml5', text: 'Download CSV', title: '{{ sheet_name }}', exportOptions: { columns: ':visible' }, className:'dt-button' }
-    ],
-    fixedColumns: {
-        leftColumns: fixedColsSettings[{{ loop.index0 }}]   // <-- freeze the first 2 columns
-    }      
-  });
-   
-   // Move search label into placeholder
-    var search_input = $('#table_{{ loop.index0 }}_filter input');
-    search_input.attr('placeholder', 'Search...');
-    $('#table_{{ loop.index0 }}_filter label').contents().filter(function(){ return this.nodeType === 3; }).remove();
-
+<div class="tabs">
+  {% for sheet_name in sheets.keys() %}
+    <button class="tab-button {% if loop.first %}active{% endif %}"
+            data-tab="{{ loop.index0 }}">
+      {{ sheet_name }}
+    </button>
   {% endfor %}
+</div>
 
-  function adjustAll() {
-    $.fn.dataTable.tables({ visible: true, api: true })
-      .columns.adjust();
-  }
+{% for sheet_name, sheet in sheets.items() %}
+<div id="tab_{{ loop.index0 }}"
+     class="tab-content {% if loop.first %}active{% endif %}">
 
-  $('.tab-button').on('click', function () {
-    const id = $(this).data('tab');
+  <div class="table-wrapper">
+    <table id="table_{{ loop.index0 }}" class="display nowrap">
+      <thead>
+        <tr>
+          {% for col in sheet.columns %}
+            <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% set prev_team = None %}
+        {% for row in sheet.rows %}
+        {% set team_name = team_col and row[sheet.columns.index(team_col)] %}
+        {% set row_class = '' %}
+        {% if prev_team is not none and team_name != prev_team %}
+            {% set row_class = 'team-separator' %}
+        {% endif %}
+        <tr class="{{ row_class }}">
+            {% for cell in row %}
+                {% if cell is number %}
+                    {% if cell != cell %}
+                        <td data-order="-999999999">-</td>
+                    {% else %}
+                        <td data-order="{{ cell }}">{{ cell | round(4) }}</td>
+                    {% endif %}
+                {% else %}
+                    <td data-order="{{ cell | string | lower }}">{{ cell }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% set prev_team = team_name %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %}
 
-    $('.tab-button').removeClass('active');
-    $(this).addClass('active');
-    $('.tab-content').removeClass('active');
-    $('#tab_' + id).addClass('active');
+{% endblock %}
 
-    setTimeout(adjustAll, 50);
-  });
+{% block scripts %}
+  <!-- jQuery + DataTables JS -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 
-  $('#sidebarToggle').on('click', function () {
-    $('#sidebar').toggleClass('collapsed');
-    setTimeout(adjustAll, 300);
-  });
-
-  $(window).on('resize', () => {
-    adjustAll();
-  });
-});
-</script>
-
-</body>
-</html>
+  <!-- Page-specific JS -->
+  <script>
+    {% include "includes/js/table.js" %}
+  </script>
+{% endblock %}

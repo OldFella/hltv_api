@@ -1,0 +1,73 @@
+:root {
+  --bg: #020617;
+  --border: #1f2933;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #22c55e;
+}
+
+.topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.home-link {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.layout {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  width: 260px;
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  transition: width 0.25s ease, padding 0.25s ease;
+  overflow-y: auto;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sidebar a {
+  display: block;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.sidebar a.active-file {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  height: calc(100vh - 56px);
+}

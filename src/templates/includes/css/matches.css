@@ -1,0 +1,66 @@
+
+/* ===== MATCHES ===== */
+.match {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  border-bottom: 1px solid #1f2933;
+  gap: 8px;
+}
+
+.match-scores {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.team {
+  flex: 0 0 46%;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-left { text-align: right; padding-right: 4px; }
+.team-right { text-align: left; padding-left: 4px; }
+
+.score-center {
+  flex: 0 0 8%;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  font-weight: bold;
+}
+
+.green-score { color: #22c55e; }
+.red-score { color: #ef4444; }
+.neutral-score { color: #e5e7eb; }
+
+.match-event-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+  .cards-container {
+    flex-direction: column;
+  }
+
+  .match-scores {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .team,
+  .score-center {
+    width: 100%;
+    text-align: center;
+    padding: 0;
+  }
+}
