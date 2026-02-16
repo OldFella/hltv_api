@@ -9,6 +9,7 @@ from routers import spreadsheets, results, download
 from fastapi.staticfiles import StaticFiles
 from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
+from src.config.example_requests import example_requests
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
@@ -39,5 +40,6 @@ async def homepage(request: Request):
         {"request": request,
         "api_base": "https://api.csapi.de",
         "endpoints": endpoints,
-        "hero_card": hero_card},
+        "hero_card": hero_card,
+        "example_requests": example_requests},
     )

@@ -24,6 +24,16 @@
       <div class="info-description">
         🌍 Public API &nbsp;•&nbsp; 🔓 No API key required
       </div>
+    
+    <div class="example-requests">
+       <div class="endpoint-category">Example Requests</div>
+    {% for example in example_requests %}
+      <details>
+        <summary>{{ example.url }}</summary>
+        <pre>{{ example.response }}</pre>
+      </details>
+    {% endfor %}
+  </div>
     <div class="api-links">
         {% for category, routes in endpoints.items() %}
             

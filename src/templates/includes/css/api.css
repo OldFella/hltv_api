@@ -37,13 +37,13 @@ details summary::-webkit-details-marker {
   display: none;
 }
 
-details summary::after {
-  content: " ▼";
+details summary::before {
+  content: "\25B6  ";
   font-size: 0.75rem;
 }
 
-details[open] summary::after {
-  content: " ▲";
+details[open] summary::before {
+  content: "\25BC  ";
 }
 
 pre {
