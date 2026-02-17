@@ -1,6 +1,6 @@
 from src.db.classes import players, matches, sides, maps, match_overview, player_stats
 from src.db.session import engine 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from sqlalchemy import select, func
 from src.db.models import Item, PlayerStats, PlayerAverageStats
@@ -24,8 +24,12 @@ async def get_players(
     )->list[Item]:
 
     filters = []
+    order_bys = []
     if name:
-        filters.append(players.name == name)
+        similarity = func.similarity(players.name, name)
+        filters.append(similarity > 0.3)
+        order_bys.append(similarity.desc())
+
     statement = (
         select(
             players.playerid.label('id'),
@@ -34,6 +38,7 @@ async def get_players(
             .where(*filters)
             .offset(offset)
             .limit(limit)
+            .order_by(*order_bys)
     )
 
     with engine.connect() as con:
@@ -58,17 +63,23 @@ async def get_player(playerid)->Item:
 
 @router.get("/{playerid}/stats")
 async def get_average_player_stats(
-    playerid
+    playerid,
+    event: Optional[str] = Query(None, description="Filter by team name")
     )-> PlayerAverageStats:
 
     stmnt = get_player_stats_query(
             playerid=playerid,
             mapid=None, 
             sideid=0, 
-            matchid=None
+            matchid=None,
+            event=event
             )
     with engine.connect() as con:
-        row = dict(con.execute(stmnt).mappings().all()[0])
+        row = con.execute(stmnt).mappings().all()
+        if len(row) == 0:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        row = dict(row[0])
 
     
     for entry in entries:
@@ -162,12 +173,14 @@ def get_player_stats_query(
     mapid = None,
     sideid = None,
     matchid = None,
+    event = None,
     group_by = None
     ) -> list[PlayerStats]:
 
     ps = aliased(player_stats)
 
     filters = [ps.playerid == playerid]
+    order_bys = []
 
     if mapid is not None:
         filters.append(ps.mapid == mapid)
@@ -181,6 +194,11 @@ def get_player_stats_query(
     
     if matchid is not None:
         filters.append(ps.matchid == matchid)
+    
+    if event:
+        similarity = func.similarity(match_overview.event, event)
+        filters.append(similarity > 0.3)
+        order_bys.append(similarity.desc())
     
     selects =[
         ps.playerid.label('player_id'),
@@ -210,12 +228,20 @@ def get_player_stats_query(
                 sides.name.label('side_name')
                 ])
             group_bys.extend([ps.sideid,sides.name])
+        
+        if 'events' in group_by:
+            selects.extend([
+                match_overview.events.label('events')
+            ])
+            group_bys.extend([match_overview.events])
+
     
     stmnt = (
         select(*selects)
             .join(players, players.playerid == ps.playerid)
             .join(maps, maps.mapid == ps.mapid)
             .join(sides, sides.sideid == ps.sideid)
+            .join(match_overview, match_overview.matchid == ps.matchid)
             .where(*filters)
             .group_by(*group_bys)
     )

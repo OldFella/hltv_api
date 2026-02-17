@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import select, func
 import numpy as np
 from sqlalchemy.orm import aliased
 
@@ -24,21 +24,34 @@ TEAM_NAMES, TEAM_IDS = get_db_values()
 
 @router.get("/", response_model=List[Item])
 async def get_teams(
-    name: Optional[str] = Query(None, description="Filter by team name")
-) -> list[Item]:
+    name: Optional[str] = Query(None, description="Filter by team name"),
+    limit: Optional[int] = Query(20, description="Limit number of entries"),
+    offset: Optional[int] = Query(0, description="Limit number of entries")
+    ) -> list[Item]:
 
-    query = select(teams.teamid, teams.name)
+    filters = []
+    order_bys = []
+
     if name:
-        if name not in TEAM_NAMES:
-            raise HTTPException(status_code=404, detail="Item not found")
-        query = query.where(teams.name == name)
-    values = []
-    keys = ['id', 'name']
+        similarity = func.similarity(teams.name, name)
+        filters.append(similarity > 0.3)
+        order_bys.append(similarity.desc())
+
+    statement = (
+        select(
+            teams.teamid.label('id'),
+            teams.name.label('name')
+            )
+            .where(*filters)
+            .offset(offset)
+            .limit(limit)
+            .order_by(*order_bys)
+        )
+
     with engine.connect() as con:
-        results = np.array(con.execute(query).fetchall())
-        for result in results:
-            values.append(dict(zip(keys,list(result))))
-    return values
+        rows = con.execute(statement).mappings().all()
+        result = [{'id':r['id'], 'name':r['name']} for r in rows]
+    return result
 
 @router.get("/{teamid}")
 async def get_team_name(teamid) -> Item:
