@@ -2,63 +2,67 @@ endpoints = {
     "Maps": [
         {
             "path": "/maps",
-            "description": "Returns all Map names and IDs"
+            "description": "List all maps with their names and unique IDs."
         }
     ],
     "Sides": [
         {
             "path": "/sides",
-            "description": "Returns all Side names and IDs"
+            "description": "List all sides (T/CT) with names and IDs."
         }
     ],
     "Matches": [
         {
             "path": "/matches/latest",
-            "description": "Returns latest pro CS results"
+            "description": "Get the most recent professional CS match results."
         },
         {
             "path": "/matches/2389666",
-            "description": "Search Match with ID"
+            "description": "Look up a specific match by its unique match ID."
         }
     ],
     "Teams": [
         {
             "path": "/teams",
-            "description": "Returns all pro CS team names and IDs"
+            "description": "List all professional CS teams with names and IDs."
         },
         {
             "path": "/teams/?name=Vitality",
-            "description": "Search Team with name"
+            "description": "Search for a team by name."
         },
         {
             "path": "/teams/9565",
-            "description": "Search Team with ID"
+            "description": "Get details for a specific team using its unique ID."
         },
         {
             "path": "/teams/9565/matchhistory",
-            "description": "Returns the last recent matches"
+            "description": "Retrieve the recent matches played by a team."
         }
     ],
     "Players": [
         {
             "path": "/players/?offset=0&limit=20",
-            "description": "Returns all Player names and IDs"
+            "description": "List players with names and IDs (paginated)."
         },
         {
             "path": "/players/21167",
-            "description": "Returns a Player's name and ID"
+            "description": "Get details for a specific player using their ID."
         },
         {
             "path": "/players/21167/stats",
-            "description": "Returns a Player's average stats per map"
+            "description": "View a player's average stats per map."
         },
         {
             "path": "/players/21167/stats/maps",
-            "description": "Returns a list of a Player's average stats for all maps"
+            "description": "See a player's average stats broken down by each map."
         },
         {
             "path": "/players/21167/stats/sides",
-            "description": "Returns a list of a Player's average stats for both sides"
+            "description": "See a player's average stats for both sides (T/CT)."
+        },
+        {
+            "path": "/players/21167/stats/events",
+            "description": "View a player's average stats across different events."
         }
     ]
 }

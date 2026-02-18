@@ -2,10 +2,13 @@ from src.db.classes import players, matches, sides, maps, match_overview, player
 from src.db.session import engine 
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from src.db.models import Item, PlayerStats, PlayerAverageStats
 import numpy as np
 from sqlalchemy.orm import aliased
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from typing import Literal
 
 
 
@@ -13,8 +16,20 @@ router = APIRouter(prefix = '/players',
                    tags = ['players'])
 
 
-entries = ['k', 'd', 'swing', 'adr', 'kast', 'rating']
+FIELDS = {
+    'k': 'k',
+    'd': 'd',
+    'swing': 'roundswing',
+    'adr': 'adr',
+    'kast': 'kast',
+    'rating': 'rating',
+}
 
+GROUP_CONFIG = {
+    "maps": {"id": "map_id", "name": "map_name"},
+    "sides": {"id": "side_id", "name": "side_name"},
+    "events": {"name": "events"} 
+}
 
 @router.get("/")
 async def get_players(
@@ -22,6 +37,7 @@ async def get_players(
     limit: Optional[int] = Query(20, description="Limit number of entries"),
     offset: Optional[int] = Query(0, description="Limit number of entries")
     )->list[Item]:
+       
 
     filters = []
     order_bys = []
@@ -64,109 +80,134 @@ async def get_player(playerid)->Item:
 @router.get("/{playerid}/stats")
 async def get_average_player_stats(
     playerid,
-    event: Optional[str] = Query(None, description="Filter by team name")
+    event: Optional[str] = Query(
+        None,
+        description="Filter by team name"
+        ),
+    startDate: Optional[date] = Query(
+        date.today() - relativedelta(months = 3), 
+        description="Start date for filtering stats (defaults to 3 months ago)"
+        ),
+    endDate: Optional[date] = Query(
+        date.today(), 
+        description="End date for filtering stats (defaults to today)"
+        )
     )-> PlayerAverageStats:
+    """
+    Returns the average per map performance of the player from the last 3 months
+    """
 
     stmnt = get_player_stats_query(
             playerid=playerid,
             mapid=None, 
             sideid=0, 
             matchid=None,
-            event=event
+            event=event,
+            startDate=startDate,
+            endDate=endDate
             )
+    
     with engine.connect() as con:
         row = con.execute(stmnt).mappings().all()
-        if len(row) == 0:
-            raise HTTPException(status_code=404, detail="Item not found")
+    row = row[0] if row else None
+    if not row:
+        raise HTTPException(status_code=404, detail="Item not found")
+    row = dict(row)
         
-        row = dict(row[0])
-
     
-    for entry in entries:
-            row[entry] = round(row[entry], 3)
-    
+    for key, col in fields.items():
+        row[key] = round(row[col], 3)
     
 
-    return {
-            'id': row['player_id'],
-            'name': row['player_name'],
-            'k': row['k'],
-            'd': row['d'],
-            'swing': row['swing'],
-            'adr': row['adr'],
-            'kast': row['kast'],
-            'rating': row['rating'],
-            'maps_played': row['n']
-        }
+    result = {
+        'id': row['player_id'],
+        'name': row['player_name'],
+        **{key: row[key] for key in fields},
+        'maps_played': row['n']
+    }
+    return result
 
-@router.get("/{playerid}/stats/maps")
-async def get_player_stats_maps(
-    playerid
-    ):
-
-    stmnt = get_player_stats_query(
-            playerid=playerid,
-            mapid=None, 
-            sideid=0, 
-            matchid=None,
-            group_by = ['maps']
-            )
-    with engine.connect() as con:
-        rows = con.execute(stmnt).mappings().all()
-    
-    results = []
+def format_player_stats(rows, group_fields: dict):
+    output = []
     for row in rows:
         row = dict(row)
-        for entry in entries:
-            row[entry] = round(row[entry], 3)
-        results.append({
-            'id': row['map_id'],
-            'name': row['map_name'],
-            'k': row['k'],
-            'd': row['d'],
-            'swing': row['swing'],
-            'adr': row['adr'],
-            'kast': row['kast'],
-            'rating': row['rating'],
+        for key, col in FIELDS.items():
+            row[key] = round(row[col], 3)
+        
+        group_info = {key: row[col] for key, col in group_fields.items()}
+
+        output.append({
+            **group_info,
+            **{key: row[key] for key in FIELDS},
             'maps_played': row['n']
         })
-    return results
+    return output
 
-@router.get("/{playerid}/stats/sides")
-async def get_player_stats_sides(
-    playerid
+@router.get("/{playerid}/stats/{group}")
+async def get_player_grouped_stats(
+    playerid: int,
+    group: Literal['maps', 'sides', 'events'] 
     ):
+    """
+    Retrieve a player's aggregated stats grouped by maps, sides, or events.
+
+    This endpoint returns the average stats for a player, grouped by the specified category.
+    For maps and sides, both the ID and name of the group are returned. For events, only
+    the event name is returned (events do not have a unique ID).
+
+    Args:
+        playerid (int): The unique ID of the player to fetch stats for.
+        group (str): The type of grouping to apply. Must be one of:
+            - 'maps'   : Group stats by map (includes map_id and map_name)
+            - 'sides'  : Group stats by side (includes side_id and side_name)
+            - 'events' : Group stats by event (includes only event name)
+
+    Returns:
+        list[dict]: A list of grouped stats entries, each containing:
+            - group info (id/name or just name for events)
+            - k, d, swing, adr, kast, rating: Aggregated stats rounded to 3 decimals
+            - maps_played (int): Number of matches counted for the group
+
+    Raises:
+        HTTPException: If the `group` parameter is invalid (not 'maps', 'sides', or 'events').
+    """
+    if group not in GROUP_CONFIG:
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid group type. Must be 'maps', 'sides', or 'events'."
+        )
+
+    group_fields = GROUP_CONFIG[group]
 
     stmnt = get_player_stats_query(
-            playerid=playerid,
-            mapid=None, 
-            sideid=None, 
-            matchid=None,
-            group_by = ['sides']
-            )
+        playerid=playerid,
+        mapid=None, 
+        sideid=0 if group=='maps' else None,
+        matchid=None,
+        group_by=[group]
+    )
+
     with engine.connect() as con:
         rows = con.execute(stmnt).mappings().all()
-    
 
-    
-    results = []
-    for row in rows:
-        row = dict(row)
-        for entry in entries:
-            row[entry] = round(row[entry], 3)
-        results.append({
-            'id': row['side_id'],
-            'name': row['side_name'],
-            'k': row['k'],
-            'd': row['d'],
-            'swing': row['swing'],
-            'adr': row['adr'],
-            'kast': row['kast'],
-            'rating': row['rating'],
-            'maps_played': row['n']
-        })
-    return results
+    return format_player_stats(rows, group_fields)
 
+
+def add_fuzzy_search(col, value, filters, order_bys, threshold = 0.3):
+    """
+    Adds a fuzzy search filter and ordering for a given column.
+
+    Args:
+        col: SQLAlchemy column to search on (e.g., players.name).
+        value: The string value to search for.
+        filters: List of filters to append to (modified in-place).
+        order_bys: List of order_by clauses to append to (modified in-place).
+        threshold: Minimum similarity threshold (default 0.3).
+    """
+    if value:
+        similarity = func.similarity(col, value)
+        filters.append(similarity > threshold)
+        order_bys.append(similarity.desc())
 
 def get_player_stats_query(
     playerid,
@@ -174,67 +215,62 @@ def get_player_stats_query(
     sideid = None,
     matchid = None,
     event = None,
+    startDate=None,
+    endDate=None,
     group_by = None
     ) -> list[PlayerStats]:
 
     ps = aliased(player_stats)
 
     filters = [ps.playerid == playerid]
+    
+    optional_filters = [
+        (mapid, ps.mapid, lambda col: col !=0),
+        (sideid, ps.sideid, lambda col: col !=0),
+        (matchid, ps.matchid, None)
+        ]
+    
+    for value, column, default in optional_filters:
+        if value is not None:
+            filters.append(column == value)
+        elif default:
+            filters.append(default(column))
+
     order_bys = []
 
-    if mapid is not None:
-        filters.append(ps.mapid == mapid)
-    else:
-        filters.append(ps.mapid != 0)
+    add_fuzzy_search(match_overview.event, event, filters,order_bys)
     
-    if sideid is not None:
-        filters.append(ps.sideid == sideid)
-    else:
-        filters.append(ps.sideid != 0)
+    if startDate and endDate:
+        filters.extend([
+            match_overview.date >= startDate,
+            match_overview.date <= endDate
+            ])
     
-    if matchid is not None:
-        filters.append(ps.matchid == matchid)
-    
-    if event:
-        similarity = func.similarity(match_overview.event, event)
-        filters.append(similarity > 0.3)
-        order_bys.append(similarity.desc())
+    agg_cols = ["k", 'd', 'roundswing', 'adr', 'kast', 'rating']
     
     selects =[
         ps.playerid.label('player_id'),
-        players.name.label('player_name'),
-        func.coalesce(func.avg(ps.k), 0).label("k"),
-        func.coalesce(func.avg(ps.d), 0).label("d"),
-        func.coalesce(func.avg(ps.roundswing), 0).label("swing"),
-        func.coalesce(func.avg(ps.adr), 0).label("adr"),
-        func.coalesce(func.avg(ps.kast), 0).label("kast"),
-        func.coalesce(func.avg(ps.rating), 0).label("rating"),
+        players.name.label('player_name')
+    ]+[
+        func.coalesce(func.avg(getattr(ps, col)), 0).label(col)
+        for col in agg_cols
+    ]+[
         func.count().label('n')
     ]
 
     group_bys = [ps.playerid, players.name]
 
+    group_mapping = {
+        'maps': ([ps.mapid.label('map_id'), maps.name.label('map_name')], [ps.mapid, maps.name]),
+        'sides': ([ps.sideid.label('side_id'), sides.name.label('side_name')], [ps.sideid, sides.name]),
+        'events': ([match_overview.event.label('events')], [match_overview.event])
+    }
+
     if group_by:
-        if  'maps' in group_by:
-            selects.extend([
-                ps.mapid.label('map_id'),
-                maps.name.label('map_name')
-                ])
-            group_bys.extend([ps.mapid,maps.name])
-
-        if 'sides' in group_by:
-            selects.extend([
-                ps.sideid.label('side_id'),
-                sides.name.label('side_name')
-                ])
-            group_bys.extend([ps.sideid,sides.name])
-        
-        if 'events' in group_by:
-            selects.extend([
-                match_overview.events.label('events')
-            ])
-            group_bys.extend([match_overview.events])
-
+        for key in group_by:
+            select_cols, group_cols = group_mapping.get(key, ([], []))
+            selects.extend(select_cols)
+            group_bys.extend(group_cols)
     
     stmnt = (
         select(*selects)
