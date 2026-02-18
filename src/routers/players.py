@@ -115,14 +115,14 @@ async def get_average_player_stats(
     row = dict(row)
         
     
-    for key, col in fields.items():
+    for key, col in FIELDS.items():
         row[key] = round(row[col], 3)
     
 
     result = {
         'id': row['player_id'],
         'name': row['player_name'],
-        **{key: row[key] for key in fields},
+        **{key: row[key] for key in FIELDS},
         'maps_played': row['n']
     }
     return result
@@ -146,7 +146,8 @@ def format_player_stats(rows, group_fields: dict):
 @router.get("/{playerid}/stats/{group}")
 async def get_player_grouped_stats(
     playerid: int,
-    group: Literal['maps', 'sides', 'events'] 
+    group: Literal['maps', 'sides', 'events'],
+    map_id: Optional[int] = Query(None, description="Filter by map_id"),
     ):
     """
     Retrieve a player's aggregated stats grouped by maps, sides, or events.
@@ -181,7 +182,7 @@ async def get_player_grouped_stats(
 
     stmnt = get_player_stats_query(
         playerid=playerid,
-        mapid=None, 
+        mapid=map_id, 
         sideid=0 if group=='maps' else None,
         matchid=None,
         group_by=[group]
@@ -246,7 +247,7 @@ def get_player_stats_query(
             match_overview.date <= endDate
             ])
     
-    agg_cols = ["k", 'd', 'roundswing', 'adr', 'kast', 'rating']
+    agg_cols = FIELDS.values()
     
     selects =[
         ps.playerid.label('player_id'),
