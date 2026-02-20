@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
@@ -6,10 +6,10 @@ from core.config import settings
 from db.session import engine 
 from db.base_class import Base
 from routers import spreadsheets, results, download
-from fastapi.staticfiles import StaticFiles
 from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
 from src.config.example_requests import example_requests
+from pathlib import Path
 
 
 def create_tables():
@@ -30,14 +30,17 @@ app.include_router(download.router)
 
 
 
-templates = Jinja2Templates(directory="templates")
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
+BASE_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
-    return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+    return templates.TemplateResponse(
+    request,
+    "404.html",
+    status_code=404
+)
 
 
 @app.get("/", response_class=HTMLResponse)

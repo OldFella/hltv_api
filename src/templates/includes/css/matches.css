@@ -5,7 +5,11 @@
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
+
 .match-scores {
     display: flex;
     align-items: center;

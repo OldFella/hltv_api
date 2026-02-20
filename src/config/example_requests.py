@@ -1,5 +1,5 @@
 example_requests = [
-    {"url":  'curl "https://api.csapi.de/matches/2389666"',
+    {"url":  '"https://api.csapi.de/matches/2389666"',
     "response":"""
 {
   "id": 2389666,
@@ -50,7 +50,7 @@ example_requests = [
 """
     },
 {
-    "url":  'curl "https://api.csapi.de/players/21167/stats"',
+    "url":  '"https://api.csapi.de/players/21167/stats"',
     "response": """
 {
   "id": 21167,

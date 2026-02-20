@@ -8,10 +8,12 @@ $(document).ready(function () {
     scrollY: '70vh',
     scrollCollapse: true,
     paging: false,
+    info: false,
+    lengthChange: false,
     autoWidth: false,
     dom: 'Bfrtip',
     buttons: [
-      { extend: 'csvHtml5', text: 'Download CSV', title: '{{ sheet_name }}', exportOptions: { columns: ':visible' }, className:'dt-button' }
+      { extend: 'csvHtml5', text: 'Download CSV', title: '{{ sheet_name }}', exportOptions: { columns: ':visible' }, className: 'button' }
     ],
     fixedColumns: {
         leftColumns: fixedColsSettings[{{ loop.index0 }}]   // <-- freeze the first 2 columns

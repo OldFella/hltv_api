@@ -124,6 +124,7 @@ header .wrap::after {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
+    align-items: stretch;
 }
 
 .card {
@@ -161,6 +162,38 @@ header .wrap::after {
     text-transform: uppercase;
     color: var(--accent);
 }
+
+.results-card {
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+}
+
+#results {
+    flex: 1;
+    overflow-y: auto;
+}
+
+#results::-webkit-scrollbar {
+    width: 4px;
+}
+
+#results::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+#results::-webkit-scrollbar-thumb {
+    background: var(--accent-dim);
+    border-radius: 2px;
+}
+
+#results::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+
 
 /* ===== FOOTER ===== */
 footer {
@@ -353,3 +386,4 @@ footer a:hover {
     .cards-container { flex-direction: column; }
     .button { font-size: 0.75rem; padding: 6px 10px; }
 }
+

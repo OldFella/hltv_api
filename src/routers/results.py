@@ -42,7 +42,7 @@ async def get_latest_results() -> list[MatchHistory]:
        # get_matchhistory = get_matchhistory.where(match_overview.date == latest_date)
         get_matchhistory = get_matchhistory.where(m1.teamid < m2.teamid)
 
-        get_matchhistory= get_matchhistory.order_by(match_overview.date.desc()).limit(10)
+        get_matchhistory= get_matchhistory.order_by(match_overview.date.desc()).limit(11)
         matchhistory = np.array(con.execute(get_matchhistory).fetchall())
     
         result = []

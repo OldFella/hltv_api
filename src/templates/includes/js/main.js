@@ -38,24 +38,19 @@ fetch("/results/latest")
         "neutral-score";
 
       row.innerHTML = `
-        <div class="match-left">
           <div class="match-scores">
-            <div class="team team-left">${m.team}</div>
-
-            <div class="score-center">
-              <span class="${teamColor}">${m.score}</span>
-              <span>-</span>
-              <span class="${oppColor}">${m.score_opponent}</span>
-            </div>
-
-            <div class="team team-right">${m.opponent}</div>
+              <div class="team team-left">${m.team}</div>
+              <div class="score-center">
+                  <span class="${teamColor}">${m.score}</span>
+                  <span>-</span>
+                  <span class="${oppColor}">${m.score_opponent}</span>
+              </div>
+              <div class="team team-right">${m.opponent}</div>
           </div>
-
           <div class="match-event-date">
-            <span>${m.event}</span>
-            <span>${m.date}</span>
+              <span>${m.event}</span>
+              <span>${m.date}</span>
           </div>
-        </div>
       `;
 
       el.appendChild(row);

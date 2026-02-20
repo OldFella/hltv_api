@@ -65,20 +65,9 @@ details summary::-webkit-details-marker {
     display: none;
 }
 
+
 details summary::before {
-    content: '▶';
-    font-size: 0.6rem;
-    color: var(--accent-dim);
-    transition: transform 0.2s;
-}
-
-details[open] summary::before {
-    transform: rotate(90deg);
-}
-
-details summary::after {
     content: 'curl';
-    margin-left: auto;
     font-size: 0.7rem;
     color: var(--muted);
     background: var(--bg);

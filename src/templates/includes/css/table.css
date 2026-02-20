@@ -9,18 +9,24 @@ table.dataTable {
 /* Allow multi-line headers */
 table.dataTable thead th {
     background-color: var(--bg) !important;
-    color: var(--text) !important;
+    color: var(--accent) !important;
     border-bottom: 1px solid var(--border);
-    white-space: Normal !important;
+    white-space: normal !important;
     word-break: break-word;
     line-height: 1.25;
     padding: 8px 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 table.dataTable tbody td {
     background-color: var(--bg) !important;
     color: var(--text) !important;
     white-space: nowrap;
+    font-family: 'Rajdhani', system-ui, sans-serif !important;
+    font-size: 0.95rem !important;
 }
 
 table.dataTable tbody tr:nth-child(even) td {
@@ -49,21 +55,51 @@ table.dataTable tbody tr:hover td {
   width: 100% !important;
 }
 
-.dt-button {
-  background: var(--accent) !important;
-  color: var(--bg) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  padding: 6px 12px !important;
-  margin: 5px 5px 15px 0 !important;
-  cursor: pointer !important;
-  font-weight: bold;
+.dt-buttons a,
+.dt-buttons button {
+    color: var(--bg) !important;
+    background: var(--accent) !important;
+    padding: 7px 14px !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
 }
-.dt-button:hover {
-  background: var(--bg) !important;
-  color: var(--text) !important;
+
+.dt-buttons a:hover,
+.dt-buttons button:hover {
+    background: var(--accent-hover) !important;
+    box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4) !important;
 }
 
 .dtfc-right-top-blocker {
     background-color: var(--bg) !important;
 }
+
+.page-title {
+    font-family: 'Share Tech Mono', monospace;
+    text-align: center;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+}
+.page-actions {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.dataTables_filter input:focus {
+    outline: none !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.3) !important;
+}
+
+
