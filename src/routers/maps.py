@@ -12,7 +12,7 @@ router = APIRouter(prefix = '/maps',
 
 @router.get("/")
 async def get_maps()->list[Item]:
-    stmnt = select(maps.mapid.label('id'), maps.name.label('name'))
+    stmnt = select(maps.mapid.label('id'), maps.name.label('name')).order_by(maps.mapid)
 
     rows = execute_query(stmnt)
         
