@@ -1,8 +1,8 @@
 import sys
 sys.path.append('../')
-from db.classes import teams, sides, maps, matches, match_overview
-from db.session import engine 
-from db.models import Item, MatchHistory
+from src.db.classes import teams, sides, maps, matches, match_overview
+from src.db.session import engine 
+from src.db.models import Item, MatchHistory
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, and_
 from sqlalchemy.sql.expression import func

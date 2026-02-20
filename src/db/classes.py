@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date, Float
-from .base_class import Base
+from src.db.base_class import Base
 
 class sides(Base):
     __tablename__ = 'sides'

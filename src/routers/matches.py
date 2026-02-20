@@ -1,17 +1,8 @@
-from src.db.classes import teams, sides, maps, matches, match_overview
-from src.db.session import engine 
-from src.db.models import Item, match, MatchResponse, MapResponse
-
-from typing import List, Optional
-
+from typing import Optional
 from fastapi import APIRouter, Query
-from sqlalchemy import select, and_, or_, func
-from sqlalchemy.orm import aliased
-
-
+from src.db.models import MatchResponse, MapResponse
 from src.repositories.base import execute_query
 from src.repositories.match_repository import build_match_query, format_matches
-
 
 router = APIRouter(prefix = '/matches',
                    tags = ['matches'])

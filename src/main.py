@@ -2,10 +2,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from core.config import settings
-from db.session import engine 
-from db.base_class import Base
-from routers import sides,results, teams, matches, maps, goat, players
+from src.core.config import settings
+from src.db.session import engine 
+from src.db.base_class import Base
+from src.routers import sides,results, teams, matches, maps, goat, players
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -15,7 +15,7 @@ def create_tables():
 
 def start_application():
     app = FastAPI(title=settings.PROJECT_NAME,version=settings.PROJECT_VERSION)
-    create_tables()
+    app.add_event_handler("startup", create_tables)  # run on startup, not import
     return app
 
 

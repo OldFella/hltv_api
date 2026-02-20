@@ -5,7 +5,7 @@ jinja2==3.0.1
 jinjasql
 fastapi
 fastapi[standard]
-SQLAlchemy==2.0.13
+sqlalchemy>=2.0.36
 python-dotenv
 uvicorn==0.22.0 
 pydantic

@@ -17,7 +17,7 @@ def create_tables():
 
 def start_application():
     app = FastAPI(title=settings.PROJECT_NAME,version=settings.PROJECT_VERSION)
-    create_tables()
+    app.add_event_handler("startup", create_tables)  # run on startup, not import
     return app
 
 
