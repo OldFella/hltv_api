@@ -1,9 +1,9 @@
 from src.db.classes import sides
-from src.db.session import engine 
 from fastapi import APIRouter
 from sqlalchemy import select
 from src.db.models import Item
-import numpy as np
+
+from src.repositories.base import execute_query
 
 
 router = APIRouter(prefix = '/sides',
@@ -12,24 +12,16 @@ router = APIRouter(prefix = '/sides',
 
 @router.get("/")
 async def get_sides()->list[Item]:
-    statement = select(sides.sideid,sides.name)
-    with engine.connect() as con:
+    stmnt = select(sides.sideid.label('id'),sides.name.label('name'))
+    rows = execute_query(stmnt)
+    return [{'id':r['id'], 'name':r['name']} for r in rows]
 
-        results = np.array(con.execute(statement).fetchall())
-        
-        value = [{'id':r[0], 'name':r[1]} for r in results]
-
-    return value
 
 
 @router.get("/{sideid}")
 async def get_side_name(sideid)->Item:
-    statement = select(sides.name).where(sides.sideid == sideid)
-    value = {'id':sideid}
-    with engine.connect() as con:
+    stmnt = select(sides.name.label('name')).where(sides.sideid == sideid)
 
-        results = con.execute(statement).all()
-        for res in results:
-            value['name'] = res[0]
-
-    return value
+    row = execute_query(stmnt, many=False)
+  
+    return {'id': sideid, 'name': row['name']}

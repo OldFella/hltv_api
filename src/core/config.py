@@ -6,7 +6,7 @@ env_path = Path('.') / '.env'
 load_dotenv()
 
 class Settings:
-    PROJECT_NAME:str = "HLTV API"
+    PROJECT_NAME:str = "CS API"
     PROJECT_VERSION: str = "1.0.0"
     POSTGRES_USER : str = os.getenv("POSTGRES_USER")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")

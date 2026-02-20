@@ -4,6 +4,8 @@
   --text: #e5e7eb;
   --muted: #9ca3af;
   --accent: #22c55e;
+  --row-alt: #0b1220;
+  --row-hl: #1f2933;
 }
 
 /* ===== DataTables fixes ===== */
@@ -30,6 +32,14 @@ table.dataTable tbody td {
     background-color: var(--bg) !important;
     color: var(--text) !important;
     white-space: nowrap;
+}
+
+table.dataTable tbody tr:nth-child(even) td {
+    background-color: var(--row-alt) !important;
+}
+
+table.dataTable tbody tr:hover td {
+    background-color: var(--row-hl) !important;
 }
 
 .table-wrapper {

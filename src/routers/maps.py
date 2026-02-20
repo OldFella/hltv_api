@@ -1,9 +1,9 @@
 from src.db.classes import maps
-from src.db.session import engine 
 from fastapi import APIRouter
 from sqlalchemy import select
 from src.db.models import Item
-import numpy as np
+
+from src.repositories.base import execute_query
 
 router = APIRouter(prefix = '/maps',
                    tags = ['map'])
@@ -12,23 +12,17 @@ router = APIRouter(prefix = '/maps',
 
 @router.get("/")
 async def get_maps()->list[Item]:
-    statement = select(maps.mapid,maps.name)
-    with engine.connect() as con:
+    stmnt = select(maps.mapid.label('id'), maps.name.label('name'))
 
-        results = np.array(con.execute(statement).fetchall())
+    rows = execute_query(stmnt)
         
-        value = [{'id':r[0], 'name':r[1]} for r in results]
+    return [{'id':r['id'], 'name':r['name']} for r in rows]
 
-    return value
 
 @router.get("/{mapid}")
-async def get_map_name(mapid)->Item:
-    statement = select(maps.name).where(maps.mapid == mapid)
-    value = {'id':mapid}
-    with engine.connect() as con:
+async def get_map_name(mapid: int)->Item:
+    stmnt = select(maps.name.label('name')).where(maps.mapid == mapid)
+    
+    row = execute_query(stmnt, many=False)
 
-        results = con.execute(statement).all()
-        for res in results:
-            value['name'] = res[0]
-
-    return value
+    return {'id': mapid, 'name' : row['name']}
