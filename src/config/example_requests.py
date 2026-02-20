@@ -16,25 +16,25 @@ example_requests = [
   "maps": [
     {
       "id": 2,
-      "name": "ovp",
+      "name": "Overpass",
       "team1_score": 10,
       "team2_score": 13
     },
     {
       "id": 5,
-      "name": "nuke",
+      "name": "Nuke",
       "team1_score": 2,
       "team2_score": 13
     },
     {
       "id": 7,
-      "name": "inf",
+      "name": "Inferno",
       "team1_score": 8,
       "team2_score": 13
     },
     {
       "id": 6,
-      "name": "mrg",
+      "name": "Mirage",
       "team1_score": 13,
       "team2_score": 11
     }
