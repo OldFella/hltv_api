@@ -11,6 +11,7 @@ from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
 from src.config.example_requests import example_requests
 
+
 def create_tables():
     Base.metadata.create_all(bind=engine)
         
@@ -31,6 +32,12 @@ app.include_router(download.router)
 
 templates = Jinja2Templates(directory="templates")
 # app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
 
 @app.get("/", response_class=HTMLResponse)

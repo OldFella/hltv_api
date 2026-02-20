@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}404 — Not Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .error-code {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: clamp(72px, 14vw, 112px);
+        font-weight: 700;
+        line-height: 1;
+        color: var(--accent);
+        text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.3);
+        margin-bottom: 4px;
+        letter-spacing: -0.02em;
+    }
+
+    .error-label {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+        color: var(--muted);
+    }
+
+    .error-message {
+        font-size: 1rem;
+        line-height: 1.65;
+        max-width: 400px;
+        margin-bottom: 32px;
+        color: var(--muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">404</div>
+    <div class="error-label">// page not found</div>
+    <p class="error-message">
+        The page you requested does not exist.<br>
+        It may have been moved or the URL is incorrect.
+    </p>
+    <a href="/" class="button">Back to home</a>
+</div>
+{% endblock %}

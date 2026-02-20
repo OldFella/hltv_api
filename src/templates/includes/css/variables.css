@@ -1,0 +1,87 @@
+:root {
+    --bg:           #020617;
+    --surface:      #0d1520;
+    --border:       #1a2535;
+    --accent:       #20c45a;
+    --accent-hover: #16a34a;
+    --accent-dim:   #16a34a;
+    --text:         #e5e7eb;
+    --muted:        #9ca3af;
+    --warning:      #f59e0b;
+    --row-alt:      #080f1a;
+    --row-hl:       #0f2030;
+    --danger:       #ef4444;
+    --accent-rgb: 34, 197, 94;
+    --chrome: #060d1a;
+    --json-key:    var(--accent);
+    --json-string: #7dd3a8;
+    --json-number: #f0a500;
+    --json-bool:   #4d9fff;
+    --json-null:   var(--muted);
+}
+
+[data-theme="orange"]{
+    --bg:           #0a0c0e;
+    --surface:      #111416;
+    --border:       #1e2428;
+    --accent:       #e8a200;
+    --accent-hover: #cc7a00;
+    --accent-dim:   #7a5500;
+    --text:         #c8d0d8;
+    --muted:        #4a5560;
+    --warning:      #ef4444;
+    --danger:       #ef4444;
+    --row-alt:      #0d0f10;
+    --row-hl:       #1a1e22;
+    --accent-rgb: 232, 162, 0;
+    --chrome: #0d0f0a;
+    --json-key:    var(--accent);
+    --json-string: #c8a96e;
+    --json-number: #4d9fff;
+    --json-bool:   #e06c75;
+    --json-null:   var(--muted);
+}
+
+[data-theme="light"] {
+    --bg:           #f0f4f8;
+    --surface:      #ffffff;
+    --border:       #cbd5e1;
+    --accent:       #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-dim:   #93c5fd;
+    --accent-rgb:   37, 99, 235;
+    --text:         #0f172a;
+    --muted:        #64748b;
+    --warning:      #d97706;
+    --danger:       #dc2626;
+    --row-alt:      #f8fafc;
+    --row-hl:       #dbeafe;
+    --chrome: #e2e8f0;
+    --json-key:    #2563eb;
+    --json-string: #16a34a;
+    --json-number: #d97706;
+    --json-bool:   #9333ea;
+    --json-null:   #94a3b8;
+}
+
+[data-theme="cb"] {
+    --bg:           #000000;
+    --surface:      #0a0a0a;
+    --border:       #444444;
+    --accent:       #4d9fff;
+    --accent-hover: #2b85ff;
+    --accent-dim:   #1a4a80;
+    --accent-rgb:   77, 159, 255;
+    --text:         #ffffff;
+    --muted:        #cccccc;
+    --warning:      #f5a623;
+    --danger:       #f5a623;
+    --row-alt:      #111111;
+    --row-hl:       #1a2a3a;
+    --chrome: #050505;
+    --json-key:    #4d9fff;
+    --json-string: #ffffff;
+    --json-number: #f5a623;
+    --json-bool:   #f5a623;
+    --json-null:   var(--muted);
+}

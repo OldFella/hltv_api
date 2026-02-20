@@ -10,7 +10,7 @@
 
 {% block content %}
 
-<div class="card info-box">
+<div class="info-box">
   <h2 class="info-title">{{ hero_card.title }}</h2>
   <p class="info-text">{{ hero_card.description }}</p>
 </div>
@@ -22,7 +22,7 @@
         Available at <a href="https://api.csapi.de" target="_blank">https://api.csapi.de</a>
       </div>
       <div class="info-description">
-        🌍 Public API &nbsp;•&nbsp; 🔓 No API key required
+          PUBLIC API &nbsp;·&nbsp; NO KEY REQUIRED
       </div>
     
     <div class="example-requests">
@@ -41,7 +41,7 @@
 
             {% for route in routes %}
             <a href="{{ api_base }}{{ route.path }}" target="_blank">
-                GET {{ route.path }} — {{ route.description }}
+                {{ route.path }} — {{ route.description }}
             </a>
             {% endfor %}
         {% endfor %}
@@ -54,7 +54,7 @@
 
   <div class="card">
     <h2 class="card-title">Latest Results</h2>
-    <div id="results">Loading…</div>
+    <div id="results" class="loading-text">Loading…</div>
   </div>
 </div>
 
@@ -63,5 +63,7 @@
 {% block scripts %}
 <script>
   {% include "includes/js/main.js" %}
+  {% include "includes/js/highlight.js" %}
+
 </script>
 {% endblock %}

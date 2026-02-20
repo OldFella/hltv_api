@@ -1,66 +1,154 @@
 /* ===== API LINKS ===== */
 .api-links a {
-  display: block;
-  padding: 8px 12px;
-  margin: 4px 0;
-  background: #1f2933;
-  color: #22c55e;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-dim);
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    transition: border-left-color 0.2s, background 0.2s;
 }
 
 .api-links a:hover {
-  background: #22c55e;
-  color: #020617;
+    border-left-color: var(--accent);
+    background: var(--surface);
+    color: var(--accent);
+}
+
+.api-links a::before {
+    content: 'GET';
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.7rem;
+    background: var(--surface);
+    border: 1px solid var(--accent-dim);
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
 }
 
 /* ===== CODE EXAMPLES ===== */
-
 details {
-  margin-bottom: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 details summary {
-  cursor: pointer;
-  background: #0d1117;
-  padding: 12px;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  color: #22c55e;
-  list-style: none;
+    cursor: pointer;
+    background: var(--surface);
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+details summary:hover {
+    background: var(--bg);
 }
 
 details summary::-webkit-details-marker {
-  display: none;
+    display: none;
 }
 
 details summary::before {
-  content: "\25B6  ";
-  font-size: 0.75rem;
+    content: '▶';
+    font-size: 0.6rem;
+    color: var(--accent-dim);
+    transition: transform 0.2s;
 }
 
 details[open] summary::before {
-  content: "\25BC  ";
+    transform: rotate(90deg);
+}
+
+details summary::after {
+    content: 'curl';
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 
 pre {
-  background: #0d1117;
-  padding: 16px;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  color: #22c55e;
-  margin-top: 8px;
+    background: var(--bg);
+    padding: 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text);
+    margin: 0;
+    overflow-x: auto;
+    border-top: 1px solid var(--border);
+    line-height: 1.6;
 }
+
+.json-key     { color: var(--json-key); }
+.json-string  { color: var(--json-string); }
+.json-number  { color: var(--json-number); }
+.json-bool    { color: var(--json-bool); }
+.json-null    { color: var(--json-null); }
 
 .endpoint-category {
-  margin-top: 12px;
-  margin-bottom: 4px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #e5e7eb;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
 }
 
+.api-links a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-dim);
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    transition: border-left-color 0.2s, background 0.2s;
+}
+
+.api-links a:hover {
+    border-left-color: var(--accent);
+    background: var(--surface);
+    color: var(--accent);
+}
+
+.api-links a::before {
+    content: 'GET';
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.7rem;
+    background: var(--surface);
+    border: 1px solid var(--accent-dim);
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
