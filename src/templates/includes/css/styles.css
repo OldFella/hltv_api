@@ -1,30 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 
-/* ===== GLOBAL ===== */
+/* ===== TOKENS ===== */
+/* All var(--x) definitions live in themes.css or a <style> block in base.html */
+
+/* ===== RESET / BASE ===== */
 body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Rajdhani', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-size: 1rem;
 }
 
-/* subtle scanline overlay */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.04) 2px,
-        rgba(0,0,0,0.04) 4px
-    );
-    pointer-events: none;
-    z-index: 1000;
-}
 
+/* ===== SHARED UTILITIES ===== */
 .wrap {
     max-width: 1200px;
     margin: auto;
@@ -32,17 +21,17 @@ body::before {
 }
 
 /* ===== HEADER ===== */
-/* update existing header rule */
 header {
     background: var(--chrome);
     width: 100%;
     box-sizing: border-box;
     border-bottom: 1px solid var(--border);
     padding: 0;
-    margin-bottom: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-/* constrain content inside */
 header .wrap {
     display: flex;
     flex-wrap: nowrap;
@@ -65,7 +54,7 @@ header .wrap::after {
 }
 
 .home-logo {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--accent);
@@ -88,18 +77,27 @@ header .wrap::after {
     opacity: 0.5;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== BUTTONS ===== */
 .button {
     color: var(--bg);
     background: var(--accent);
     padding: 7px 14px;
     border-radius: 4px;
     text-decoration: none;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     letter-spacing: 0.05em;
     font-weight: 600;
     transition: background 0.2s, box-shadow 0.2s;
     text-transform: uppercase;
+    cursor: pointer;
+    border: none;
 }
 
 .button:hover {
@@ -107,23 +105,43 @@ header .wrap::after {
     box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4);
 }
 
-.wip-badge {
-    font-size: 0.7rem;
-    padding: 3px 6px;
-    opacity: 0.7;
+.button-outline {
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--border);
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.button-outline:hover {
+    background: transparent;
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
+}
+
+/* ===== THEME TOGGLE ===== */
+#theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    width: 56px;
+    height: 32px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#theme-toggle:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
 }
 
 /* ===== CARDS ===== */
 .cards-container {
     display: flex;
     gap: 16px;
-    flex-wrap: nowrap;   /* prevent wrapping so they stay side by side */
+    flex-wrap: nowrap;
     align-items: stretch;
 }
 
@@ -141,8 +159,6 @@ header .wrap::after {
     overflow: hidden;
 }
 
-
-/* top accent line on cards */
 .card::before {
     content: '';
     position: absolute;
@@ -161,38 +177,12 @@ header .wrap::after {
     margin-bottom: 16px;
     font-size: 1.1rem;
     font-weight: 700;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--accent);
-}
-
-
-.results-card {
-    overflow: hidden;
-}
-
-#results {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-}
-
-#results::-webkit-scrollbar {
-    width: 4px;
-}
-
-#results::-webkit-scrollbar-track {
-    background: var(--bg);
-}
-
-#results::-webkit-scrollbar-thumb {
-    background: var(--accent-dim);
-    border-radius: 2px;
-}
-
-#results::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
 }
 
 .card-cta {
@@ -201,116 +191,6 @@ header .wrap::after {
     border-top: 1px solid var(--border);
     display: block;
     text-align: center;
-}
-
-/* ===== FOOTER ===== */
-footer {
-    background: var(--chrome);
-    text-align: center;
-    margin-top: 48px;
-    padding: 24px 16px;
-    color: var(--muted);
-    font-size: 0.85rem;
-    border-top: 1px solid var(--border);
-    font-family: 'Share Tech Mono', monospace;
-    letter-spacing: 0.05em;
-}
-
-footer a {
-    color: var(--accent);
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-.footer-brand {
-    font-family: 'Share Tech Mono', monospace;
-    color: var(--accent);
-    font-size: 1rem;
-    letter-spacing: 0.15em;
-    margin-bottom: 6px;
-}
-
-.footer-sub {
-    color: var(--muted);
-    font-size: 0.8rem;
-}
-.footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    font-size: 0.85rem;
-}
-
-.footer-links span {
-    color: var(--border);
-}
-/* ===== HERO ===== */
-.hero-card {
-    margin-bottom: 24px;
-    border: 1px solid var(--accent-dim);
-    background: var(--surface);
-    position: relative;
-    overflow: hidden;
-}
-
-/* animated scan effect on hero */
-.hero-card::after {
-    content: '';
-    position: absolute;
-    top: -100%;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(
-        to bottom,
-        transparent,
-        rgba(var(--accent-rgb), 0.04),
-        transparent
-    );
-    animation: scan 4s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes scan {
-    from { top: -40%; }
-    to   { top: 100%; }
-}
-
-.hero-text {
-    text-align: center;
-    color: var(--muted);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* ===== INFO SECTION ===== */
-.info-available {
-    text-align: center;
-    margin-bottom: 12px;
-    color: var(--accent);
-    font-weight: 600;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
-}
-
-.info-available a {
-    color: var(--accent);
-    text-decoration: none;
-}
-
-.info-available a:hover { text-decoration: underline; }
-
-.info-description {
-    text-align: center;
-    margin-bottom: 16px;
-    color: var(--muted);
-    font-size: 0.9rem;
 }
 
 /* ===== INFO BOX ===== */
@@ -335,7 +215,7 @@ footer a:hover {
     text-align: center;
     font-size: 1.4rem;
     font-weight: 700;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     letter-spacing: 0.1em;
     color: var(--accent);
     margin-bottom: 10px;
@@ -350,8 +230,34 @@ footer a:hover {
     margin: 0;
 }
 
+/* ===== INFO SECTION ===== */
+.info-available {
+    text-align: center;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+}
+
+.info-available a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.info-available a:hover { text-decoration: underline; }
+
+.info-description {
+    text-align: center;
+    margin-bottom: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ===== LOADING ===== */
 .loading-text {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     color: var(--muted);
     font-size: 0.85rem;
     text-align: center;
@@ -359,39 +265,52 @@ footer a:hover {
     letter-spacing: 0.1em;
 }
 
-/* ===== THEME TOGGLE ===== */
-#theme-toggle {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    width: 56px;
-    height: 32px;
-    border-radius: 4px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
+/* ===== FOOTER ===== */
+footer {
+    background: var(--chrome);
+    text-align: center;
+    margin-top: 48px;
+    padding: 24px 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
     letter-spacing: 0.05em;
-    cursor: pointer;
-    z-index: 999;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    white-space: nowrap;
-    overflow: hidden;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-#theme-toggle:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
+footer a {
+    color: var(--accent);
+    text-decoration: none;
 }
+
+footer a:hover { text-decoration: underline; }
+
+.footer-brand {
+    color: var(--accent);
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+}
+
+.footer-sub {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.footer-links span { color: var(--border); }
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
     .cards-container { flex-direction: column; }
     .button { font-size: 0.75rem; padding: 6px 10px; }
+    .match-scores { flex-direction: column; gap: 6px; }
+    .team, .score-center { width: 100%; text-align: center; padding: 0; }
 }
-

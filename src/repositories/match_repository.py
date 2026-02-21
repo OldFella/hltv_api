@@ -1,7 +1,14 @@
-from src.db.classes import teams, sides, maps, matches, match_overview
-from src.db.session import engine
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import aliased
+
+from src.db.session import engine
+from src.db.classes import (
+    teams, sides, maps, 
+    matches, match_overview, 
+    player_stats, players
+)
+
+from src.repositories.player_repository import FIELDS
 
 
 # ---------------------------------------------------------------------------
@@ -64,9 +71,113 @@ def format_matches(rows)->list[dict]:
 
     return result
 
+def format_match_stats(rows, by_map: bool):
+    result = []
+    for row in rows:
+        teams = {}
+        for p in row['player_stats']:
+            tid = p['team_id']
+            if tid not in teams:
+                teams[tid] = {'id': tid, 'name': p['team_name'], 'players': []}
+            
+            teams[tid]['players'] += [{
+                'id': p['player_id'],
+                'name': p['player_name'],
+                **{key:p[col] for key, col in FIELDS.items()}
+            }]
+        
+        team_items = list(teams.values())
+        result.append({
+            'id': row['map_id'],
+            'name': row['map_name'],
+            'team1': team_items[0],
+            'team2': team_items[1]
+        })
+    return result
+
+
+def get_streak(match_history, teamid):
+    if not match_history:
+        return 0
+    
+    first_result = match_history[0]['winner']['id'] == teamid
+    streak = 0
+    
+    for match in match_history:
+        result = match['winner']['id'] == teamid
+        if result == first_result:
+            streak += 1
+        else:
+            break
+    
+    return streak if first_result else -streak  # positive = win streak, negative = loss streak
+
 # ---------------------------------------------------------------------------
 # Query builder
 # ---------------------------------------------------------------------------
+
+def build_roster_query(
+    teamid: int):
+    last_match_stmnt = (
+        select(match_overview.matchid)
+        .join(player_stats, player_stats.matchid == match_overview.matchid)
+        .where(player_stats.teamid == teamid)
+        .order_by(match_overview.date.desc(), match_overview.matchid.desc())
+        .limit(1)
+        .subquery()
+    )
+
+    stmnt = (
+        select(
+            players.playerid.label('id'),
+            players.name.label('name')
+        )
+        .distinct()
+        .join(player_stats, player_stats.playerid == players.playerid)
+        .where(
+            player_stats.matchid == last_match_stmnt,
+            player_stats.teamid == teamid
+        )
+    )
+
+    return stmnt
+
+def build_match_stats_query(matchid: int, by_map: bool):
+
+    ps = aliased(player_stats)
+
+    selects_array = [ 
+                'player_id',ps.playerid,
+                'player_name',players.name,
+                'team_id', ps.teamid,
+                'team_name', teams.name
+    ]
+    selects_array_fields = [[col, getattr(ps, col)] for col in FIELDS.values()]
+    for f in selects_array_fields:
+        selects_array += f
+
+    selects = [
+        ps.mapid.label('map_id'),
+        maps.name.label('map_name'),
+        func.array_agg(
+            func.json_build_object(*selects_array)
+        ).label("player_stats")
+    ]
+
+    filters = [ps.matchid == matchid, ps.sideid == 0]
+    if not by_map:
+        filters += [ps.mapid == 0]
+
+    stmnt = (
+        select(*selects)
+        .join(players, players.playerid == ps.playerid)
+        .join(teams, teams.teamid == ps.teamid)
+        .join(maps, ps.mapid == maps.mapid)
+        .group_by(maps.name, ps.mapid)
+        .where(*filters)
+    )
+    return stmnt
+
 
 def build_match_query(
     matchid = None,
@@ -161,9 +272,8 @@ def build_match_query(
             .join(maps, maps.mapid == m1.mapid)
             .group_by(*group_bys)
             .where(*filters)
-            .order_by(match_overview.date.desc())
+            .order_by(match_overview.date.desc(),m1.matchid.desc())
             .offset(offset)
             .limit(limit)
     )
     return stmnt
-    

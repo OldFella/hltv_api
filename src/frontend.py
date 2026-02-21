@@ -5,7 +5,7 @@ from fastapi.requests import Request
 from core.config import settings
 from db.session import engine 
 from db.base_class import Base
-from routers import spreadsheets, results, download
+from routers import spreadsheets, download
 from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
 from src.config.example_requests import example_requests
@@ -30,7 +30,6 @@ def start_application():
 app = start_application()
 
 app.include_router(spreadsheets.router)
-app.include_router(results.router)
 app.include_router(download.router)
 
 

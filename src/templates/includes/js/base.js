@@ -1,8 +1,6 @@
 const themes = [
-    { key: null,     label: '[GRN]' },
-    { key: 'orange', label: '[ORG]' },
-    { key: 'light',  label: '[LGT]' },
-    { key: 'cb',     label: '[HC]'  },
+    { key: null, label: '[GRN]' },
+    { key: 'cb', label: '[CB]'  },
 ];
 
 const toggle = document.getElementById('theme-toggle');
@@ -11,13 +9,15 @@ const saved = localStorage.getItem('theme');
 if (saved) document.documentElement.setAttribute('data-theme', saved);
 
 // set initial label
-const current = themes.find(t => t.key === (saved || null));
-if (current) toggle.textContent = current.label;
+const currentIndex = themes.findIndex(t => t.key === (saved || null));
+const next = themes[(currentIndex + 1) % themes.length];
+toggle.textContent = next.label;
 
 toggle.addEventListener('click', () => {
     const currentKey = document.documentElement.getAttribute('data-theme') || null;
     const currentIndex = themes.findIndex(t => t.key === currentKey);
     const next = themes[(currentIndex + 1) % themes.length];
+    const afterNext = themes[(currentIndex + 2) % themes.length];
 
     if (next.key) {
         document.documentElement.setAttribute('data-theme', next.key);
@@ -26,8 +26,7 @@ toggle.addEventListener('click', () => {
         document.documentElement.removeAttribute('data-theme');
         localStorage.removeItem('theme');
     }
-
-    toggle.textContent = next.label;
+    toggle.textContent = afterNext.label;
 });
 
 fetch("https://api.csapi.de/status")

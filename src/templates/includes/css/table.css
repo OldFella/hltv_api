@@ -1,12 +1,10 @@
-
-
+/* ===== TABLE ===== */
 table.dataTable {
-  width: max-content !important; /* allow table to be wider than container */
-  min-width: 100%;              /* fallback */
-  table-layout: auto !important; /* allow columns to size naturally */
+    width: max-content !important;
+    min-width: 100%;
+    table-layout: auto !important;
 }
 
-/* Allow multi-line headers */
 table.dataTable thead th {
     background-color: var(--bg) !important;
     color: var(--accent) !important;
@@ -15,7 +13,7 @@ table.dataTable thead th {
     word-break: break-word;
     line-height: 1.25;
     padding: 8px 6px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -25,7 +23,7 @@ table.dataTable tbody td {
     background-color: var(--bg) !important;
     color: var(--text) !important;
     white-space: nowrap;
-    font-family: 'Rajdhani', system-ui, sans-serif !important;
+    font-family: var(--font-body) !important;
     font-size: 0.95rem !important;
 }
 
@@ -37,64 +35,20 @@ table.dataTable tbody tr:hover td {
     background-color: var(--row-hl) !important;
 }
 
+/* ===== DATATABLES OVERRIDES ===== */
 .table-wrapper {
-  height: auto; /* vertical scroll space */
-  overflow-x: visible;             /* horizontal scroll */
-  overflow-y: auto;           /* vertical scroll handled by DataTables */
+    height: auto;
 }
 
 .dataTables_wrapper,
 .dataTables_scroll {
-  height: 100%;
+    height: 100%;
 }
-
 
 .dataTables_scrollBody {
-  overflow-x: auto !important;  /* horizontal scroll */
-  overflow-y: auto !important;  /* vertical scroll */
-  width: 100% !important;
-}
-
-.dt-buttons a,
-.dt-buttons button {
-    color: var(--accent) !important;
-    background: transparent !important;
-    border: 1px solid var(--border) !important;
-    padding: 7px 14px !important;
-    border-radius: 4px !important;
-    text-decoration: none !important;
-    font-family: 'Share Tech Mono', monospace !important;
-    font-size: 0.8rem !important;
-    letter-spacing: 0.05em !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    border: none !important;
-    cursor: pointer !important;
-    transition: background 0.2s, box-shadow 0.2s !important;
-}
-
-.dt-buttons a:hover,
-.dt-buttons button:hover {
-    background: var(--accent-hover) !important;
-    box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4) !important;
-}
-
-.dtfc-right-top-blocker {
-    background-color: var(--bg) !important;
-}
-
-.page-title {
-    font-family: 'Share Tech Mono', monospace;
-    text-align: center;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-size: 1.4rem;
-    margin-bottom: 16px;
-}
-.page-actions {
-    text-align: center;
-    margin-bottom: 16px;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    width: 100% !important;
 }
 
 .dataTables_filter input:focus {
@@ -103,4 +57,79 @@ table.dataTable tbody tr:hover td {
     box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.3) !important;
 }
 
+.dtfc-right-top-blocker {
+    background-color: var(--bg) !important;
+}
 
+/* ===== DOWNLOAD CSV BUTTON ===== */
+.dt-buttons a,
+.dt-buttons button {
+    color: var(--accent) !important;
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    padding: 7px 14px !important;
+    border-radius: 4px !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.dt-buttons a:hover,
+.dt-buttons button:hover {
+    background: transparent !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3) !important;
+}
+
+/* ===== PAGE ===== */
+.page-actions {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.tab-button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.tab-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2);
+}
+
+.tab-button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+}
+
+.tab-content {
+    display: none;
+    height: 100%;
+}
+
+.tab-content.active {
+    display: block;
+}

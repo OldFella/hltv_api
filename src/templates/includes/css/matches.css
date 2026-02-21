@@ -15,26 +15,31 @@
     align-items: center;
     width: 100%;
 }
+
 .team {
     flex: 0 0 46%;
     font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-family: var(--font-body);
 }
 
-.team-left { text-align: right; padding-right: 4px; }
-.team-right { text-align: left; padding-left: 4px; }
+.team-left  { text-align: right; padding-right: 4px; }
+.team-right { text-align: left;  padding-left: 4px; }
+
 .team-winner {
     font-weight: 700;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     color: var(--text);
 }
+
 .team-left:not(.team-winner),
 .team-right:not(.team-winner) {
     color: var(--muted);
     font-weight: 400;
 }
+
 .score-center {
     flex: 0 0 8%;
     display: flex;
@@ -42,9 +47,11 @@
     gap: 4px;
     font-weight: bold;
 }
-.green-score  { color: var(--accent); }
-.red-score    { color: #ef4444; }
+
+.green-score   { color: var(--accent); }
+.red-score     { color: var(--danger); }
 .neutral-score { color: var(--text); }
+
 .match-event-date {
     display: flex;
     flex-direction: column;
@@ -53,19 +60,18 @@
     color: var(--muted);
     font-size: 0.9rem;
 }
-/* ===== MOBILE ===== */
-@media (max-width: 600px) {
-    .cards-container {
-        flex-direction: column;
-    }
-    .match-scores {
-        flex-direction: column;
-        gap: 6px;
-    }
-    .team,
-    .score-center {
-        width: 100%;
-        text-align: center;
-        padding: 0;
-    }
+
+.results-card {
+    overflow: hidden;
 }
+
+#results {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+#results::-webkit-scrollbar { width: 4px; }
+#results::-webkit-scrollbar-track { background: var(--bg); }
+#results::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 2px; }
+#results::-webkit-scrollbar-thumb:hover { background: var(--accent); }

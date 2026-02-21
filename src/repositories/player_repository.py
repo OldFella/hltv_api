@@ -1,6 +1,5 @@
-from src.db.classes import players, matches, sides, maps, match_overview, player_stats
+from src.db.classes import players, matches, sides, maps, match_overview, player_stats, teams
 from sqlalchemy import select, func, text, literal
-from src.db.models import PlayerStats
 from sqlalchemy.orm import aliased
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -53,6 +52,30 @@ def format_stats(rows, group: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Query builder
 # ---------------------------------------------------------------------------
+def build_team_query(playerid: int):
+    last_match_stmnt = (
+        select(match_overview.matchid)
+        .join(player_stats, player_stats.matchid == match_overview.matchid)
+        .where(player_stats.playerid == playerid)
+        .order_by(match_overview.date.desc(), match_overview.matchid.desc())
+        .limit(1)
+        .subquery()
+    )
+
+    stmnt = (
+        select(
+            teams.teamid.label('id'),
+            teams.name.label('name')
+        )
+        .distinct()
+        .join(player_stats, player_stats.teamid == teams.teamid)
+        .where(
+            player_stats.matchid == last_match_stmnt,
+            player_stats.playerid == playerid
+        )
+    )
+    return stmnt
+
 
 def build_player_stats_query(
     playerid = None,

@@ -20,9 +20,7 @@
     box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2);
 }
 
-#searchInput::placeholder {
-    color: var(--muted);
-}
+#searchInput::placeholder { color: var(--muted); }
 
 #folderList {
     list-style: none;
@@ -35,9 +33,7 @@
     border-bottom: 1px solid var(--border);
 }
 
-#folderList li:last-child {
-    border-bottom: none;
-}
+#folderList li:last-child { border-bottom: none; }
 
 #folderList li a {
     color: var(--accent);
@@ -45,7 +41,7 @@
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.85rem;
     letter-spacing: 0.05em;
-    transition: color 0.2s, text-shadow 0.2s;
+    transition: text-shadow 0.2s;
 }
 
 #folderList li a:hover {

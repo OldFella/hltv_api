@@ -1,4 +1,18 @@
-/* ===== API LINKS ===== */
+/* ===== ENDPOINT CATEGORY HEADERS ===== */
+.endpoint-category {
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ===== API ENDPOINT LINKS ===== */
 .api-links a {
     display: flex;
     align-items: center;
@@ -11,7 +25,7 @@
     color: var(--text);
     text-decoration: none;
     border-radius: 4px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     transition: border-left-color 0.2s, background 0.2s;
 }
@@ -46,7 +60,7 @@ details summary {
     cursor: pointer;
     background: var(--surface);
     padding: 10px 14px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     color: var(--accent);
     list-style: none;
@@ -57,14 +71,8 @@ details summary {
     user-select: none;
 }
 
-details summary:hover {
-    background: var(--bg);
-}
-
-details summary::-webkit-details-marker {
-    display: none;
-}
-
+details summary:hover { background: var(--bg); }
+details summary::-webkit-details-marker { display: none; }
 
 details summary::before {
     content: 'curl';
@@ -79,7 +87,7 @@ details summary::before {
 pre {
     background: var(--bg);
     padding: 16px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     color: var(--text);
     margin: 0;
@@ -88,56 +96,9 @@ pre {
     line-height: 1.6;
 }
 
-.json-key     { color: var(--json-key); }
-.json-string  { color: var(--json-string); }
-.json-number  { color: var(--json-number); }
-.json-bool    { color: var(--json-bool); }
-.json-null    { color: var(--json-null); }
-
-.endpoint-category {
-    margin-top: 16px;
-    margin-bottom: 6px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--border);
-}
-
-.api-links a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    margin: 4px 0;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent-dim);
-    color: var(--text);
-    text-decoration: none;
-    border-radius: 4px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.8rem;
-    transition: border-left-color 0.2s, background 0.2s;
-}
-
-.api-links a:hover {
-    border-left-color: var(--accent);
-    background: var(--surface);
-    color: var(--accent);
-}
-
-.api-links a::before {
-    content: 'GET';
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 0.7rem;
-    background: var(--surface);
-    border: 1px solid var(--accent-dim);
-    padding: 2px 6px;
-    border-radius: 3px;
-    flex-shrink: 0;
-}
+/* ===== JSON SYNTAX HIGHLIGHTING ===== */
+.json-key    { color: var(--json-key); }
+.json-string { color: var(--json-string); }
+.json-number { color: var(--json-number); }
+.json-bool   { color: var(--json-bool); }
+.json-null   { color: var(--json-null); }

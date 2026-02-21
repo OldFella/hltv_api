@@ -1,4 +1,9 @@
 :root {
+    /* Fonts */
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-body: 'Rajdhani', system-ui, sans-serif;
+
+    /* Color Theme  */
     --bg:           #020617;
     --surface:      #0d1520;
     --border:       #1a2535;
@@ -67,21 +72,21 @@
 [data-theme="cb"] {
     --bg:           #000000;
     --surface:      #0a0a0a;
-    --border:       #444444;
-    --accent:       #4d9fff;
-    --accent-hover: #2b85ff;
-    --accent-dim:   #1a4a80;
-    --accent-rgb:   77, 159, 255;
+    --border:       #333333;
+    --accent:       #88ccee;
+    --accent-hover: #4477aa;
+    --accent-dim:   #223355;
+    --accent-rgb:   136, 204, 238;
     --text:         #ffffff;
-    --muted:        #cccccc;
-    --warning:      #f5a623;
-    --danger:       #f5a623;
-    --row-alt:      #111111;
-    --row-hl:       #1a2a3a;
-    --chrome: #050505;
-    --json-key:    #4d9fff;
-    --json-string: #ffffff;
-    --json-number: #f5a623;
-    --json-bool:   #f5a623;
-    --json-null:   var(--muted);
+    --muted:        #bbbbbb;
+    --warning:      #ddcc77;
+    --danger:       #cc6677;
+    --row-alt:      #0d0d0d;
+    --row-hl:       #1a2a2a;
+    --chrome:       #050505;
+    --json-key:     #88ccee;  /* light blue */
+    --json-string:  #ddcc77;  /* yellow */
+    --json-number:  #cc6677;  /* rose */
+    --json-bool:    #4477aa;  /* dark blue */
+    --json-null:    var(--muted);
 }

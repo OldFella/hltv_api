@@ -1,30 +1,15 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
 
 class Item(BaseModel):
     id: int
     name: str
 
-class match(BaseModel):
-    matchid: int
-    teamid: int
-    mapid: int
-    sideid: int
-    score: int
-    date: date
-    event: str
-
-class MatchHistory(BaseModel):
-    matchid: int
-    map: str
-    side: str
-    team: str
-    score: int
-    opponent: str
-    score_opponent: int
-    date: date
-    event: str
+class TeamResponse(Item):
+    streak: int
+    roster: list[Item]
 
 class TeamScore(Item):
     score: int
@@ -43,25 +28,22 @@ class MatchResponse(BaseModel):
     event: str
     winner: Item
 
-class MapResponse(BaseModel):
-    id: int
-    team1: TeamScore
-    team2: TeamScore
-    date: date
-    event: str
-    maps: list[MapScore]
-    best_of: int
-    winner: Item
-
-class PlayerStats(Item):
+class PlayerStatsValues(BaseModel):
     k: float
     d: float
     swing: float
     adr: float
     kast: float
     rating: float
+    maps_played: int
 
-class PlayerAverageStats(Item):
+class PlayerResponse(Item):
+    team: Item
+    stats: PlayerStatsValues
+
+class GroupedStats(BaseModel):
+    id: Optional[int] = None
+    name: str
     k: float
     d: float
     swing: float
