@@ -66,4 +66,16 @@ class GroupedStats(BaseModel):
     kast: float
     rating: float
     maps_played: int
+
+class FantasyPlayers(Item):
+    cost: int
+
+class FantasyTeams(Item):
+    players: list[FantasyPlayers]
+
+class FantasyResponse(Item):
+    salary_cap: int
+    currency: str
+    teams: list[FantasyTeams]
+
     

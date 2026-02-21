@@ -64,14 +64,23 @@ async def get_player_stats(
 
 
 @router.get("/{playerid}", response_model=PlayerResponse, summary="Player details")
-async def get_player_info(playerid: int) -> PlayerResponse:
+async def get_player_info(
+    playerid: int,
+    start_date: Optional[date] = Query(None, description="Start date for stats filter (default: 3 months ago)"),
+    end_date: Optional[date] = Query(None, description="End date for stats filter (default: today)")
+    ) -> PlayerResponse:
     """
     Returns detailed information for a specific player including their current team
     and overall stats over the default date range (last 3 months).
 
     - **playerid**: unique player ID
+    - **start_date**: Start date for stats filter (default: 3 months ago)
+    - **end_date**: End date for stats filter (default: today)
     """
-    stmnt_stats = build_player_stats_query(playerid=playerid, sideid=0)
+    start, end = default_date_range() if (not start_date and not end_date) else (start_date, end_date)
+
+
+    stmnt_stats = build_player_stats_query(playerid=playerid, sideid=0, start_date= start, end_date=end)
     row_stats = execute_query(stmnt_stats, many=False)
     stats = format_stats([row_stats], "players")[0]
 
