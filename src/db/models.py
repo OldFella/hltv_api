@@ -28,6 +28,21 @@ class MatchResponse(BaseModel):
     event: str
     winner: Item
 
+class MatchPlayerStats(Item):
+    k: int
+    d: int
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+
+class MatchTeamStats(Item):
+    players: list[MatchPlayerStats]
+
+class MatchStats(Item):
+    team1: MatchTeamStats
+    team2: MatchTeamStats
+
 class PlayerStatsValues(BaseModel):
     k: float
     d: float

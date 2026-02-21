@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Query
-from src.db.models import MatchResponse
+from src.db.models import MatchResponse, MatchStats
 from src.repositories.base import execute_query
 from src.repositories.match_repository import (
     build_match_query, format_matches, 
@@ -64,7 +64,7 @@ async def get_match_results(matchid:int) -> MatchResponse:
 async def get_match_stats(
     matchid: int,
     by_map: bool = Query(False, description="Break down stats per map")
-):
+)->list[MatchStats]:
     """
     Returns player stats for both teams in a specific match.
 

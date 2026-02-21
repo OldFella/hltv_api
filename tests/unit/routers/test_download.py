@@ -7,26 +7,24 @@ from src.frontend import app
 client = TestClient(app)
 
 
-@patch("routers.download.FileResponse")
-@patch("routers.download.Path.is_file", return_value=True)
-@patch("routers.download.Path.exists", return_value=True)
+import tempfile
+import os
+
 class TestDownloadFile:
     def setup_method(self, method):
-        self.mock_response = Response(content=b"", status_code=200)
+        os.makedirs("static/downloads", exist_ok=True)
+        with open("static/downloads/test.zip", "wb") as f:
+            f.write(b"test content")
 
-    def test_returns_200(self, mock_exists, mock_is_file, mock_fr):
-        mock_fr.return_value = self.mock_response
+    def teardown_method(self, method):
+        os.remove("static/downloads/test.zip")
+
+    def test_returns_200(self):
         assert client.get("/download/test.zip").status_code == 200
 
-    def test_calls_file_response(self, mock_exists, mock_is_file, mock_fr):
-        mock_fr.return_value = self.mock_response
-        client.get("/download/test.zip")
-        assert mock_fr.called
-
-    def test_passes_correct_filename(self, mock_exists, mock_is_file, mock_fr):
-        mock_fr.return_value = self.mock_response
-        client.get("/download/test.zip")
-        assert mock_fr.call_args[1]["filename"] == "test.zip"
+    def test_passes_correct_filename(self):
+        response = client.get("/download/test.zip")
+        assert "test.zip" in response.headers["content-disposition"]
 
 
 @patch("src.routers.download.Path.is_file", return_value=False)

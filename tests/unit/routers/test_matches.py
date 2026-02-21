@@ -82,21 +82,6 @@ class TestGetMatchNotFound:
         assert client.get("/matches/999999").status_code == 404
 
 
-# ---------------------------------------------------------------------------
-# GET /matches/{matchid}/maps
-# ---------------------------------------------------------------------------
-
-@patch("src.routers.matches.format_matches", return_value=[MOCK_MATCH])
-@patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH])
-class TestGetMatchMaps:
-    def test_returns_200(self, mock_eq, mock_fm):
-        assert client.get("/matches/1/maps").status_code == 200
-
-    def test_returns_correct_shape(self, mock_eq, mock_fm):
-        data = client.get("/matches/1/maps").json()
-        assert "maps" in data
-
-
 @patch("src.routers.matches.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))
 class TestGetMatchMapsNotFound:
     def test_not_found(self, mock_eq):

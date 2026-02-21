@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from core.config import settings
+from src.core.config import settings
 from db.session import engine 
 from db.base_class import Base
-from routers import spreadsheets, download
+from src.config.routers_fe import include_routers
 from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
 from src.config.example_requests import example_requests
@@ -29,10 +29,7 @@ def start_application():
 
 app = start_application()
 
-app.include_router(spreadsheets.router)
-app.include_router(download.router)
-
-
+include_routers(app)
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")

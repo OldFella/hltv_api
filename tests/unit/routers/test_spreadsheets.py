@@ -19,9 +19,9 @@ MOCK_SHEETS = {
 # GET /spreadsheet/
 # ---------------------------------------------------------------------------
 
-@patch("routers.spreadsheets.templates.TemplateResponse")
-@patch("routers.spreadsheets._get_fantasy_map", return_value=MOCK_FANTASY_MAP)
-@patch("routers.spreadsheets._get_sorted_fantasy_ids", return_value=MOCK_FOLDER_IDS)
+@patch("src.routers.spreadsheets.templates.TemplateResponse")
+@patch("src.routers.spreadsheets._get_fantasy_map", return_value=MOCK_FANTASY_MAP)
+@patch("src.routers.spreadsheets._get_sorted_fantasy_ids", return_value=MOCK_FOLDER_IDS)
 class TestShowFolders:
     def setup_method(self, method):
         self.html_response = HTMLResponse(content="<html></html>", status_code=200)
@@ -56,11 +56,11 @@ class TestShowFolders:
 # GET /spreadsheet/{fantasyid}
 # ---------------------------------------------------------------------------
 
-@patch("routers.spreadsheets.templates.TemplateResponse")
-@patch("routers.spreadsheets._parse_ods", return_value=(MOCK_SHEETS, []))
-@patch("routers.spreadsheets._get_fantasy_map", return_value=MOCK_FANTASY_MAP)
-@patch("routers.spreadsheets._get_sorted_fantasy_ids", return_value=MOCK_FOLDER_IDS)
-@patch("routers.spreadsheets.Path.exists", return_value=True)
+@patch("src.routers.spreadsheets.templates.TemplateResponse")
+@patch("src.routers.spreadsheets._parse_ods", return_value=(MOCK_SHEETS, []))
+@patch("src.routers.spreadsheets._get_fantasy_map", return_value=MOCK_FANTASY_MAP)
+@patch("src.routers.spreadsheets._get_sorted_fantasy_ids", return_value=MOCK_FOLDER_IDS)
+@patch("src.routers.spreadsheets.Path.exists", return_value=True)
 class TestDisplaySpreadsheet:
     def test_returns_200(self, mock_exists, mock_ids, mock_map, mock_ods, mock_template):
         mock_template.return_value = HTMLResponse(content="<html></html>", status_code=200)

@@ -5,7 +5,14 @@ from src.main import app
 
 client = TestClient(app)
 
-MOCK_TEAM = {"id": 1, "name": "NaVi"}
+MOCK_TEAM = {
+  "id": 1,
+  "name": "NaVi"
+}
+MOCK_ROSTER = {
+    "id":1,
+    "name":'s1mple'
+}
 MOCK_MATCH = {
     "id": 1,
     "maps": [{"id": 1, "name": "Mirage", "team1_score": 16, "team2_score": 14}],
@@ -51,14 +58,20 @@ class TestGetTeamsNotFound:
 # GET /teams/{teamid}
 # ---------------------------------------------------------------------------
 
-@patch("src.routers.teams.execute_query", return_value=MOCK_TEAM)
+@patch("src.routers.teams.build_roster_query")
+@patch("src.routers.teams.build_match_query")
+@patch("src.routers.teams.format_matches", return_value=[MOCK_MATCH])
+@patch("src.routers.teams.execute_query")
 class TestGetTeam:
-    def test_returns_200(self, mock_eq):
+    def test_returns_200(self, mock_eq, mock_fm, mock_bm, mock_br):
+        mock_eq.side_effect = [MOCK_TEAM, [MOCK_MATCH], [MOCK_ROSTER]]
         assert client.get("/teams/1").status_code == 200
 
-    def test_returns_correct_shape(self, mock_eq):
+    def test_returns_correct_shape(self, mock_eq, mock_eq2, mock_fm, mock_eq3):
+        mock_eq.side_effect = [MOCK_TEAM, [MOCK_MATCH], [MOCK_ROSTER]]
         data = client.get("/teams/1").json()
-        assert "id" in data and "name" in data
+        assert all(k in data for k in ["id", "name", "streak", "roster"])
+
 
 
 @patch("src.routers.teams.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))
