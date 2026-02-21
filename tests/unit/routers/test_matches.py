@@ -15,7 +15,22 @@ MOCK_MATCH = {
     "event": "ESL Pro League",
     "winner": {"id": 1, "name": "NaVi"}
 }
-
+MOCK_MATCH_STATS = [
+    {
+        "id": 0,
+        "name": "All",
+        "team1": {
+            "id": 1, "name": "NaVi",
+            "players": [{"id": 1, "name": "s1mple", "k": 25, "d": 15,
+                         "swing": 3.5, "adr": 90.0, "kast": 75.0, "rating": 1.4}]
+        },
+        "team2": {
+            "id": 2, "name": "Astralis",
+            "players": [{"id": 2, "name": "device", "k": 20, "d": 18,
+                         "swing": 1.2, "adr": 80.0, "kast": 70.0, "rating": 1.1}]
+        }
+    }
+]
 
 # ---------------------------------------------------------------------------
 # GET /matches/
@@ -64,7 +79,6 @@ class TestGetLatestMatches:
 # ---------------------------------------------------------------------------
 # GET /matches/{matchid}
 # ---------------------------------------------------------------------------
-
 @patch("src.routers.matches.format_matches", return_value=[MOCK_MATCH])
 @patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH])
 class TestGetMatch:
@@ -75,14 +89,33 @@ class TestGetMatch:
         data = client.get("/matches/1").json()
         assert all(k in data for k in ["id", "maps", "team1", "team2", "best_of", "winner"])
 
+    def test_returns_single_object(self, mock_eq, mock_fm):
+        data = client.get("/matches/1").json()
+        assert isinstance(data, dict)
 
-@patch("src.routers.matches.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))
+
+@patch("src.routers.matches.execute_query", side_effect=HTTPException(status_code=404, detail="Match not found"))
 class TestGetMatchNotFound:
     def test_not_found(self, mock_eq):
         assert client.get("/matches/999999").status_code == 404
 
+# ---------------------------------------------------------------------------
+# GET /matches/{matchid}/stats
+# ---------------------------------------------------------------------------
+@patch("src.routers.matches.format_match_stats", return_value=MOCK_MATCH_STATS)
+@patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH_STATS])
+class TestGetMatchStats:
+    def test_returns_200(self, mock_eq, mock_fms):
+        assert client.get("/matches/1/stats").status_code == 200
 
-@patch("src.routers.matches.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))
-class TestGetMatchMapsNotFound:
-    def test_not_found(self, mock_eq):
-        assert client.get("/matches/999999/maps").status_code == 404
+    def test_returns_list(self, mock_eq, mock_fms):
+        assert isinstance(client.get("/matches/1/stats").json(), list)
+
+    def test_returns_correct_shape(self, mock_eq, mock_fms):
+        data = client.get("/matches/1/stats").json()[0]
+        assert all(k in data for k in ["id", "name", "team1", "team2"])
+
+    def test_by_map_param(self, mock_eq, mock_fms):
+        assert client.get("/matches/1/stats?by_map=true").status_code == 200
+
+

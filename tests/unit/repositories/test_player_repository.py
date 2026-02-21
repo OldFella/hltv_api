@@ -8,6 +8,7 @@ from src.repositories.player_repository import (
     format_stats,
     build_player_stats_query,
     DEFAULT_LOOKBACK_MONTHS,
+    build_team_query,
 )
 
 
@@ -87,6 +88,18 @@ class TestFormatStats:
 
     def test_empty_rows_returns_empty_list(self):
         assert format_stats([], "players") == []
+
+# ---------------------------------------------------------------------------
+# build_team_query
+# ---------------------------------------------------------------------------
+class TestBuildTeamQuery:
+    def test_returns_select_statement(self):
+        result = build_team_query(playerid=1)
+        assert isinstance(result, Select)
+    
+    def test_playerid_filter(self):
+        compiled = str(build_team_query(playerid=1).compile())
+        assert "playerid" in compiled.lower()
 
 
 # ---------------------------------------------------------------------------

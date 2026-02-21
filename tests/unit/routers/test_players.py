@@ -65,6 +65,10 @@ class TestGetPlayerStats:
 
     def test_pagination(self, mock_eq, mock_fs):
         assert client.get("/players/stats/?limit=5&offset=0").status_code == 200
+    
+    def test_returns_correct_shape(self, mock_eq, mock_fs):
+        data = client.get("/players/stats/").json()[0]
+        assert all(k in data for k in ["id", "name", "k", "d", "rating", "maps_played"])
 
 
 # ---------------------------------------------------------------------------
@@ -112,6 +116,10 @@ class TestGetPlayerGroupedStats:
 
     def test_mapid_filter(self, mock_eq, mock_fs):
         assert client.get("/players/1/stats/maps?mapid=1").status_code == 200
+    
+    def test_returns_correct_shape(self, mock_eq, mock_fs):
+        data = client.get("/players/1/stats/maps").json()[0]
+        assert all(k in data for k in ["id", "name", "k", "d", "rating"])
 
 
 @patch("src.routers.players.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))

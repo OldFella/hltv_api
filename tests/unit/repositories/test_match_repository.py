@@ -6,9 +6,12 @@ from src.repositories.match_repository import (
     _calc_best_of,
     _get_winner,
     format_matches,
+    format_match_stats,
+    get_streak,
     build_match_query,
+    build_roster_query,
+    build_match_stats_query
 )
-
 
 # ---------------------------------------------------------------------------
 # _parse_maps
@@ -137,7 +140,90 @@ class TestFormatMatches:
     def test_empty_rows_returns_empty_list(self):
         assert format_matches([]) == []
 
+# ---------------------------------------------------------------------------
+# get_streak
+# ---------------------------------------------------------------------------
 
+class TestGetStreak:
+    def setup_method(self, method):
+        self.win = {'winner': {'id': 1}}
+        self.loss = {'winner': {'id': 2}}
+
+    def test_empty_history_returns_zero(self):
+        assert get_streak([], 1) == 0
+
+    def test_win_streak(self):
+        assert get_streak([self.win, self.win, self.win], 1) == 3
+
+    def test_loss_streak(self):
+        assert get_streak([self.loss, self.loss], 1) == -2
+
+    def test_streak_stops_at_first_different_result(self):
+        assert get_streak([self.win, self.win, self.loss], 1) == 2
+
+    def test_single_win(self):
+        assert get_streak([self.win], 1) == 1
+
+
+# ---------------------------------------------------------------------------
+# format_match_stats
+# ---------------------------------------------------------------------------
+
+class TestFormatMatchStats:
+    def setup_method(self, method):
+        self.mock_rows = [{
+            'map_id': 0,
+            'map_name': 'All',
+            'player_stats': [
+                {'player_id': 1, 'player_name': 's1mple', 'team_id': 1,
+                 'team_name': 'NaVi', 'k': 25, 'd': 15, 'roundswing': 3.5,
+                 'adr': 90.0, 'kast': 75.0, 'rating': 1.4},
+                {'player_id': 2, 'player_name': 'device', 'team_id': 2,
+                 'team_name': 'Astralis', 'k': 20, 'd': 18, 'roundswing': 1.2,
+                 'adr': 80.0, 'kast': 70.0, 'rating': 1.1}
+            ]
+        }]
+
+    def test_returns_list(self):
+        assert isinstance(format_match_stats(self.mock_rows, by_map=False), list)
+
+    def test_returns_correct_shape(self):
+        result = format_match_stats(self.mock_rows, by_map=False)[0]
+        assert all(k in result for k in ['id', 'name', 'team1', 'team2'])
+
+    def test_team1_is_lower_id(self):
+        result = format_match_stats(self.mock_rows, by_map=False)[0]
+        assert result['team1']['id'] == 1
+        assert result['team2']['id'] == 2
+
+    def test_players_in_teams(self):
+        result = format_match_stats(self.mock_rows, by_map=False)[0]
+        assert len(result['team1']['players']) == 1
+        assert len(result['team2']['players']) == 1
+
+
+# ---------------------------------------------------------------------------
+# build_roster_query
+# ---------------------------------------------------------------------------
+class TestBuildRosterQuery:
+    def test_returns_select_statement(self):
+        assert isinstance(build_roster_query(teamid=1), Select)
+
+    def test_matchid_filter(self):
+        compiled = str(build_roster_query(teamid=1).compile())
+        assert "teamid" in compiled.lower()
+
+# ---------------------------------------------------------------------------
+# build_match_stats_query
+# ---------------------------------------------------------------------------
+class TestBuildMatchStatsQuery:
+    def test_returns_select_statement(self):
+        assert isinstance(build_match_stats_query(matchid=1,by_map=False), Select)
+
+    def test_matchid_filter(self):
+        compiled = str(build_match_stats_query(matchid=1, by_map=False).compile())
+        assert "matchid" in compiled.lower()
+    
 # ---------------------------------------------------------------------------
 # build_match_query
 # ---------------------------------------------------------------------------

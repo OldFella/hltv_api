@@ -124,7 +124,7 @@ def build_roster_query(
         .where(player_stats.teamid == teamid)
         .order_by(match_overview.date.desc(), match_overview.matchid.desc())
         .limit(1)
-        .subquery()
+        .scalar_subquery()
     )
 
     stmnt = (

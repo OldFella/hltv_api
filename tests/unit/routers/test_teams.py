@@ -67,7 +67,7 @@ class TestGetTeam:
         mock_eq.side_effect = [MOCK_TEAM, [MOCK_MATCH], [MOCK_ROSTER]]
         assert client.get("/teams/1").status_code == 200
 
-    def test_returns_correct_shape(self, mock_eq, mock_eq2, mock_fm, mock_eq3):
+    def test_returns_correct_shape(self, mock_eq, mock_fm, mock_bm, mock_br):
         mock_eq.side_effect = [MOCK_TEAM, [MOCK_MATCH], [MOCK_ROSTER]]
         data = client.get("/teams/1").json()
         assert all(k in data for k in ["id", "name", "streak", "roster"])

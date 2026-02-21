@@ -59,7 +59,7 @@ def build_team_query(playerid: int):
         .where(player_stats.playerid == playerid)
         .order_by(match_overview.date.desc(), match_overview.matchid.desc())
         .limit(1)
-        .subquery()
+        .scalar_subquery()
     )
 
     stmnt = (

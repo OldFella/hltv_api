@@ -51,7 +51,6 @@ async def get_team_info(teamid: int) -> TeamResponse:
     streak = get_streak(history, teamid)
 
     roster = execute_query(build_roster_query(teamid=teamid))
-    print(roster)
     return {
         'id': row['id'],
         'name': row['name'],
