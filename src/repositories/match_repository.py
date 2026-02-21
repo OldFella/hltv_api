@@ -86,7 +86,7 @@ def format_match_stats(rows, by_map: bool):
                 **{key:p[col] for key, col in FIELDS.items()}
             }]
         
-        team_items = list(teams.values())
+        team_items = sorted(list(teams.values()), key=lambda t: t['id'])
         result.append({
             'id': row['map_id'],
             'name': row['map_name'],
