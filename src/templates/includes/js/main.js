@@ -42,7 +42,9 @@ const renderResults = (data) => {
   const rowHeight = firstRow.getBoundingClientRect().height;
 
   const cardHeight = document.querySelector('.card:not(.results-card)').getBoundingClientRect().height;
-  const limit = Math.floor(cardHeight / rowHeight) -1;
+  const remainingHeight = cardHeight - rowHeight;
+
+  const limit = Math.floor(remainingHeight / rowHeight);
 
   data.slice(1, limit).forEach(m => el.appendChild(createMatchRow(m)));
 };

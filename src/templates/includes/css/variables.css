@@ -73,20 +73,22 @@
     --bg:           #000000;
     --surface:      #0a0a0a;
     --border:       #333333;
-    --accent:       #88ccee;
-    --accent-hover: #4477aa;
-    --accent-dim:   #223355;
+    --accent:       #33BBEE; /* optional main UI accent */
+    --accent-hover: #0077BB;
+    --accent-dim:   #0077BB;
     --accent-rgb:   136, 204, 238;
     --text:         #ffffff;
     --muted:        #bbbbbb;
-    --warning:      #ddcc77;
-    --danger:       #cc6677;
+    --warning:      #EE7733;
+    --danger:       #CC3311;  /* red from Paul Tol */
     --row-alt:      #0d0d0d;
     --row-hl:       #1a2a2a;
     --chrome:       #050505;
-    --json-key:     #88ccee;  /* light blue */
-    --json-string:  #ddcc77;  /* yellow */
-    --json-number:  #cc6677;  /* rose */
-    --json-bool:    #4477aa;  /* dark blue */
-    --json-null:    var(--muted);
+
+    /* JSON Syntax Colors - Paul Tol Bright Palette */
+    --json-key:     var(--accent);  
+    --json-string:  #009988;  
+    --json-number:  var(--warning); 
+    --json-bool:    var(--accent);  
+    --json-null:    var(--muted);  
 }

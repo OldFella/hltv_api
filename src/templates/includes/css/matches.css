@@ -14,6 +14,7 @@
     display: flex;
     align-items: center;
     width: 100%;
+    font-size: 1.1rem;
 }
 
 .team {
@@ -25,8 +26,8 @@
     font-family: var(--font-body);
 }
 
-.team-left  { text-align: right; padding-right: 4px; }
-.team-right { text-align: left;  padding-left: 4px; }
+.team-left  { text-align: right; padding-right: 8px; }
+.team-right { text-align: left;  padding-left: 8px; }
 
 .team-winner {
     font-weight: 700;
@@ -37,7 +38,7 @@
 .team-left:not(.team-winner),
 .team-right:not(.team-winner) {
     color: var(--muted);
-    font-weight: 400;
+    font-weight: 500;
 }
 
 .score-center {
@@ -57,7 +58,7 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    color: var(--muted);
+    color: var(--accent-hover);
     font-size: 0.9rem;
 }
 

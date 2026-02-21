@@ -79,7 +79,6 @@ async def get_player_info(
     """
     start, end = default_date_range() if (not start_date and not end_date) else (start_date, end_date)
 
-
     stmnt_stats = build_player_stats_query(playerid=playerid, sideid=0, start_date= start, end_date=end)
     row_stats = execute_query(stmnt_stats, many=False)
     stats = format_stats([row_stats], "players")[0]
