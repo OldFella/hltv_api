@@ -29,3 +29,18 @@ toggle.addEventListener('click', () => {
 
     toggle.textContent = next.label;
 });
+
+fetch("https://api.csapi.de/status")
+.then(r => r.json())
+.then(({ updated_at }) => {
+    const date = new Date(updated_at);
+    const formatted = date.toLocaleString("en-GB", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+    timeZone: "UTC", timeZoneName: "short"
+    });
+    document.getElementById("last-updated").textContent = `Last updated: ${formatted}`;
+})
+.catch(() => {
+    document.getElementById("last-updated").textContent = "";
+});

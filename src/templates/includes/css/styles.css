@@ -123,7 +123,7 @@ header .wrap::after {
 .cards-container {
     display: flex;
     gap: 16px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;   /* prevent wrapping so they stay side by side */
     align-items: stretch;
 }
 
@@ -136,7 +136,11 @@ header .wrap::after {
     min-width: 280px;
     position: relative;
     transition: border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
+
 
 /* top accent line on cards */
 .card::before {
@@ -163,17 +167,15 @@ header .wrap::after {
     color: var(--accent);
 }
 
+
 .results-card {
-    overflow-x: hidden;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 400px;
+    overflow: hidden;
 }
 
 #results {
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
 }
 
 #results::-webkit-scrollbar {
@@ -193,7 +195,13 @@ header .wrap::after {
     background: var(--accent);
 }
 
-
+.card-cta {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: block;
+    text-align: center;
+}
 
 /* ===== FOOTER ===== */
 footer {

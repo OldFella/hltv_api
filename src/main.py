@@ -23,7 +23,7 @@ app = start_application()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://csapi.de"],
+    allow_origins=["https://csapi.de","https://www.csapi.de"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,3 +44,8 @@ app.include_router(players.router)
 async def homepage(request: Request):
     return {'Hello':'Welcome to my api service!',
             'docs': "https://api.csapi.de/docs"}
+
+@app.get("/status")
+def status():
+    with open("last_updated.txt") as f:
+        return {"updated_at": f.read().strip()}

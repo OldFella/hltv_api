@@ -1,30 +1,42 @@
 .tabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
 }
 
 .tab-button {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.tab-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2);
 }
 
 .tab-button.active {
-  background: var(--accent);
-  color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
 }
 
 .tab-content {
-  display: none;
-  height: 100%;
+    display: none;
+    height: 100%;
 }
 
 .tab-content.active {
-  display: block;
+    display: block;
 }

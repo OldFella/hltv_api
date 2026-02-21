@@ -10,20 +10,16 @@
 {% block title %}Available Fantasies{% endblock %}
 
 {% block content %}
-<div class="wrap">
-  <div class="card">
-    <h2>Available Fantasy Spreadsheets</h2>
-
+<div class="card">
+    <h2 class="card-title">Available Fantasy Spreadsheets</h2>
     <input type="text" id="searchInput" placeholder="Search Fantasies...">
-
     <ul id="folderList">
-      {% for folder, fantasy_name in folders.items() %}
+        {% for folder, fantasy_name in folders.items() %}
         <li>
-          <a href="/spreadsheet/{{ folder | urlencode }}">{{ fantasy_name }}</a>
+            <a href="/spreadsheet/{{ folder | urlencode }}">{{ fantasy_name }}</a>
         </li>
-      {% endfor %}
+        {% endfor %}
     </ul>
-  </div>
 </div>
 {% endblock %}
 
