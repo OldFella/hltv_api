@@ -1,4 +1,4 @@
-# HLTV API ![Tests](https://github.com/OldFella/hltv_api/actions/workflows/test.yml/badge.svg)
+# HLTV API ![Tests](https://github.com/OldFella/hltv_api/actions/workflows/tests.yml/badge.svg)
 A RESTful API for exposing Counter-Strike match, team, and player data gathered with an HLTV scraper.  
 Built in Python, this API provides structured endpoints for accessing HLTV.org–derived data for use in analytics tools, bots, dashboards, or other applications.
 
