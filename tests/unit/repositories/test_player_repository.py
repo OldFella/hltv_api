@@ -88,6 +88,17 @@ class TestFormatStats:
 
     def test_empty_rows_returns_empty_list(self):
         assert format_stats([], "players") == []
+    
+    def test_events_group_has_no_id(self):
+        row = {**self.mock_row, "events": "ESL Pro League"}
+        result = format_stats([row], "events")[0]
+        assert "name" in result
+        assert result.get("id") is None
+    
+    def test_sides_group_includes_id_and_name(self):
+        row = {**self.mock_row, "side_id": 1, "side_name": "CT"}
+        result = format_stats([row], "sides")[0]
+        assert "id" in result and "name" in result
 
 # ---------------------------------------------------------------------------
 # build_team_query
@@ -100,6 +111,10 @@ class TestBuildTeamQuery:
     def test_playerid_filter(self):
         compiled = str(build_team_query(playerid=1).compile())
         assert "playerid" in compiled.lower()
+    
+    def test_uses_subquery(self):
+        compiled = str(build_team_query(playerid=1).compile())
+        assert compiled.lower().count("select") > 1
 
 
 # ---------------------------------------------------------------------------
@@ -148,3 +163,28 @@ class TestBuildPlayerStatsQuery:
         result = build_player_stats_query(playerid=1)
         compiled = str(result.compile())
         assert "avg" in compiled.lower()
+    
+    def test_no_group_by_uses_literal_avg(self):
+        result = build_player_stats_query()
+        compiled = str(result.compile())
+        assert "avg" not in compiled.lower()
+    
+    def test_event_filter(self):
+        result = build_player_stats_query(event="ESL Pro League")
+        compiled = str(result.compile())
+        assert "event" in compiled.lower()
+
+    def test_mapid_filter(self):
+        result = build_player_stats_query(mapid=1)
+        compiled = str(result.compile())
+        assert "mapid" in compiled.lower()
+
+    def test_sideid_filter(self):
+        result = build_player_stats_query(sideid=1)
+        compiled = str(result.compile())
+        assert "sideid" in compiled.lower()
+
+    def test_matchid_filter(self):
+        result = build_player_stats_query(matchid=1)
+        compiled = str(result.compile())
+        assert "matchid" in compiled.lower()

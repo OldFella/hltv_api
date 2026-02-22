@@ -201,6 +201,11 @@ class TestFormatMatchStats:
         assert len(result['team1']['players']) == 1
         assert len(result['team2']['players']) == 1
 
+    def test_player_stats_use_field_keys(self):
+        result = format_match_stats(self.mock_rows, by_map=False)[0]
+        player = result['team1']['players'][0]
+        assert 'swing' in player      # FIELDS key
+        assert 'roundswing' not in player  # raw column name should not appear
 
 # ---------------------------------------------------------------------------
 # build_roster_query
@@ -213,6 +218,9 @@ class TestBuildRosterQuery:
         compiled = str(build_roster_query(teamid=1).compile())
         assert "teamid" in compiled.lower()
 
+    def test_uses_subquery(self):
+        compiled = str(build_roster_query(teamid=1).compile())
+        assert compiled.lower().count("select") > 1
 # ---------------------------------------------------------------------------
 # build_match_stats_query
 # ---------------------------------------------------------------------------
@@ -223,7 +231,43 @@ class TestBuildMatchStatsQuery:
     def test_matchid_filter(self):
         compiled = str(build_match_stats_query(matchid=1, by_map=False).compile())
         assert "matchid" in compiled.lower()
-    
+
+    def test_by_map_returns_multiple_maps(self):
+        rows = [
+            {
+                'map_id': 0,
+                'map_name': 'All',
+                'player_stats': [
+                    {'player_id': 1, 'player_name': 's1mple', 'team_id': 1,
+                    'team_name': 'NaVi', 'k': 25, 'd': 15, 'roundswing': 3.5,
+                    'adr': 90.0, 'kast': 75.0, 'rating': 1.4},
+                    {'player_id': 2, 'player_name': 'device', 'team_id': 2,
+                    'team_name': 'Astralis', 'k': 20, 'd': 18, 'roundswing': 1.2,
+                    'adr': 80.0, 'kast': 70.0, 'rating': 1.1}
+                ]
+            },
+            {
+                'map_id': 6,
+                'map_name': 'Mirage',
+                'player_stats': [
+                    {'player_id': 1, 'player_name': 's1mple', 'team_id': 1,
+                    'team_name': 'NaVi', 'k': 20, 'd': 15, 'roundswing': 2.1,
+                    'adr': 88.0, 'kast': 72.0, 'rating': 1.3},
+                    {'player_id': 2, 'player_name': 'device', 'team_id': 2,
+                    'team_name': 'Astralis', 'k': 18, 'd': 16, 'roundswing': 0.9,
+                    'adr': 75.0, 'kast': 68.0, 'rating': 1.0}
+                ]
+            }
+        ]
+        result = format_match_stats(rows, by_map=True)
+        assert len(result) == 2
+        assert result[1]['name'] == 'Mirage'
+        assert result[1]['id'] == 6
+
+    def test_by_map_excludes_mapid_zero_filter(self):
+        without_map = str(build_match_stats_query(matchid=1, by_map=False).compile())
+        with_map = str(build_match_stats_query(matchid=1, by_map=True).compile())
+        assert without_map != with_map
 # ---------------------------------------------------------------------------
 # build_match_query
 # ---------------------------------------------------------------------------

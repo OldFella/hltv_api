@@ -76,11 +76,11 @@
     --accent:       #33BBEE; /* optional main UI accent */
     --accent-hover: #0077BB;
     --accent-dim:   #0077BB;
-    --accent-rgb:   136, 204, 238;
+    --accent-rgb: 51, 187, 238;
     --text:         #ffffff;
     --muted:        #bbbbbb;
     --warning:      #EE7733;
-    --danger:       #CC3311;  /* red from Paul Tol */
+    --danger:       #EE3377;  /* magenta from Paul Tol */
     --row-alt:      #0d0d0d;
     --row-hl:       #1a2a2a;
     --chrome:       #050505;
@@ -88,7 +88,7 @@
     /* JSON Syntax Colors - Paul Tol Bright Palette */
     --json-key:     var(--accent);  
     --json-string:  #009988;  
-    --json-number:  var(--warning); 
-    --json-bool:    var(--accent);  
+    --json-number:  var(--danger); 
+    --json-bool:    var(--accent-dim);  
     --json-null:    var(--muted);  
 }

@@ -87,6 +87,10 @@ class TestGetPlayer:
         mock_eq.side_effect = [MOCK_PLAYER_STATS, MOCK_TEAM]
         data = client.get("/players/1").json()
         assert all(k in data for k in ["id", "name", "team", "stats"])
+        
+    def test_date_filter(self, mock_eq, mock_fs, mock_btq):
+        mock_eq.side_effect = [MOCK_PLAYER_STATS, MOCK_TEAM]
+        assert client.get("/players/1?start_date=2024-01-01&end_date=2024-03-01").status_code == 200
 
 
 @patch("src.routers.players.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))

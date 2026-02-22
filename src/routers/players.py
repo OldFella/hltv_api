@@ -77,8 +77,8 @@ async def get_player_info(
     - **start_date**: Start date for stats filter (default: 3 months ago)
     - **end_date**: End date for stats filter (default: today)
     """
-    start, end = default_date_range() if (not start_date and not end_date) else (start_date, end_date)
-
+    start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]
+    
     stmnt_stats = build_player_stats_query(playerid=playerid, sideid=0, start_date= start, end_date=end)
     row_stats = execute_query(stmnt_stats, many=False)
     stats = format_stats([row_stats], "players")[0]
