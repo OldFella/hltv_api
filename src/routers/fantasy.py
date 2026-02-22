@@ -37,6 +37,8 @@ async def get_fantasy(fantasyid: int) -> FantasyResponse:
     Returns a specific fantasy by its unique ID.
 
     - **fantasyid**: unique fantasy ID
+    
+    Costs and salary cap are expressed in thousands (e.g. 240 = $240,000).
     """
     fo = aliased(fantasy_overview)
     f = aliased(fantasies)
