@@ -8,8 +8,7 @@ client = TestClient(app)
 MOCK_PLAYER_STATS = {
     "id": 1, "name": "zywoo",
     "k": 23, "d": 2, "swing": 5.3,
-    "adr": 85.0, "kast": 0.72, "rating": 1.3,
-    "maps_played": 20
+    "adr": 85.0, "kast": 0.72, "rating": 1.3
 }
 MOCK_PLAYER = {"id": 1, "name": "zywoo", "stats": MOCK_PLAYER_STATS}
 
@@ -20,6 +19,12 @@ MOCK_GROUPED_STATS = [{
     "maps_played": 20
 }]
 MOCK_TEAM = {'id': 1, 'name': 'Vitality'}
+
+MOCK_PLAYER_RESPONSE_STATS = {
+    "k": 23, "d": 2, "swing": 5.3,
+    "adr": 85.0, "kast": 0.72, "rating": 1.3,
+    "maps_played": 20
+}
 
 # ---------------------------------------------------------------------------
 # GET /players/
@@ -65,10 +70,20 @@ class TestGetPlayerStats:
 
     def test_pagination(self, mock_eq, mock_fs):
         assert client.get("/players/stats/?limit=5&offset=0").status_code == 200
-    
+
     def test_returns_correct_shape(self, mock_eq, mock_fs):
         data = client.get("/players/stats/").json()[0]
-        assert all(k in data for k in ["id", "name", "k", "d", "rating", "maps_played"])
+        assert all(k in data for k in ["id", "name", "k", "d", "rating"])
+        assert "maps_played" not in data
+
+    def test_mapid_filter(self, mock_eq, mock_fs):
+        assert client.get("/players/stats/?mapid=2").status_code == 200
+
+    def test_sideid_filter(self, mock_eq, mock_fs):
+        assert client.get("/players/stats/?sideid=1").status_code == 200
+
+    def test_default_mapid_sideid(self, mock_eq, mock_fs):
+        assert client.get("/players/stats/?mapid=0&sideid=0").status_code == 200
 
 
 # ---------------------------------------------------------------------------
@@ -76,7 +91,7 @@ class TestGetPlayerStats:
 # ---------------------------------------------------------------------------
 
 @patch("src.routers.players.build_team_query")
-@patch("src.routers.players.format_stats", return_value=[MOCK_PLAYER_STATS])
+@patch("src.routers.players.format_stats", return_value=[{**MOCK_PLAYER_STATS, **MOCK_PLAYER_RESPONSE_STATS}])
 @patch("src.routers.players.execute_query")
 class TestGetPlayer:
     def test_returns_200(self, mock_eq, mock_fs, mock_btq):
@@ -87,7 +102,8 @@ class TestGetPlayer:
         mock_eq.side_effect = [MOCK_PLAYER_STATS, MOCK_TEAM]
         data = client.get("/players/1").json()
         assert all(k in data for k in ["id", "name", "team", "stats"])
-        
+        assert "maps_played" in data["stats"]
+
     def test_date_filter(self, mock_eq, mock_fs, mock_btq):
         mock_eq.side_effect = [MOCK_PLAYER_STATS, MOCK_TEAM]
         assert client.get("/players/1?start_date=2024-01-01&end_date=2024-03-01").status_code == 200
@@ -118,12 +134,18 @@ class TestGetPlayerGroupedStats:
     def test_returns_list(self, mock_eq, mock_fs):
         assert isinstance(client.get("/players/1/stats/maps").json(), list)
 
-    def test_mapid_filter(self, mock_eq, mock_fs):
-        assert client.get("/players/1/stats/maps?mapid=1").status_code == 200
-    
+    def test_mapid_filter_sides(self, mock_eq, mock_fs):
+        assert client.get("/players/1/stats/sides?mapid=1").status_code == 200
+
+    def test_mapid_filter_events(self, mock_eq, mock_fs):
+        assert client.get("/players/1/stats/events?mapid=1").status_code == 200
+
     def test_returns_correct_shape(self, mock_eq, mock_fs):
         data = client.get("/players/1/stats/maps").json()[0]
-        assert all(k in data for k in ["id", "name", "k", "d", "rating"])
+        assert all(k in data for k in ["id", "name", "k", "d", "rating", "maps_played"])
+
+    def test_date_filter(self, mock_eq, mock_fs):
+        assert client.get("/players/1/stats/maps?start_date=2024-01-01&end_date=2024-03-01").status_code == 200
 
 
 @patch("src.routers.players.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))

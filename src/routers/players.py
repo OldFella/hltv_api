@@ -3,7 +3,7 @@ from typing import Optional, Literal
 from fastapi import APIRouter, Query
 from sqlalchemy import select
 from src.db.classes import players
-from src.db.models import Item, GroupedStats, PlayerResponse
+from src.db.models import Item, GroupedStats, PlayerResponse, PlayerStats
 from src.repositories.base import add_fuzzy_filter, execute_query
 from src.repositories.player_repository import (
     build_player_stats_query,
@@ -28,6 +28,7 @@ async def get_players(
     - **limit**: number of results to return (default 20)
     - **offset**: pagination offset (default 0)
     """
+    
     filters, order_bys = [], []
     add_fuzzy_filter(players.name, name, filters, order_bys)
     stmnt = (
@@ -41,26 +42,30 @@ async def get_players(
     return [{"id": r["id"], "name": r["name"]} for r in rows]
 
 
-@router.get("/stats", response_model=list[GroupedStats], summary="All player stats")
+@router.get("/stats", response_model=list[PlayerStats], summary="All player stats")
 async def get_player_stats(
+    mapid: Optional[int] = Query(0, description="Map ID. 0 for overall match stats."),
+    sideid: Optional[int] = Query(0, description="Side ID. 0 for both sides."),
     limit: Optional[int] = Query(20, description="Max results to return"),
     offset: Optional[int] = Query(0, description="Pagination offset")
-) -> list[GroupedStats]:
+) -> list[PlayerStats]:
     """
-    Returns aggregated stats for all players over the default date range (last 3 months).
+    Returns a paginated log of raw player stats, one row per player per match performance.
 
+    - **mapid**: map ID to filter by, 0 for overall match stats
+    - **sideid**: side ID to filter by, 0 for both sides
     - **limit**: number of results to return (default 20)
     - **offset**: pagination offset (default 0)
     """
-    start, end = default_date_range()
+
     stmnt = build_player_stats_query(
-        mapid=0,
-        sideid=0,
-        start_date=start,
-        end_date=end
+        mapid=mapid,
+        sideid=sideid,
     ).offset(offset).limit(limit)
     rows = execute_query(stmnt)
     return format_stats(rows, "players")
+
+
 
 
 @router.get("/{playerid}", response_model=PlayerResponse, summary="Player details")
@@ -71,12 +76,13 @@ async def get_player_info(
     ) -> PlayerResponse:
     """
     Returns detailed information for a specific player including their current team
-    and overall stats over the default date range (last 3 months).
+    and aggregated stats over the given date range (default: last 3 months).
 
     - **playerid**: unique player ID
-    - **start_date**: Start date for stats filter (default: 3 months ago)
-    - **end_date**: End date for stats filter (default: today)
+    - **start_date**: start date for stats filter (default: 3 months ago)
+    - **end_date**: end date for stats filter (default: today)
     """
+
     start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]
     
     stmnt_stats = build_player_stats_query(playerid=playerid, sideid=0, start_date= start, end_date=end)
@@ -98,16 +104,18 @@ async def get_player_info(
 async def get_player_grouped_stats(
     playerid: int,
     group: Literal["maps", "sides", "events"],
-    mapid: Optional[int] = Query(None, description="Filter by map ID"),
+    mapid: Optional[int] = Query(None, description="Filter by map ID. Only applicable when group is `sides` or `events`."),
     start_date: Optional[date] = Query(None, description="Start date for stats filter (default: 3 months ago)"),
     end_date: Optional[date] = Query(None, description="End date for stats filter (default: today)")
 ) -> list[GroupedStats]:
     """
-    Returns a player's average stats grouped by map, side, or event.
+    Returns a player's aggregated stats grouped by map, side, or event.
 
     - **playerid**: unique player ID
     - **group**: grouping dimension — one of `maps`, `sides`, or `events`
-    - **mapid**: optionally filter by a specific map ID
+    - **mapid**: optionally filter by a specific map ID. Only applicable when group is `sides` or `events`.
+    - **start_date**: start date for stats filter (default: 3 months ago)
+    - **end_date**: end date for stats filter (default: today)
     """
     
     start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]

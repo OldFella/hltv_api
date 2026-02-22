@@ -50,19 +50,56 @@ example_requests = [
 """
     },
 {
-    "url":  '"https://api.csapi.de/players/21167/stats"',
+    "url":  '"https://api.csapi.de/players/21167"',
     "response": """
 {
   "id": 21167,
   "name": "donk",
-  "k": 20.711,
-  "d": 15.6,
-  "swing": 2.645,
-  "adr": 94.331,
-  "kast": 76.056,
-  "rating": 1.405,
-  "maps_played": 45
+  "team": {
+    "id": 7020,
+    "name": "Spirit"
+  },
+  "stats": {
+    "k": 21.0,
+    "d": 14.643,
+    "swing": 3.608,
+    "adr": 99.525,
+    "kast": 77.993,
+    "rating": 1.49,
+    "maps_played": 28
+  }
 }
     """
+},
+{
+    "url":  '"https://api.csapi.de/teams/9565"',
+      "response": """
+{
+  "id": 9565,
+  "name": "Vitality",
+  "streak": 10,
+  "roster": [
+    {
+      "id": 7322,
+      "name": "apex"
+    },
+    {
+      "id": 11816,
+      "name": "ropz"
+    },
+    {
+      "id": 11893,
+      "name": "zywoo"
+    },
+    {
+      "id": 16693,
+      "name": "flamez"
+    },
+    {
+      "id": 18462,
+      "name": "mezii"
+    }
+  ]
 }
-]
+"""
+  }]

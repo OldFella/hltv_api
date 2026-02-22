@@ -43,6 +43,14 @@ class MatchStats(Item):
     team1: MatchTeamStats
     team2: MatchTeamStats
 
+class PlayerStats(Item):
+    k: int
+    d: int
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+
 class PlayerStatsValues(BaseModel):
     k: float
     d: float
