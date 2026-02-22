@@ -98,7 +98,9 @@ async def get_player_info(
 async def get_player_grouped_stats(
     playerid: int,
     group: Literal["maps", "sides", "events"],
-    mapid: Optional[int] = Query(None, description="Filter by map ID")
+    mapid: Optional[int] = Query(None, description="Filter by map ID"),
+    start_date: Optional[date] = Query(None, description="Start date for stats filter (default: 3 months ago)"),
+    end_date: Optional[date] = Query(None, description="End date for stats filter (default: today)")
 ) -> list[GroupedStats]:
     """
     Returns a player's average stats grouped by map, side, or event.
@@ -107,10 +109,15 @@ async def get_player_grouped_stats(
     - **group**: grouping dimension — one of `maps`, `sides`, or `events`
     - **mapid**: optionally filter by a specific map ID
     """
+    
+    start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]
+
     stmnt = build_player_stats_query(
         playerid=playerid,
         mapid=mapid,
         sideid=None if group == 'sides' else 0,
+        start_date = start,
+        end_date = end,
         group_by=[group]
     )
     rows = execute_query(stmnt)

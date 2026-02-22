@@ -7,3 +7,4 @@ certs/
 src/nginx/
 *.conf
 default.conf
+src/last_updated.txt

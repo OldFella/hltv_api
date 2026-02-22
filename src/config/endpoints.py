@@ -39,8 +39,8 @@ endpoints = {
             "description": "Player details by ID."
         },
         {
-            "path": "/players/21167/stats",
-            "description": "Player stats per map."
+            "path": "/players/21167/stats/event",
+            "description": "Player stats for each event."
         }
     ]
 }
