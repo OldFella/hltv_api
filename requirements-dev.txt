@@ -1,3 +1,5 @@
 -r requirements.txt
 httpx
 pytest
+pytest-asyncio
+pytest-dotenv
