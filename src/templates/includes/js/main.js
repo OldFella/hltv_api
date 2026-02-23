@@ -59,3 +59,7 @@ fetch("https://api.csapi.de/matches/")
     console.error("Failed to fetch results:", err);
     document.getElementById("results").textContent = "Could not load results.";
   });
+
+document.querySelectorAll('.api-links a').forEach((el, i) => {
+    el.style.animationDelay = `${i * 0.05}s`;
+});

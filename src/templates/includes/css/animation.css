@@ -1,0 +1,135 @@
+/* ===== ANIMATIONS ===== */
+
+.logo-accent {
+    animation: glow 4s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 8%    { opacity: 0.2; text-shadow: none; }
+    25%, 75%  { opacity: 1; text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8); }
+    92%, 100% { opacity: 0.2; text-shadow: none; }
+}
+
+/* Header accent line draws in on load */
+header .wrap::after {
+    animation: growLine 0.6s ease both;
+}
+
+@keyframes growLine {
+    from { width: 0; }
+    to   { width: 120px; }
+}
+
+/* Cards fade + slide up staggered */
+.card {
+    animation: fadeUp 0.4s ease both;
+}
+
+.card:nth-child(1) { animation-delay: 0s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Card + info-box accent line pulse */
+.info-box::before,
+.card::before {
+    animation: pulseLine 3s ease-in-out infinite;
+}
+
+@keyframes pulseLine {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+/* Match results fade in one by one */
+.match {
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.match:nth-child(1)  { animation-delay: 0.1s; }
+.match:nth-child(2)  { animation-delay: 0.2s; }
+.match:nth-child(3)  { animation-delay: 0.3s; }
+.match:nth-child(4)  { animation-delay: 0.4s; }
+.match:nth-child(5)  { animation-delay: 0.5s; }
+.match:nth-child(6)  { animation-delay: 0.6s; }
+.match:nth-child(7)  { animation-delay: 0.7s; }
+.match:nth-child(8)  { animation-delay: 0.8s; }
+.match:nth-child(9)  { animation-delay: 0.9s; }
+.match:nth-child(10) { animation-delay: 1.0s; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Endpoint rows slide in */
+
+.api-links a {
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* CTA button subtle pulse */
+.button.card-cta{
+    animation: ctaPulse 3s ease-in-out infinite;
+}
+
+@keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 0 0px rgba(var(--accent-rgb), 0); }
+    50%       { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4); }
+}
+
+
+/* 404 animations */
+.error-code {
+    animation: glitchIn 0.5s ease both, glitch 6s ease-in-out infinite 2s, errorGlow 3s ease-in-out infinite 0.5s;
+}
+
+@keyframes errorGlow {
+    0%, 100% { text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.3); }
+    50%       { text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.6); }
+}
+
+@keyframes glitch {
+    0%, 90%, 100% { transform: skewX(0); opacity: 1; }
+    91%            { transform: skewX(-8deg); opacity: 0.8; }
+    92%            { transform: skewX(6deg); opacity: 1; }
+    93%            { transform: skewX(-4deg); opacity: 0.9; }
+    94%            { transform: skewX(0); opacity: 1; }
+}
+@keyframes glitchIn {
+    0%   { opacity: 0; transform: translateY(-10px) skewX(-5deg); }
+    60%  { opacity: 1; transform: translateY(2px) skewX(2deg); }
+    100% { opacity: 1; transform: translateY(0) skewX(0); }
+}
+
+
+.error-label {
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards 0.4s;
+}
+
+.error-message {
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards 0.6s;
+}
+
+
+/* Noise overlay */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+}

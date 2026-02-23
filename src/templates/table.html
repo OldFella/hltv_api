@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% block title %}{{ fantasy_name }}{% endblock %}
-
 {% block extra_css %}
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
@@ -12,6 +10,9 @@
     {% include "includes/css/table.css" %}
 </style>
 {% endblock %}
+
+{% block title %}{{ fantasy_name }}{% endblock %}
+
 
 {% block content %}
 
