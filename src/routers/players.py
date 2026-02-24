@@ -9,7 +9,8 @@ from src.repositories.player_repository import (
     build_player_stats_query,
     default_date_range,
     format_stats,
-    build_team_query
+    build_team_query,
+    build_player_stats_query_outcome
 )
 
 router = APIRouter(prefix='/players', tags=['players'])
@@ -61,6 +62,29 @@ async def get_player_stats(
     stmnt = build_player_stats_query(
         mapid=mapid,
         sideid=sideid,
+    ).offset(offset).limit(limit)
+    rows = execute_query(stmnt)
+    return format_stats(rows, "players")
+
+@router.get("/stats/{outcome}", response_model=list[PlayerStats], summary="All player stats")
+async def get_player_stats(
+    outcome: Literal["win", "lose"],
+    mapid: Optional[int] = Query(0, description="Map ID. 0 for overall match stats."),
+    limit: Optional[int] = Query(100, description="Max results to return"),
+    offset: Optional[int] = Query(0, description="Pagination offset")
+) -> list[PlayerStats]:
+    """
+    Returns a paginated log of raw player stats, one row per player per match performance.
+
+    - **mapid**: map ID to filter by, 0 for overall match stats
+    - **sideid**: side ID to filter by, 0 for both sides
+    - **limit**: number of results to return (default 20)
+    - **offset**: pagination offset (default 0)
+    """
+
+    stmnt = build_player_stats_query_outcome(
+        mode = outcome,
+        mapid= None if mapid == -1 else mapid
     ).offset(offset).limit(limit)
     rows = execute_query(stmnt)
     return format_stats(rows, "players")

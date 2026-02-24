@@ -324,3 +324,33 @@ footer a:hover { text-decoration: underline; }
     .match-scores { flex-direction: column; gap: 6px; }
     .team, .score-center { width: 100%; text-align: center; padding: 0; }
 }
+
+.blog-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    margin: 1.5rem 0;
+}
+
+.blog-body th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+.blog-body td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+.blog-body tr:last-child td {
+    border-bottom: none;
+}
+
+.blog-body img {
+    display: block;
+    margin: 0 auto;
+}

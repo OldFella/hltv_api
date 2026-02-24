@@ -10,3 +10,4 @@ python-dotenv
 uvicorn==0.22.0 
 pydantic
 odfpy
+markdown

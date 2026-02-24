@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}About · CS API{% endblock %}
+{% block content %}
+
+<div class="info-box" style="max-width: 600px; margin: 32px auto 24px;">
+    <div class="info-title">About CS API</div>
+    <p class="info-text">
+        CS API is a personal hobby project providing a read-only REST API
+        for Counter-Strike match, team, and player data. It is not affiliated
+        with HLTV.org, Valve, or any tournament organizer.
+    </p>
+</div>
+
+<div class="info-box" style="max-width: 600px; margin: 0 auto 24px;">
+    <div class="info-title">Data</div>
+    <p class="info-text">
+        Data is sourced from publicly available information and refreshed
+        once daily. No guarantees are made about accuracy or completeness.
+    </p>
+</div>
+
+{% endblock %}

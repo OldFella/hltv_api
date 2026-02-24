@@ -10,6 +10,8 @@ from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
 from src.config.example_requests import example_requests
 from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+import markdown
 
 
 def create_tables():
@@ -33,6 +35,7 @@ include_routers(app)
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.exception_handler(404)
@@ -54,3 +57,22 @@ async def homepage(request: Request):
         "hero_card": hero_card,
         "example_requests": example_requests},
     )
+
+@app.get("/imprint")
+def impressum(request: Request):
+    return templates.TemplateResponse("imprint.html", {"request": request})
+
+@app.get("/about")
+def impressum(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+
+
+@app.get("/blog/rating-analysis")
+async def rating_analysis(request: Request):
+    with open("content/blog/rating-analysis.md") as f:
+        content = markdown.markdown(f.read(), extensions=["fenced_code", "tables"])
+    return templates.TemplateResponse("blog.html", {
+        "request": request,
+        "content": content,
+        "title": "Modelling CS Player Performance"
+    })

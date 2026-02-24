@@ -11,12 +11,12 @@ from src.db.classes import fantasy_overview
 from src.db.session import engine
 
 
-templates = Jinja2Templates(directory="src/templates")
+templates = Jinja2Templates(directory="templates")
 
 router = APIRouter(prefix = '/spreadsheet',
                    tags = ['spreadsheet'])
 
-BASE_DIR = Path("src/db/spreadsheets/").resolve()
+BASE_DIR = Path("db/spreadsheets/").resolve()
 
 
 # ---------------------------------------------------------------------------

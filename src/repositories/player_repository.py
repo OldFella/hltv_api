@@ -1,5 +1,5 @@
 from src.db.classes import players, matches, sides, maps, match_overview, player_stats, teams
-from sqlalchemy import select, func, text, literal
+from sqlalchemy import select, func, text, literal, and_, case
 from sqlalchemy.orm import aliased
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -85,12 +85,13 @@ def build_player_stats_query(
     event = None,
     start_date=None,
     end_date=None,
-    group_by = None
+    group_by = None,
+    ps = None
     ):
 
     # --- Aliases ---
-
-    ps = aliased(player_stats)
+    if ps is None:
+        ps = aliased(player_stats)
 
 
     # --- Filters ---
@@ -167,6 +168,60 @@ def build_player_stats_query(
             .join(match_overview, match_overview.matchid == ps.matchid)
             .where(*filters)
             .group_by(*group_bys)
+    )
+
+    return stmnt
+
+
+def build_player_stats_query_outcome(
+    mode = 'win',
+    mapid = None,
+    sideid = 0
+    ):
+    # --- Aliases ---
+
+    m1 = aliased(matches)
+    m2 = aliased(matches)
+    ps = aliased(player_stats)
+
+
+    outcome_sq = (
+        select(
+            m1.matchid.label('match_id'),
+            m1.mapid.label('map_id'),
+            m1.teamid.label('team_id'),
+            case(
+                (m1.score > m2.score, 1),
+                (m1.score < m2.score, 0),
+                else_=None
+            ).label('win')
+        )
+        .join(m2, and_(
+            m2.matchid == m1.matchid,
+            m2.teamid != m1.teamid,
+            m1.mapid == m2.mapid,
+            m1.sideid == m2.sideid
+            ))
+        .where(m1.sideid == 0)
+        .subquery()
+    )
+        
+    outcome_filter = 1 if mode == 'win' else 0
+
+    stmnt = build_player_stats_query(
+        mapid = mapid,
+        sideid = sideid,
+        ps = ps
+    )
+
+    stmnt = (
+        stmnt
+        .join(outcome_sq, and_(
+            outcome_sq.c.match_id == ps.matchid,
+            outcome_sq.c.map_id == ps.mapid,
+            outcome_sq.c.team_id == ps.teamid
+        ))
+        .where(outcome_sq.c.win == outcome_filter)
     )
 
     return stmnt
