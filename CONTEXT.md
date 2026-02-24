@@ -60,10 +60,11 @@ src/
 └── static/                  # Static files and downloadable ODS files
 
 tests/
-├── conftest.py
-└── unit/
-    ├── repositories/        # Tests for base, match, player repositories
-    └── routers/             # Tests for all routers
+├── unit/
+|   ├── conftest.py
+|   ├── repositories/        # Tests for base, match, player repositories
+|   └── routers/             # Tests for all routers
+└── endpoints/               # Tests for all endpoints against the database
 ```
 
 ---
