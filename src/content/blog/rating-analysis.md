@@ -1,5 +1,5 @@
 # Modelling CS Player Performance with Log-Normal Distributions
-*February 2026 · Analysis*
+*24th February 2026 · Analysis*
 
 Using HLTV rating data to build per-player performance distributions, and how these can be used to predict match outcomes.
 
@@ -64,7 +64,9 @@ Conveniently, the log-normal model holds without any additional tweaking.
 
 Given a win probability for a map, we can estimate a player's expected rating as a weighted average of their won and lost map distributions:
 
+```
 E[rating] = p_win · exp(μ_won) + p_lose · exp(μ_lost)
+```
 
 For example, a player with a median rating of 1.16 on won maps and 0.90 on lost maps, facing a 60% win probability, yields an expected rating of 1.056.
 

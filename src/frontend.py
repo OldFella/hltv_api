@@ -12,7 +12,7 @@ from src.config.example_requests import example_requests
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 import markdown
-
+import os
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
@@ -35,8 +35,8 @@ include_routers(app)
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
+static_dir = os.getenv("STATIC_DIR", "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
