@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from src.core.config import settings
-from db.session import engine 
-from db.base_class import Base
+from src.db.session import engine 
+from src.db.base_class import Base
 from src.config.routers_fe import include_routers
 from src.config.endpoints import endpoints
 from src.config.hero_card import hero_card
