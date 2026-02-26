@@ -1,10 +1,15 @@
 from typing import Optional
 from fastapi import APIRouter, Query
 from sqlalchemy import select
+from datetime import date
+
 from src.db.classes import teams
 from src.db.models import Item, MatchResponse, TeamResponse
+
 from src.repositories.match_repository import format_matches, build_match_query, build_roster_query, get_streak
 from src.repositories.base import execute_query, add_fuzzy_filter
+from src.repositories.team_repository import build_team_stats_query
+from src.repositories.player_repository import default_date_range
 
 router = APIRouter(prefix='/teams', tags=['teams'])
 
@@ -75,3 +80,15 @@ async def get_matchhistory(
     stmnt = build_match_query(teamid=teamid, limit=limit, offset=offset)
     rows = execute_query(stmnt)
     return format_matches(rows)
+
+
+@router.get("/{teamid}/stats", summary="Team stats")
+async def get_team_stats(
+    teamid: int,
+    start_date: Optional[date] = Query(None, description="Start date for stats filter (default: 3 months ago)"),
+    end_date: Optional[date] = Query(None, description="End date for stats filter (default: today)")
+    ):
+    start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]
+    rows = execute_query(build_team_stats_query(teamid = teamid, start_date = start, end_date = end))
+
+    return rows

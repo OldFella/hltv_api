@@ -232,20 +232,20 @@ def build_match_query(
 
     selects = [
         m1.matchid.label('match_id'),
-            m1.teamid.label('team1_id'),
-            t1.name.label('team1_name'),
-            m2.teamid.label('team2_id'),
-            t2.name.label('team2_name'),
-            match_overview.date.label('date'),
-            match_overview.event.label('event'),
-            func.array_agg(
-                func.json_build_object(
-                'id', maps.mapid,
-                'name', maps.name,
-                'team1_score', m1.score,
-                'team2_score', m2.score
-                )
-            ).label('maps')
+        m1.teamid.label('team1_id'),
+        t1.name.label('team1_name'),
+        m2.teamid.label('team2_id'),
+        t2.name.label('team2_name'),
+        match_overview.date.label('date'),
+        match_overview.event.label('event'),
+        func.array_agg(
+            func.json_build_object(
+            'id', maps.mapid,
+            'name', maps.name,
+            'team1_score', m1.score,
+            'team2_score', m2.score
+            )
+        ).label('maps')
     ]
 
     # --- Group-by columns ---

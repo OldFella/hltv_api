@@ -44,6 +44,8 @@ class MatchStats(Item):
     team2: MatchTeamStats
 
 class PlayerStats(Item):
+    team_id: int
+    team_name: str
     k: int
     d: int
     swing: float

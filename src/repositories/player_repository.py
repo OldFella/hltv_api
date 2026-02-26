@@ -22,6 +22,10 @@ FIELDS: dict[str, str] = {
 
 GROUP_CONFIG: dict[str, dict] = {
     "players": {"id": "player_id", "name": "player_name"},
+    "players_w_teams": {
+        "id": "player_id", "name": "player_name",
+        "team_id": "team_id", "team_name":"team_name"
+        },
     "maps":    {"id": "map_id",    "name": "map_name"},
     "sides":   {"id": "side_id",   "name": "side_name"},
     "events":  {"name": "events"},
@@ -86,6 +90,7 @@ def build_player_stats_query(
     start_date=None,
     end_date=None,
     group_by = None,
+    include_teams = False,
     ps = None
     ):
 
@@ -159,6 +164,11 @@ def build_player_stats_query(
         count_col,
         *extra_selects
     ]
+
+    if include_teams:
+        selects += [ps.teamid.label('team_id'),
+        teams.name.label('team_name')]
+
     
     stmnt = (
         select(*selects)
@@ -166,10 +176,39 @@ def build_player_stats_query(
             .join(maps, maps.mapid == ps.mapid)
             .join(sides, sides.sideid == ps.sideid)
             .join(match_overview, match_overview.matchid == ps.matchid)
+            .join(teams, teams.teamid == ps.teamid)
             .where(*filters)
             .group_by(*group_bys)
     )
 
+    return stmnt
+
+
+def build_outcome_query():
+
+    m1 = aliased(matches)
+    m2 = aliased(matches)
+
+    stmnt = (
+        select(
+            m1.matchid.label('match_id'),
+            m1.mapid.label('map_id'),
+            m1.teamid.label('team_id'),
+            m1.sideid.label('side_id'),
+            case(
+                (m1.score > m2.score, 1),
+                (m1.score < m2.score, 0),
+                else_=None
+            ).label('win')
+        )
+        .join(m2, and_(
+            m2.matchid == m1.matchid,
+            m2.teamid != m1.teamid,
+            m1.mapid == m2.mapid,
+            m1.sideid == m2.sideid
+            ))
+        .where(m1.sideid == 0)
+    )
     return stmnt
 
 
@@ -185,32 +224,14 @@ def build_player_stats_query_outcome(
     ps = aliased(player_stats)
 
 
-    outcome_sq = (
-        select(
-            m1.matchid.label('match_id'),
-            m1.mapid.label('map_id'),
-            m1.teamid.label('team_id'),
-            case(
-                (m1.score > m2.score, 1),
-                (m1.score < m2.score, 0),
-                else_=None
-            ).label('win')
-        )
-        .join(m2, and_(
-            m2.matchid == m1.matchid,
-            m2.teamid != m1.teamid,
-            m1.mapid == m2.mapid,
-            m1.sideid == m2.sideid
-            ))
-        .where(m1.sideid == 0)
-        .subquery()
-    )
+    outcome_sq = build_outcome_query().subquery()
         
     outcome_filter = 1 if mode == 'win' else 0
 
     stmnt = build_player_stats_query(
         mapid = mapid,
         sideid = sideid,
+        include_teams = True,
         ps = ps
     )
 

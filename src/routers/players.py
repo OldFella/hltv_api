@@ -62,9 +62,10 @@ async def get_player_stats(
     stmnt = build_player_stats_query(
         mapid=mapid,
         sideid=sideid,
+        include_teams = True,
     ).offset(offset).limit(limit)
     rows = execute_query(stmnt)
-    return format_stats(rows, "players")
+    return format_stats(rows, "players_w_teams")
 
 @router.get("/stats/{outcome}", response_model=list[PlayerStats], summary="All player stats")
 async def get_player_stats(
@@ -87,7 +88,7 @@ async def get_player_stats(
         mapid= None if mapid == -1 else mapid
     ).offset(offset).limit(limit)
     rows = execute_query(stmnt)
-    return format_stats(rows, "players")
+    return format_stats(rows, "players_w_teams")
 
 
 
