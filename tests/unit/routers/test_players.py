@@ -21,6 +21,8 @@ MOCK_GROUPED_STATS = [{
 MOCK_TEAM = {'id': 1, 'name': 'Vitality'}
 
 MOCK_PLAYER_RESPONSE_STATS = {
+    'id': 1, 'name': 'zywoo',
+    'team_id': 1, 'team_name': 'Vitality',
     "k": 23, "d": 2, "swing": 5.3,
     "adr": 85.0, "kast": 0.72, "rating": 1.3,
     "maps_played": 20
@@ -59,8 +61,8 @@ class TestGetPlayersNotFound:
 # GET /players/stats/
 # ---------------------------------------------------------------------------
 
-@patch("src.routers.players.format_stats", return_value=[MOCK_PLAYER_STATS])
-@patch("src.routers.players.execute_query", return_value=[MOCK_PLAYER_STATS])
+@patch("src.routers.players.format_stats", return_value=[MOCK_PLAYER_RESPONSE_STATS])
+@patch("src.routers.players.execute_query", return_value=[MOCK_PLAYER_RESPONSE_STATS])
 class TestGetPlayerStats:
     def test_returns_200(self, mock_eq, mock_fs):
         assert client.get("/players/stats/").status_code == 200
@@ -73,7 +75,7 @@ class TestGetPlayerStats:
 
     def test_returns_correct_shape(self, mock_eq, mock_fs):
         data = client.get("/players/stats/").json()[0]
-        assert all(k in data for k in ["id", "name", "k", "d", "rating"])
+        assert all(k in data for k in ["id", "name", "k", "d",'swing','kast', "rating"])
         assert "maps_played" not in data
 
     def test_mapid_filter(self, mock_eq, mock_fs):
