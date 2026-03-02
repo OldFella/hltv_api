@@ -8,6 +8,6 @@ fastapi[standard]
 sqlalchemy>=2.0.36
 python-dotenv
 uvicorn==0.22.0 
-pydantic
+pydantic <= 2.0.0
 odfpy
 markdown
