@@ -88,4 +88,11 @@ class FantasyResponse(Item):
     currency: str
     teams: list[FantasyTeams]
 
-    
+
+class TeamRank(Item):
+    rank: int
+    points: int
+
+class Ranking(BaseModel):
+    date: date    
+    rankings: list[TeamRank]

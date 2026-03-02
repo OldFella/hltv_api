@@ -325,11 +325,24 @@ footer a:hover { text-decoration: underline; }
     .team, .score-center { width: 100%; text-align: center; padding: 0; }
 }
 
+.blog-body {
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.blog-body h2 {
+    font-size: 1.4rem;
+}
+
+.blog-body h3 {
+    font-size: 1.2rem;
+}
+
 .blog-body table {
     width: 100%;
     border-collapse: collapse;
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: 1rem;
     margin: 1.5rem 0;
 }
 
@@ -353,4 +366,80 @@ footer a:hover { text-decoration: underline; }
 .blog-body img {
     display: block;
     margin: 0 auto;
+}
+
+/* ===============================
+   Fenced Code Block Styling
+   Uses your existing CSS variables
+   =============================== */
+
+.blog-body pre {
+    background-color: var(--surface); /* code block background */
+    color: var(--text);               /* main text color */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+/* Optional inner shadow for depth */
+.blog-body pre::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0.5rem;
+    pointer-events: none;
+}
+
+/* Inline code inside text */
+.blog-body code {
+    background-color: var(--surface);
+    color: var(--accent);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+}
+
+/* Optional: language-specific syntax hints */
+.blog-body pre.language-python {
+    color: var(--text);
+}
+
+.blog-body pre code {
+    display: block;
+    white-space: pre;
+}
+
+/* Scrollbar styling for long code blocks */
+.blog-body pre::-webkit-scrollbar {
+    height: 8px;
+}
+.blog-body pre::-webkit-scrollbar-track {
+    background: var(--chrome);
+}
+.blog-body pre::-webkit-scrollbar-thumb {
+    background: var(--accent-dim);
+    border-radius: 4px;
+}
+.blog-body pre::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* Highlight lines or special spans (optional) */
+.blog-body pre .hl-line {
+    display: block;
+    background-color: var(--row-hl);
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    border-left: 3px solid var(--accent);
+}
+.blog-body svg * {
+    transition: fill 0.3s, stroke 0.3s;
 }

@@ -62,3 +62,8 @@ class fantasies(Base):
     playerid = Column(Integer, primary_key = True)
     cost = Column(Integer)
 
+
+class rankings(Base):
+    teamid = Column(Integer, primary_key = True)
+    points = Column(Integer, primary_key = True)
+    date = Column(Date)

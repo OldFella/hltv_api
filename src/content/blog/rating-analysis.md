@@ -8,9 +8,17 @@ Using HLTV rating data to model player performance, simulate bo3 draft phases, a
 ## Background
 
 HLTV's rating system is designed so that 1.0 represents an average performance. Across all professional maps, ratings follow a right-skewed distribution centered just above 1.0. Elite players pull the right tail while the left side is bounded by a natural floor.
-
-![Overall rating distribution](/static/img/blog/rating-distribution.png)
-*Fig 1. Distribution of HLTV ratings across all players and maps (last 3 months).*
+<figure style="text-align:center; margin:1em 0;">
+    <div id="chart" style="text-align:center;"></div>
+    <figcaption style="margin-top:0.5em; font-size:0.9em; color: var(--text);">
+      Fig 1. Distribution of HLTV ratings across all players and maps (last 3 months).
+    </figcaption>
+</figure>
+<script>
+fetch('/static/img/blog/rating-distribution.svg')
+  .then(r => r.text())
+  .then(svg => document.getElementById('chart').innerHTML = svg);
+</script>
 
 ---
 
@@ -22,8 +30,17 @@ Applying a log transform centers the distribution at 0, since `log(1) = 0` means
 log(rating) ~ N(μ, σ)
 ```
 
-![Log-transformed rating distribution](/static/img/blog/log-rating-distribution.png)
-*Fig 2. Log-transformed ratings. The Gaussian fit closely tracks the empirical distribution.*
+<figure style="text-align:center; margin:1em 0;">
+  <div id="chart2"></div>
+  <figcaption style="margin-top:0.5em; font-size:0.9em; color: var(--text);">
+    Fig 2. Log-transformed ratings. The Gaussian fit closely tracks the empirical distribution.
+  </figcaption>
+</figure>
+<script>
+fetch('/static/img/blog/log-rating-distribution.svg')
+  .then(r => r.text())
+  .then(svg => document.getElementById('chart2').innerHTML = svg);
+</script>
 
 This means raw HLTV ratings are approximately **log-normally distributed**, a natural result for a ratio-based performance metric.
 
@@ -51,8 +68,12 @@ sigma = np.std(log_ratings)    # consistency
 
 Across all players, ratings are higher on won maps than lost maps. Splitting the full dataset by map outcome and fitting separate distributions confirms this clearly.
 
-![Won vs Lost rating distributions](/static/img/blog/won-lost-distribution.png)
-*Fig 3. Log-transformed rating distributions split by map outcome across all players. Won maps are centered above 0, lost maps below.*
+<div id="chart3" style="text-align:center;"></div>
+<script>
+fetch('/static/img/blog/won-lost-distribution.svg')
+  .then(r => r.text())
+  .then(svg => document.getElementById('chart3').innerHTML = svg);
+</script>
 
 Both distributions remain approximately Gaussian, which means the log-normal model holds for each outcome separately. This allows us to fit four parameters per player: μ_won, σ_won, μ_lost, σ_lost, and use these as the basis for player predictions.
 
@@ -81,21 +102,56 @@ ZywOo's raw μ_won of 1.51 is a genuine outlier, so shrinkage pulls it down mean
 
 ---
 
+## Expected Match Rating
+
+With shrunk parameters in hand, computing a player's expected rating for a given matchup is straightforward. Since ratings are log-normally distributed, the expected rating on a won map is `exp(μ_won + 0.5 · σ_won²)` and similarly for a lost map. In a bo3, each series outcome implies a fixed number of won and lost maps, so the expected rating per outcome is just the weighted average of the two. Integrating over all possible outcomes gives:
+
+```
+E[R] = Σ P(outcome) · E[R | outcome]
+```
+
+To compute this we need the probability of each series outcome, which depends on team strength and the map draft. We turn to that next.
+
+---
+
 ## Team Map Strength
 
-For each team on each map we compute a smoothed win rate using additive smoothing with prior `c = 15`:
+For each team on each map we compute a smoothed win rate using additive smoothing with prior `c = 5` and a dynamic penalty that shrinks as sample size grows:
 
 ```
-winrate_smoothed = (wins + c) / (games + 2c)
+penalty = c / (games + 1)
+winrate_smoothed = (wins + c) / (games + 2c + penalty)
 ```
 
-This prevents extreme estimates for players with few maps played, pulling the win rate toward 0.5 for small sample sizes. The smoothed win rate is then converted to a strength score using a log-odds transformation scaled by K = 400:
+This pulls win rates toward 0.5 for small sample sizes while applying a slight negative bias for low game counts. The smoothed win rate is then converted to a strength score using a log-odds transformation scaled by K = 400:
 
 ```
-strength = K · log(winrate_smoothed / (1 - winrate_smoothed))
+strength = K · log10(winrate_smoothed / (1 - winrate_smoothed))
 ```
 
-This is equivalent to an Elo-style rating where a strength difference of 400 corresponds to a 10x win rate advantage. Team strength on a given map is then the sum of the five players' individual strength scores.
+Teams with no history on a map receive a default strength of -400, acting as a soft permaban in the draft simulation.
+
+---
+
+## Global Team Strength
+
+Map-specific win rates alone do not capture overall team quality. A team with few games on a given map may have misleading strength estimates regardless of smoothing. To address this we incorporate a global team strength prior based on the Valve Regional Standing (VRS) ranking points.
+
+The VRS is an Elo-based system where teams are initially seeded by prize money won and opponent strength, then updated through match results with a recency weighting. A strength difference of 400 points corresponds to a 10x win rate advantage, consistent with our map strength scale. We therefore pass the raw ranking points directly into the Bradley-Terry formula:
+
+```
+p_win_global = 1 / (1 + 10^((points_B - points_A) / 400))
+```
+
+The final per-map win probability is a weighted blend of the map-specific and global estimates:
+
+```
+p_win = 0.7 · p_win_map + 0.3 · p_win_global
+```
+
+This gives 70% weight to map-specific performance and 30% to overall team quality, ensuring that teams with strong global form are not penalized purely by sparse map data.
+
+The 70/30 weighting is currently heuristic, chosen to prioritize map-specific information while still anchoring predictions to overall team strength.
 
 ---
 
@@ -111,6 +167,7 @@ For maps where a team has no history, a default weak strength score is used as a
 
 ---
 
+
 ## Bo3 Draft Simulation
 
 The ban and pick phase is simulated using a softmax over the per-map win probabilities with temperature `τ = 0.2`. This introduces some randomness into the draft, reflecting that teams occasionally make unexpected picks and bans. The full bo3 draft follows the standard CS format:
@@ -119,11 +176,17 @@ The ban and pick phase is simulated using a softmax over the per-map win probabi
 2. Team 2 bans their worst map
 3. Team 1 picks their best map
 4. Team 2 picks their best map
-5. Team 1 bans their worst remaining map
-6. Team 2 bans their worst remaining map
+5. Team 2 bans their worst remaining map
+6. Team 1 bans their worst remaining map
 7. Remaining map is the decider
 
 The softmax ensures the selection is probabilistic rather than strictly deterministic, capturing the uncertainty in real draft decisions.
+
+Unfortunately, the drafting process is sequential and non-linear, meaning that a closed-form solution for the series win probability is not tractable. The ban–pick decisions depend on previous outcomes and are further randomized via the softmax temperature, introducing path dependence.
+
+As a result, Monte Carlo simulation provides the most practical and robust way to estimate match win probabilities. Running a sufficiently large number of simulations yields an empirical distribution over series outcomes.
+
+This distribution then serves as the foundation for estimating expected player ratings in the head-to-head matchup.
 
 ---
 
@@ -131,58 +194,38 @@ The softmax ensures the selection is probabilistic rather than strictly determin
 
 Before running the simulation, we compute the per-map strength scores and Bradley-Terry win probabilities for Vitality against MongolZ:
 
-| Map | Vitality Strength | MongolZ Strength | P(Vitality) |
-|-----|-------------------|------------------|-------------|
-| Anubis | 31.67 | -400 | 92.31% |
-| Overpass | 66.99 | -10.53 | 60.98% |
-| Ancient | 0.00 | 17.39 | 47.50% |
-| Dust2 | 103.31 | -33.19 | 68.69% | 
-| Nuke | 15.80 | 0.00 | 52.27% |
-| Mirage | 42.58 | 7.72 | 55.00% |
-| Inferno | 43.66 | -26.78 | 60.00% |
+| Map      | Vitality Strength | MongolZ Strength | P(Vitality) |
+|----------|-------------------|------------------|-------------|
+| Global (VRS)  | 2029         | 1628             | 90.96%      |
+| Anubis   | 42.88             | -400.00          | 92.75%      |
+| Overpass | 147.69            | -400.00          | 95.90%      |
+| Ancient  | -38.76            | -6.10            | 45.31%      |
+| Dust2    | 199.72            | -87.08           | 83.90%      |
+| Nuke     | 26.78             | -6.10            | 55.96%      |
+| Mirage   | 7.39              | 26.30            | 47.28%      |
+| Inferno  | 110.37            | -70.44           | 73.90%      |
 
-Vitality are favorites on most maps, particularly Anubis and Dust2. Ancient is the only map where MongolZ hold an edge, which is reflected in the 47.50% win probability for Vitality. These per-map probabilities feed directly into the draft simulation.
+Vitality are strong favorites on most maps. MongolZ have no history on Anubis and Overpass, receiving the -400 default, effectively removing those maps from contention. Ancient and Mirage are the only maps where MongolZ hold a slight edge.
 
-Running 10 000 Monte Carlo simulations of the full bo3 produces the following outcome distribution:
+Running 10 000 Monte Carlo simulations of the full bo3 on map strength alone produces the following outcome distribution:
 
-| Outcome | n    | P      |
+| Outcome | N    | P      |
 |---------|------|--------|
-| 2-0     | 3877 | 38.8%  |
-| 2-1     | 2806  | 28.1%  |
-| 1-2     | 1966  | 19.7%  |
-| 0-2     | 1351  | 13.5%   |
+| 2-0     | 4619 | 46.2%  |
+| 2-1     | 3404 | 34.0%  |
+| 1-2     | 1300 | 13.0%  |
+| 0-2     | 677  | 6.8%   |
 
-Vitality are favored, winning in 2-0 in roughly 39% of simulations. However the match is more competitive than the map win probabilities alone suggest, with MongolZ winning in over 33% of simulations.
+Adding a global ranking prior (30% weight, based on Valve ranking points) shifts the distribution further toward Vitality:
 
-Using ZywOo's shrunk per-outcome distributions (μ_won = 1.42, μ_lost = 0.91) and weighting by outcome probability gives an expected rating for the series:
+| Outcome | N    | P      |
+|---------|------|--------|
+| 2-0     | 5717 | 57.2%  |
+| 2-1     | 2969 | 29.7%  |
+| 1-2     | 810  | 8.1%   |
+| 0-2     | 504  | 5.0%   |
 
-| Outcome | E[rating] | P      |
-|---------|-----------|--------|
-| 2-0     | 1.42      | 38.8%  |
-| 2-1     | 1.25      | 28.1%  |
-| 1-2     | 1.08      | 19.7%  |
-| 0-2     | 0.91      | 13.5%   |
-
-```
-E[rating] = 1.237
-```
-
-Extending this methodology to all players in the matchup, the expected ratings for Vitality vs MongolZ are as follows:
-
-| Player | Team | E[rating] |
-|--------|------|-----------|
-| ropz | Vitality | 1.095 |
-| flamez | Vitality | 1.130 |
-| zywoo | Vitality | 1.237 |
-| mezii | Vitality | 1.046 |
-| apex | Vitality | 0.952 |
-| blitz | MongolZ | 0.932 |
-| mzinho | MongolZ | 0.987 |
-| techno | MongolZ | 0.946 |
-| 910 | MongolZ | 1.043 |
-| cobrazera | MongolZ | 0.986 |
-
-Note that the current model does not account for overall team strength beyond map-specific win rates. Adding a global performance prior, such as HLTV ranking points, would improve the win probability estimates and is a planned next step.
+Vitality are heavily favored in both cases, reflecting their dominant form over the last 3 months with 48 won maps against only 7 lost.
 
 ---
 
