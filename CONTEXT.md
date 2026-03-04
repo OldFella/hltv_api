@@ -1,123 +1,136 @@
-# Project Context: HLTV API
+# HLTV API — Project Context
 
-## Overview
-A read-only RESTful API that exposes Counter-Strike match, team, and player data scraped from HLTV.org. Data is refreshed once per day. The project also serves a frontend via Jinja2 templates (hybrid API + SSR app).
-
-- **Live API:** https://api.csapi.de
-- **Website:** https://www.csapi.de
-- **Status:** Active, in development
+**What it is:** Read-only REST API + SSR frontend exposing CS match, team, and player data scraped from HLTV.org. Data refreshes daily.
+**Live:** https://api.csapi.de | https://www.csapi.de
+**Stack:** Python · FastAPI · SQLAlchemy · PostgreSQL (`pg_trgm`) · Jinja2 · Docker · Nginx · Pytest · GitHub Actions
 
 ---
 
-## Tech Stack
-- **Language:** Python
-- **Framework:** FastAPI
-- **ASGI Server:** Uvicorn / Gunicorn
-- **Reverse Proxy:** Nginx
-- **Database:** PostgreSQL
-- **ORM:** SQLAlchemy
-- **Deployment:** Self-hosted Linux server via Docker (`Dockerfile.api`, `Dockerfile.frontend`, `compose.api.yaml`)
-- **Tests:** Pytest (`pytest.ini`, `tests/`)
-- **CI:** GitHub Actions (`.github/workflows/tests.yml`)
+## Architecture
+
+- **Repository pattern** — routers never touch the DB directly; all queries live in `src/repositories/`
+- **Read-only** — GET endpoints only, no mutations
+- **Hybrid app** — JSON API (`routers_api.py`) + SSR frontend (`routers_fe.py` / `frontend.py`)
+- **Fuzzy search** — powered by pg_trgm `similarity()` via `add_fuzzy_filter()`; used on `name` fields across teams, players
+- **Stat rows** — the DB stores stats at multiple granularities controlled by `mapid` and `sideid`: `id=0` means "overall/both"; non-zero means a specific map or side. Query builders default `mapid=None` / `sideid=None` to **exclude** the `id=0` summary rows (filter `!= 0`)
+- **Outcome join** — win/loss is not stored directly; it is derived at query time by self-joining `matches` on `matchid` where `teamid != teamid` and comparing scores (`build_outcome_query`)
+- **Active maps** — `ACTIVE_MAPS` (config) is materialised as a VALUES subquery in team stats so every active map always appears in results even with zero matches
 
 ---
 
-## Project Structure
-```
-src/
-├── main.py                  # FastAPI app entry point
-├── frontend.py              # Jinja2 SSR frontend routes
-├── config/
-│   ├── endpoints.py         # Endpoint definitions/constants
-│   ├── example_requests.py  # Example request data
-│   ├── hero_card.py         # Hero card config (likely for frontend)
-│   ├── routers_api.py       # API router registration
-│   └── routers_fe.py        # Frontend router registration
-├── core/
-│   ├── config.py            # App settings (reads from .env)
-│   └── __init__.py
-├── db/
-│   ├── base_class.py        # SQLAlchemy declarative base
-│   ├── classes.py           # DB class helpers
-│   ├── models.py            # SQLAlchemy ORM models
-│   ├── session.py           # DB session / engine setup
-│   └── spreadsheets/        # ODS spreadsheet data files (591–598)
-├── repositories/
-│   ├── base.py              # Base repository with shared query logic
-│   ├── match_repository.py  # Match-specific DB queries
-│   └── player_repository.py # Player-specific DB queries
-├── routers/
-│   ├── matches.py           # /matches endpoints
-│   ├── players.py           # /players endpoints
-│   ├── teams.py             # /teams endpoints
-│   ├── fantasy.py           # /fantasy endpoints
-│   ├── maps.py              # /maps endpoints
-│   ├── sides.py             # /sides endpoints
-│   ├── download.py          # /download endpoints
-│   ├── goat.py              # /goat endpoints
-│   └── spreadsheets.py      # /spreadsheets endpoints
-├── templates/               # Jinja2 HTML templates (SSR frontend)
-└── static/                  # Static files and downloadable ODS files
+## Endpoints
 
-tests/
-├── unit/
-|   ├── conftest.py
-|   ├── repositories/        # Tests for base, match, player repositories
-|   └── routers/             # Tests for all routers
-└── endpoints/               # Tests for all endpoints against the database
-```
+### Teams `src/routers/teams.py`
+| Endpoint | Params | Notes |
+|---|---|---|
+| `GET /teams/` | `name` (fuzzy), `limit=20`, `offset=0` | |
+| `GET /teams/{teamid}` | — | includes roster (from most recent match) + win/loss streak |
+| `GET /teams/{teamid}/matchhistory` | `limit=5`, `offset=0` | |
+| `GET /teams/{teamid}/stats` | `start_date`, `end_date` (default: last 3 months) | per-map win/loss counts across all active maps |
 
----
+### Matches `src/routers/matches.py`
+| Endpoint | Params | Notes |
+|---|---|---|
+| `GET /matches/` | `limit=100`, `offset=0` | |
+| `GET /matches/latest` | `limit=10`, `offset=0` | shares `get_matches()` helper with above, differs only in default limit |
+| `GET /matches/{matchid}` | — | includes per-map scores + derived `best_of` and `winner` |
+| `GET /matches/{matchid}/stats` | `by_map=false` | player stats for both teams; `by_map=true` splits by map |
 
-## Architecture Patterns
-- **Repository pattern:** DB access is abstracted into repository classes (`src/repositories/`). Routers call repositories, not the DB directly.
-- **Router-based structure:** Each domain (matches, players, teams, etc.) has its own FastAPI router file.
-- **Hybrid app:** The app serves both a JSON API (`routers_api.py`) and an SSR frontend with Jinja2 templates (`routers_fe.py`, `frontend.py`).
-- **Read-only API:** All endpoints are GET only. No mutations.
+### Players `src/routers/players.py`
+| Endpoint | Params | Notes |
+|---|---|---|
+| `GET /players/` | `name` (fuzzy), `limit=20`, `offset=0` | |
+| `GET /players/stats` | `mapid=0`, `sideid=0`, `limit=20`, `offset=0` | raw per-player-per-match rows |
+| `GET /players/stats/{outcome}` | `outcome`: `win`\|`lose`, `mapid`, `limit=100`, `offset=0` | filters via outcome subquery |
+| `GET /players/{playerid}` | `start_date`, `end_date` (default: last 3 months) | aggregated stats + current team |
+| `GET /players/{playerid}/stats/{group}` | `group`: `maps`\|`sides`\|`events`, `mapid`, `start_date`, `end_date` | `mapid` only applies for `sides`/`events` |
 
----
+### Rankings `src/routers/rankings.py`
+| Endpoint | Params | Notes |
+|---|---|---|
+| `GET /rankings/` | — | most recent VRS snapshot; returns `date` + ordered list of `{id, name, rank, points}` |
 
-## API Domains & Key Endpoints
-
-### Teams
-- `GET /teams/` — all teams, supports `?name=` fuzzy search
-- `GET /teams/{teamid}` — team by ID with roster and win/loss streak
-- `GET /teams/{teamid}/matchhistory` — match history for a team
-
-### Matches
-- `GET /matches/` — all matches (paginated)
-- `GET /matches/latest` — latest matches (default limit 10)
-- `GET /matches/{matchid}` — match by ID with maps and scores
-- `GET /matches/{matchid}/stats` — player stats for a match (`?by_map=true` for per-map breakdown)
-
-### Players
-- `GET /players/` — all players, supports `?name=` fuzzy search
-- `GET /players/stats` — stats for all players
-- `GET /players/{playerid}` — player by ID with team and overall stats
-- `GET /players/{playerid}/stats/{group}` — stats grouped by `maps`, `sides`, or `events`
-
-### Fantasy
-- `GET /fantasy/` — all available fantasies
-- `GET /fantasy/{fantasyid}` — fantasy details with teams, players, costs (salary cap: $1,000)
-
-### Maps & Sides
+### Other
+- `GET /fantasy/`, `GET /fantasy/{fantasyid}` — fantasy details with teams, players, costs (salary cap $1,000)
 - `GET /maps/`, `GET /maps/{id}`
 - `GET /sides/`, `GET /sides/{id}`
+- `GET /download/`, `GET /spreadsheets/`, `GET /goat/`
 
 ---
 
-## Key Data Models (from JSON examples)
-- **Team:** `id`, `name`, `streak`, `roster[]`
-- **Match:** `id`, `team1`, `team2`, `date`, `event`, `maps[]`, `best_of`, `winner`
-- **Player:** `id`, `name`, `team`, `stats` (k, d, swing, adr, kast, rating, maps_played)
-- **Fantasy:** `id`, `name`, `salary_cap`, `currency`, `teams[]` with players and costs
+## Response Models `src/db/models.py`
+
+| Model | Shape |
+|---|---|
+| `Item` | `{id, name}` |
+| `TeamResponse` | `{id, name, streak: int, roster: Item[]}` |
+| `MatchResponse` | `{id, team1, team2, date, event, maps[], best_of, winner}` |
+| `MatchStats` | per-map `{id, name, team1: {players[]}, team2: {players[]}}` |
+| `PlayerResponse` | `{id, name, team: Item, stats: {k,d,swing,adr,kast,rating,maps_played}}` |
+| `PlayerStats` | raw stat row with optional team fields |
+| `GroupedStats` | stat row reshaped by group dimension |
+| `Ranking` | `{date, rankings: [{id, name, rank, points}]}` |
 
 ---
 
-## Development Notes
-- Local dev: `uvicorn src.main:app --reload --host 0.0.0.0 --port 8000`
-- Install deps: `pip install -r requirements-dev.txt`
-- Run tests: `pytest` or `pytest -v`
-- Environment config lives in `.env` and `src/core/.env`
-- Data source is HLTV.org (not affiliated); scraped data, refreshed daily
-- ODS spreadsheet files are stored in `src/db/spreadsheets/` and served via `src/static/downloads/`
+## Repositories
+
+### `src/repositories/base.py`
+- `execute_query(stmt, *, many=True)` — runs statement, raises **HTTP 404** if no rows; pass `many=False` to get single mapping
+- `add_fuzzy_filter(col, value, filters, order_bys, threshold=0.3)` — no-op when `value` is None; otherwise appends `similarity() > threshold` filter and `similarity().desc()` ordering in-place
+
+### `src/repositories/match_repository.py`
+- `build_match_query(matchid, teamid, vsid, sideid, mapid, limit, offset)` — self-joins `matches` aliased as `m1`/`m2` to pair team1/team2; aggregates maps as JSON via `array_agg`; orders by `date desc, matchid desc`
+- `build_match_stats_query(matchid, by_map)` — aggregates player stats per map as JSON array; filters `sideid=0`; adds `mapid=0` filter when `by_map=False`
+- `build_roster_query(teamid)` — resolves players from team's single most recent match
+- `format_matches(rows)` — parses `maps` array, splits out `id=0` overall score row, computes `best_of = (2 * max_score) - 1`, derives `winner`
+- `format_match_stats(rows, by_map)` — reshapes flat player rows into `{team1: {players[]}, team2: {players[]}}` structure per map
+- `get_streak(match_history, teamid)` — returns positive int for win streak, negative for loss streak
+
+### `src/repositories/player_repository.py`
+- `FIELDS` — API key → DB column: `k→k`, `d→d`, `swing→roundswing`, `adr→adr`, `kast→kast`, `rating→rating`
+- `GROUP_CONFIG` — maps format mode to id/name field names: `players`, `players_w_teams`, `maps`, `sides`, `events`
+- `default_date_range()` — returns `(today - 3 months, today)`
+- `format_stats(rows, group)` — rounds stats to 3dp, reshapes via `GROUP_CONFIG`, appends `maps_played` from `n`
+- `build_team_query(playerid)` — resolves current team from player's most recent match
+- `build_player_stats_query(playerid, mapid, sideid, matchid, event, start_date, end_date, group_by, include_teams, ps)`:
+  - when `group_by` is set → aggregates with `avg()`; otherwise returns raw per-row stats
+  - `mapid=None` → excludes `mapid=0` rows; `sideid=None` → excludes `sideid=0` rows
+  - `group_by` accepts list of `maps`, `sides`, `events`
+  - `include_teams=True` adds `team_id`/`team_name` to selects
+- `build_outcome_query()` — self-joins `matches` to label each `(matchid, mapid, teamid)` row as `win=1` or `win=0`; filters to `sideid=0`
+- `build_player_stats_query_outcome(mode, mapid, sideid)` — wraps `build_player_stats_query` and joins outcome subquery, filtering to `win=1` (win) or `win=0` (lose)
+
+### `src/repositories/team_repository.py`
+- `build_team_stats_query(teamid, start_date, end_date)`:
+  - builds `ACTIVE_MAPS` as a VALUES subquery so all active maps always appear
+  - joins `build_outcome_query()` subquery to count wins
+  - left-joins stats onto active maps → maps with no data return `n=0, n_wins=0`
+
+---
+
+## DB Tables `src/db/classes.py`
+`teams` · `players` · `matches` · `match_overview` · `player_stats` · `maps` · `sides` · `rankings`
+
+---
+
+## Key Files
+| Path | Purpose |
+|---|---|
+| `src/main.py` | FastAPI app entry point |
+| `src/frontend.py` | Jinja2 SSR routes |
+| `src/core/config.py` | App settings from `.env` |
+| `src/db/session.py` | SQLAlchemy engine setup |
+| `src/config/active_maps.py` | `ACTIVE_MAPS: dict[int, str]` — map_id → name |
+| `src/config/routers_api.py` | API router registration |
+| `src/config/routers_fe.py` | Frontend router registration |
+
+---
+
+## Dev Commands
+```bash
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000   # local dev
+pip install -r requirements-dev.txt
+pytest / pytest -v
+```
+Config: `.env` + `src/core/.env`
