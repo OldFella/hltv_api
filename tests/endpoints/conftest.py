@@ -19,8 +19,9 @@ from pathlib import Path
 from sqlalchemy import create_engine, text
 from httpx import AsyncClient, ASGITransport
 
+
 # ---------------------------------------------------------------------------
-# Test DB URL — reads from env, falls back to local default
+# Test DB URL — assembled from env vars matching .env.test
 # ---------------------------------------------------------------------------
 
 def _build_db_url() -> str:
@@ -45,7 +46,8 @@ from src.main import app
 from src.db.base_class import Base
 from src.db.classes import (
     teams, players, maps, sides,
-    matches, match_overview, player_stats, rankings
+    matches, match_overview, player_stats, rankings,
+    fantasy_overview, fantasies,
 )
 
 
@@ -54,7 +56,7 @@ from src.db.classes import (
 # ---------------------------------------------------------------------------
 
 def _ps(matchid, playerid, teamid, mapid, sideid, k, d, swing, adr, kast, rating):
-    """Build a full player_stats row, mirroring ek/eadr/ekast = k/adr/kast."""
+    """Build a full player_stats row, mirroring ek/eadr/ekast from k/adr/kast."""
     return {
         "matchid": matchid, "playerid": playerid, "teamid": teamid,
         "mapid": mapid, "sideid": sideid,
@@ -72,12 +74,13 @@ def _ps(matchid, playerid, teamid, mapid, sideid, k, d, swing, adr, kast, rating
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
-    """Create schema, seed fixture data, yield, then drop everything."""
+    """Drop, recreate schema, seed fixture data, yield, then drop everything."""
 
+    # Drop first to avoid UniqueViolation if the DB wasn't cleaned up previously
+    Base.metadata.drop_all(bind=_test_engine)
     Base.metadata.create_all(bind=_test_engine)
 
     with _test_engine.begin() as con:
-        # Enable pg_trgm (idempotent)
         con.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
 
         # --- Teams ---
@@ -123,26 +126,55 @@ def setup_test_db():
             {"matchid": 1, "teamid": 2, "mapid": 1, "sideid": 0, "score": 8},
             {"matchid": 1, "teamid": 1, "mapid": 2, "sideid": 0, "score": 16},
             {"matchid": 1, "teamid": 2, "mapid": 2, "sideid": 0, "score": 14},
+            # Side-specific rows (sideid=1 CT, sideid=2 T) — needed for grouped stats by sides
+            {"matchid": 1, "teamid": 1, "mapid": 1, "sideid": 1, "score": 9},
+            {"matchid": 1, "teamid": 2, "mapid": 1, "sideid": 2, "score": 4},
+            {"matchid": 1, "teamid": 1, "mapid": 1, "sideid": 2, "score": 4},
+            {"matchid": 1, "teamid": 2, "mapid": 1, "sideid": 1, "score": 4},
         ]))
 
         # --- Player stats ---
-        # Overall rows (mapid=0, sideid=0) — used by /players/{id} and /players/stats
-        # Per-map rows (mapid=1, sideid=0) — used by /matches/{id}/stats?by_map=true
+        # Overall rows (mapid=0, sideid=0) — /players/{id}, /players/stats
+        # Per-map overall (mapid=1, sideid=0) — /matches/{id}/stats?by_map, /players/stats/win|lose
+        # Per-map per-side (mapid=1, sideid=1/2) — /players/{id}/stats/sides
         con.execute(player_stats.__table__.insert().values([
-            _ps(1, 1, 1, 0, 0, 25, 14, 11.0, 95.0, 80.0, 1.50),  # zywoo overall
-            _ps(1, 2, 1, 0, 0, 18, 15,  3.0, 72.0, 75.0, 1.10),  # apex overall
-            _ps(1, 3, 2, 0, 0, 20, 18,  2.0, 78.0, 70.0, 1.05),  # arT overall
-            _ps(1, 4, 2, 0, 0, 17, 16,  1.0, 68.0, 72.0, 1.00),  # yuurih overall
-            _ps(1, 1, 1, 1, 0, 22, 12, 10.0, 98.0, 82.0, 1.55),  # zywoo Mirage
-            _ps(1, 2, 1, 1, 0, 16, 14,  2.0, 70.0, 74.0, 1.08),  # apex Mirage
-            _ps(1, 3, 2, 1, 0, 15, 18, -3.0, 65.0, 68.0, 0.90),  # arT Mirage
-            _ps(1, 4, 2, 1, 0, 14, 17, -3.0, 62.0, 66.0, 0.88),  # yuurih Mirage
+            # Overall
+            _ps(1, 1, 1, 0, 0, 25, 14, 11.0, 95.0, 80.0, 1.50),
+            _ps(1, 2, 1, 0, 0, 18, 15,  3.0, 72.0, 75.0, 1.10),
+            _ps(1, 3, 2, 0, 0, 20, 18,  2.0, 78.0, 70.0, 1.05),
+            _ps(1, 4, 2, 0, 0, 17, 16,  1.0, 68.0, 72.0, 1.00),
+            # Per-map overall (sideid=0)
+            _ps(1, 1, 1, 1, 0, 22, 12, 10.0, 98.0, 82.0, 1.55),
+            _ps(1, 2, 1, 1, 0, 16, 14,  2.0, 70.0, 74.0, 1.08),
+            _ps(1, 3, 2, 1, 0, 15, 18, -3.0, 65.0, 68.0, 0.90),
+            _ps(1, 4, 2, 1, 0, 14, 17, -3.0, 62.0, 66.0, 0.88),
+            # Per-map CT side (sideid=1)
+            _ps(1, 1, 1, 1, 1, 13,  6,  7.0, 102.0, 85.0, 1.60),
+            _ps(1, 2, 1, 1, 1,  9,  7,  2.0,  68.0, 76.0, 1.10),
+            _ps(1, 3, 2, 1, 1,  8, 10, -2.0,  60.0, 65.0, 0.85),
+            _ps(1, 4, 2, 1, 1,  7,  9, -2.0,  58.0, 63.0, 0.82),
+            # Per-map T side (sideid=2)
+            _ps(1, 1, 1, 1, 2,  9,  6,  3.0,  94.0, 79.0, 1.48),
+            _ps(1, 2, 1, 1, 2,  7,  7,  0.0,  72.0, 73.0, 1.06),
+            _ps(1, 3, 2, 1, 2,  7,  8, -1.0,  70.0, 70.0, 0.95),
+            _ps(1, 4, 2, 1, 2,  7,  8, -1.0,  65.0, 68.0, 0.92),
         ]))
 
         # --- Rankings ---
         con.execute(rankings.__table__.insert().values([
             {"teamid": 1, "points": 1000, "date": "2026-01-01"},
             {"teamid": 2, "points": 850,  "date": "2026-01-01"},
+        ]))
+
+        # --- Fantasy ---
+        con.execute(fantasy_overview.__table__.insert().values([
+            {"fantasyid": 1, "name": "Test Fantasy Event"},
+        ]))
+        con.execute(fantasies.__table__.insert().values([
+            {"fantasyid": 1, "teamid": 1, "playerid": 1, "cost": 240},
+            {"fantasyid": 1, "teamid": 1, "playerid": 2, "cost": 180},
+            {"fantasyid": 1, "teamid": 2, "playerid": 3, "cost": 160},
+            {"fantasyid": 1, "teamid": 2, "playerid": 4, "cost": 150},
         ]))
 
     yield
