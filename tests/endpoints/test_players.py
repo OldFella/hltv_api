@@ -19,7 +19,7 @@ class TestPlayersEndpoints:
 
     @pytest.mark.asyncio
     async def test_list_players_name_filter(self, client: AsyncClient):
-        r = await client.get("/players/", params={"name": "s1mple"})
+        r = await client.get("/players/", params={"name": "zywoo"})
         assert r.status_code == 200
         assert isinstance(r.json(), list)
 
@@ -115,7 +115,8 @@ class TestPlayersEndpoints:
     async def test_player_sides_stats_with_mapid(self, client: AsyncClient):
         """mapid filter is applicable when group is sides or events."""
         players = (await client.get("/players/")).json()
-        maps = (await client.get("/maps/")).json()
+        # Use a real map (skip mapid=0 which is the Overall row, has no side data)
+        maps = [m for m in (await client.get("/maps/")).json() if m["id"] != 0]
         if not players or not maps:
             pytest.skip("Insufficient data")
         player_id = players[0]["id"]
@@ -125,4 +126,3 @@ class TestPlayersEndpoints:
         )
         assert r.status_code == 200
         assert isinstance(r.json(), list)
-
