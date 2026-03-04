@@ -4,7 +4,7 @@ from sqlalchemy import select
 from datetime import date
 
 from src.db.classes import teams
-from src.db.models import Item, MatchResponse, TeamResponse
+from src.db.models import Item, MatchResponse, TeamResponse, TeamStatsResponse
 
 from src.repositories.match_repository import format_matches, build_match_query, build_roster_query, get_streak
 from src.repositories.base import execute_query, add_fuzzy_filter
@@ -82,7 +82,7 @@ async def get_matchhistory(
     return format_matches(rows)
 
 
-@router.get("/{teamid}/stats", summary="Team stats")
+@router.get("/{teamid}/stats", response_model = list[TeamStatsResponse], summary="Team stats")
 async def get_team_stats(
     teamid: int,
     start_date: Optional[date] = Query(None, description="Start date for stats filter (default: 3 months ago)"),

@@ -1,8 +1,8 @@
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-
 from src.main import app
+
 
 class TestAPIContract:
 
@@ -15,7 +15,10 @@ class TestAPIContract:
         "/teams/",
         "/players/",
         "/players/stats",
+        "/players/stats/win",
+        "/players/stats/lose",
         "/fantasy/",
+        "/rankings/",
     ])
     async def test_returns_json_content_type(self, client: AsyncClient, path: str):
         r = await client.get(path)
@@ -33,6 +36,7 @@ class TestAPIContract:
         "/matches/",
         "/players/",
         "/fantasy/",
+        "/rankings/",
     ])
     async def test_post_not_allowed(self, client: AsyncClient, path: str):
         """All endpoints are GET-only — POST must return 405."""

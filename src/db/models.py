@@ -96,3 +96,7 @@ class TeamRank(Item):
 class Ranking(BaseModel):
     date: date    
     rankings: list[TeamRank]
+
+class TeamStatsResponse(Item):
+    n: int
+    n_wins: int

@@ -98,9 +98,12 @@ def assert_player_response(obj: dict):
 
 
 def assert_player_stats(obj: dict):
-    """{ id: int, name: str, k: int, d: int, swing, adr, kast, rating: float }"""
+    """{ id: int, name: str, team_id: int, team_name: str,
+         k: int, d: int, swing, adr, kast, rating: float }"""
     assert isinstance(obj["id"], int)
     assert isinstance(obj["name"], str)
+    assert isinstance(obj["team_id"], int)
+    assert isinstance(obj["team_name"], str)
     assert isinstance(obj["k"], int)
     assert isinstance(obj["d"], int)
     for field in ("swing", "adr", "kast", "rating"):
@@ -143,3 +146,27 @@ def assert_fantasy_response(obj: dict):
     assert isinstance(obj["teams"], list)
     for t in obj["teams"]:
         assert_fantasy_team(t)
+
+
+def assert_team_rank(obj: dict):
+    """{ id: int, name: str, rank: int, points: int }"""
+    assert isinstance(obj["id"], int)
+    assert isinstance(obj["name"], str)
+    assert isinstance(obj["rank"], int)
+    assert isinstance(obj["points"], int)
+
+
+def assert_ranking(obj: dict):
+    """{ date: str, rankings: TeamRank[] }"""
+    assert isinstance(obj["date"], str)
+    assert isinstance(obj["rankings"], list)
+    for entry in obj["rankings"]:
+        assert_team_rank(entry)
+
+
+def assert_team_stats_response(obj: dict):
+    """{ id: int, name: str, n: int, n_wins: int }"""
+    assert isinstance(obj["id"], int)
+    assert isinstance(obj["name"], str)
+    assert isinstance(obj["n"], int)
+    assert isinstance(obj["n_wins"], int)
