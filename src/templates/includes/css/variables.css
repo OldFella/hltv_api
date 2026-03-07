@@ -37,6 +37,7 @@
     /* --- Status --- */
     --win:          #22c55e;
     --danger:       #ef4444;
+    --danger-rgb: 239, 68, 68;
     --warning:      #f59e0b;
 
     /* --- JSON syntax --- */

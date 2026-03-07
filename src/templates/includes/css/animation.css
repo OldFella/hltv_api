@@ -1,16 +1,43 @@
 /* ===== ANIMATIONS ===== */
 
 /* Crosshair dot glow pulse (replaces old .logo-accent glow) */
+.logo-crosshair-ring {
+    animation: crosshairPulse 4s ease-in-out infinite;
+}
+
 .logo-crosshair-dot {
-    animation: crosshairGlow 4s ease-in-out infinite;
+    animation: crosshairPulseBG 4s ease-in-out infinite;
 }
 
-@keyframes crosshairGlow {
-    0%, 8%    { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
-    25%, 75%  { box-shadow: 0 0 12px rgba(var(--accent-rgb), 1), 0 0 20px rgba(var(--accent-rgb), 0.4); }
-    92%, 100% { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
+
+
+@keyframes crosshairPulse {
+    0%, 25% {
+        border-color: rgba(var(--accent-rgb), 1);
+    }
+
+    25%, 75% {
+        border-color: rgba(var(--danger-rgb), 1);
+    }
+
+    75%, 100% {
+        border-color: rgba(var(--accent-rgb), 1);
+    }
 }
 
+@keyframes crosshairPulseBG {
+    0%, 25% {
+        background-color: rgba(var(--accent-rgb), 1);
+    }
+
+    25%, 75% {
+        background-color: rgba(var(--danger-rgb), 1);
+    }
+
+    75%, 100% {
+        background-color: rgba(var(--accent-rgb), 1);
+    }
+}
 /* Header accent gradient line draws in on load */
 header .wrap::after {
     animation: growLine 0.8s ease both;
