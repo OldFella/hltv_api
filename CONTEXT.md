@@ -32,7 +32,7 @@
 | Endpoint | Params | Notes |
 |---|---|---|
 | `GET /matches/` | `limit=100`, `offset=0` | |
-| `GET /matches/latest` | `limit=10`, `offset=0` | shares `get_matches()` helper with above, differs only in default limit |
+| `GET /matches/latest` | `limit=10`, `offset=0` | shares `get_matches()` helper with above, differs only in default limit; response includes `team1.rank` and `team2.rank` (derived from latest rankings snapshot) |
 | `GET /matches/{matchid}` | — | includes per-map scores + derived `best_of` and `winner` |
 | `GET /matches/{matchid}/stats` | `by_map=false` | player stats for both teams; `by_map=true` splits by map |
 
@@ -50,6 +50,11 @@
 |---|---|---|
 | `GET /rankings/` | — | most recent VRS snapshot; returns `date` + ordered list of `{id, name, rank, points}` |
 
+### Counts `src/routers/counts.py` *(new)*
+| Endpoint | Params | Notes |
+|---|---|---|
+| `GET /counts/` | — | returns `{players, teams, matches}` as distinct counts from DB; used by homepage hero stats |
+
 ### Other
 - `GET /fantasy/`, `GET /fantasy/{fantasyid}` — fantasy details with teams, players, costs (salary cap $1,000)
 - `GET /maps/`, `GET /maps/{id}`
@@ -64,7 +69,7 @@
 |---|---|
 | `Item` | `{id, name}` |
 | `TeamResponse` | `{id, name, streak: int, roster: Item[]}` |
-| `MatchResponse` | `{id, team1, team2, date, event, maps[], best_of, winner}` |
+| `MatchResponse` | `{id, team1, team2, date, event, maps[], best_of, winner}` — team objects include `rank` field |
 | `MatchStats` | per-map `{id, name, team1: {players[]}, team2: {players[]}}` |
 | `PlayerResponse` | `{id, name, team: Item, stats: {k,d,swing,adr,kast,rating,maps_played}}` |
 | `PlayerStats` | raw stat row with optional team fields |
@@ -80,7 +85,7 @@
 - `add_fuzzy_filter(col, value, filters, order_bys, threshold=0.3)` — no-op when `value` is None; otherwise appends `similarity() > threshold` filter and `similarity().desc()` ordering in-place
 
 ### `src/repositories/match_repository.py`
-- `build_match_query(matchid, teamid, vsid, sideid, mapid, limit, offset)` — self-joins `matches` aliased as `m1`/`m2` to pair team1/team2; aggregates maps as JSON via `array_agg`; orders by `date desc, matchid desc`
+- `build_match_query(matchid, teamid, vsid, sideid, mapid, limit, offset)` — self-joins `matches` aliased as `m1`/`m2` to pair team1/team2; aggregates maps as JSON via `array_agg`; orders by `date desc, matchid desc`; joins `rankings` subquery twice (aliased `r1`/`r2`) to add `team1_rank`/`team2_rank` — rank is computed via `RANK() OVER (ORDER BY points DESC)` on the latest rankings date, LEFT JOIN so unranked teams return `null`
 - `build_match_stats_query(matchid, by_map)` — aggregates player stats per map as JSON array; filters `sideid=0`; adds `mapid=0` filter when `by_map=False`
 - `build_roster_query(teamid)` — resolves players from team's single most recent match
 - `format_matches(rows)` — parses `maps` array, splits out `id=0` overall score row, computes `best_of = (2 * max_score) - 1`, derives `winner`
@@ -111,6 +116,41 @@
 
 ## DB Tables `src/db/classes.py`
 `teams` · `players` · `matches` · `match_overview` · `player_stats` · `maps` · `sides` · `rankings`
+
+Note: `rankings` table schema is `{teamid, points, date}` — rank is **not stored**, it is derived at query time via `RANK() OVER (ORDER BY points DESC)` filtered to `max(date)`.
+
+---
+
+## Frontend `src/frontend.py`
+
+SSR pages use Jinja2 templates. All `TemplateResponse` calls use the new signature: `TemplateResponse(request, "template.html", {...})`.
+
+Every route passes `current_page` string to templates for active nav highlighting.
+
+### Homepage (`/`)
+- Hero section with live stat counters fetched from `GET /counts/`
+- Two-panel layout: World Rankings (fixed 300px) + Latest Results (flex)
+- Rankings: top 10 from `GET /rankings/`, staggered fade-in from right
+- Matches: 3 most recent from `GET /matches/latest`, staggered fade-in from left; each card shows team names, ranks (`#N`), series score, map chips with per-map scores
+- API banner below cards linking to `api.csapi.de/docs`
+- Endpoints card removed from homepage
+
+---
+
+## Frontend Asset Files
+
+| File | Purpose |
+|---|---|
+| `variables.css` | CSS custom properties / design tokens |
+| `styles.css` | Global layout, header, hero, cards, buttons, footer |
+| `matches.css` | Match cards, score rows, map chips, rankings panel |
+| `animation.css` | All keyframe animations; matches fade left, rankings fade right |
+| `theme-toggle.css` | Theme toggle button styles (merge into styles.css) |
+| `base.js` | Theme toggle logic, last-updated fetch |
+| `main.js` | Homepage: fetches counts, rankings, matches; renders cards |
+| `header.html` | Header template with crosshair logo + nav |
+| `footer.html` | Footer template |
+| `base.html` | Base template; inlines CSS/JS via `{% include %}`; applies saved theme before render to prevent flash |
 
 ---
 
