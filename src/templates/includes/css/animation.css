@@ -1,23 +1,24 @@
 /* ===== ANIMATIONS ===== */
 
-.logo-accent {
-    animation: glow 4s ease-in-out infinite;
+/* Crosshair dot glow pulse (replaces old .logo-accent glow) */
+.logo-crosshair-dot {
+    animation: crosshairGlow 4s ease-in-out infinite;
 }
 
-@keyframes glow {
-    0%, 8%    { opacity: 0.7; text-shadow: none; }
-    25%, 75%  { opacity: 1; text-shadow: 0 0 8px rgba(var(--accent-rgb), 1); }
-    92%, 100% { opacity: 0.7; text-shadow: none; }
+@keyframes crosshairGlow {
+    0%, 8%    { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
+    25%, 75%  { box-shadow: 0 0 12px rgba(var(--accent-rgb), 1), 0 0 20px rgba(var(--accent-rgb), 0.4); }
+    92%, 100% { box-shadow: 0 0 4px rgba(var(--accent-rgb), 0.4); }
 }
 
-/* Header accent line draws in on load */
+/* Header accent gradient line draws in on load */
 header .wrap::after {
-    animation: growLine 0.6s ease both;
+    animation: growLine 0.8s ease both;
 }
 
 @keyframes growLine {
-    from { width: 0; }
-    to   { width: 120px; }
+    from { opacity: 0; transform: scaleX(0); transform-origin: left; }
+    to   { opacity: 0.35; transform: scaleX(1); transform-origin: left; }
 }
 
 /* Cards fade + slide up staggered */
@@ -34,15 +35,15 @@ header .wrap::after {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Card + info-box accent line pulse */
+/* Card + info-box top accent line pulse */
 .info-box::before,
 .card::before {
     animation: pulseLine 3s ease-in-out infinite;
 }
 
 @keyframes pulseLine {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
+    0%, 100% { opacity: 0.5; }
+    50%       { opacity: 0.15; }
 }
 
 /* Match results fade in one by one */
@@ -67,15 +68,38 @@ header .wrap::after {
     to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Endpoint rows slide in */
+/* Rankings fade in staggered */
+.rank-item {
+    opacity: 0;
+    animation: fadeInRight 0.3s ease forwards;
+}
 
+.rank-item:nth-child(1)  { animation-delay: 0.05s; }
+.rank-item:nth-child(2)  { animation-delay: 0.10s; }
+.rank-item:nth-child(3)  { animation-delay: 0.15s; }
+.rank-item:nth-child(4)  { animation-delay: 0.20s; }
+.rank-item:nth-child(5)  { animation-delay: 0.25s; }
+.rank-item:nth-child(6)  { animation-delay: 0.30s; }
+.rank-item:nth-child(7)  { animation-delay: 0.35s; }
+.rank-item:nth-child(8)  { animation-delay: 0.40s; }
+.rank-item:nth-child(9)  { animation-delay: 0.45s; }
+.rank-item:nth-child(10) { animation-delay: 0.50s; }
+.rank-item:nth-child(11)  { animation-delay: 0.55s; }
+.rank-item:nth-child(12) { animation-delay: 0.60s; }
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Endpoint / API link rows slide in */
 .api-links a {
     opacity: 0;
     animation: fadeIn 0.3s ease forwards;
 }
 
 /* CTA button subtle pulse */
-.button.card-cta{
+.button.card-cta {
     animation: ctaPulse 3s ease-in-out infinite;
 }
 
@@ -84,8 +108,13 @@ header .wrap::after {
     50%       { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4); }
 }
 
+/* Live badge pulse (used in badge-live) */
+@keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.55; }
+}
 
-/* 404 animations */
+/* 404 / error page animations */
 .error-code {
     animation: glitchIn 0.5s ease both, glitch 6s ease-in-out infinite 2s, errorGlow 3s ease-in-out infinite 0.5s;
 }
@@ -102,12 +131,12 @@ header .wrap::after {
     93%            { transform: skewX(-4deg); opacity: 0.9; }
     94%            { transform: skewX(0); opacity: 1; }
 }
+
 @keyframes glitchIn {
     0%   { opacity: 0; transform: translateY(-10px) skewX(-5deg); }
     60%  { opacity: 1; transform: translateY(2px) skewX(2deg); }
     100% { opacity: 1; transform: translateY(0) skewX(0); }
 }
-
 
 .error-label {
     opacity: 0;
@@ -119,8 +148,7 @@ header .wrap::after {
     animation: fadeIn 0.4s ease forwards 0.6s;
 }
 
-
-/* Noise overlay */
+/* Noise film grain overlay */
 body::after {
     content: '';
     position: fixed;
@@ -128,7 +156,7 @@ body::after {
     width: 100%; height: 100%;
     pointer-events: none;
     z-index: 9999;
-    opacity: 0.06;
+    opacity: 0.045;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 200px 200px;

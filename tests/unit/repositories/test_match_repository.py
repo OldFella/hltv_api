@@ -99,8 +99,8 @@ class TestFormatMatches:
     def setup_method(self, method):
         self.mock_row = {
             "match_id": 1,
-            "team1_id": 1, "team1_name": "NaVi",
-            "team2_id": 2, "team2_name": "Astralis",
+            "team1_id": 1, "team1_name": "NaVi", "team1_rank": 1,
+            "team2_id": 2, "team2_name": "Astralis", "team2_rank": 2,
             "date": "2024-01-01",
             "event": "ESL Pro League",
             "maps": [

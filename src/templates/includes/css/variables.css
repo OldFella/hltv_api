@@ -1,51 +1,82 @@
-:root {
-    /* Fonts */
-    --font-mono: 'Share Tech Mono', monospace;
-    --font-body: 'Rajdhani', system-ui, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&display=swap');
 
-    /* Color Theme  */
-    --bg:           #020617;
-    --surface:      #0d1520;
-    --border:       #1a2535;
-    --accent:       #20c45a;
-    --accent-hover: #16a34a;
-    --accent-dim:   #16a34a;
-    --text:         #e5e7eb;
-    --muted:        #9ca3af;
-    --warning:      #f59e0b;
-    --row-alt:      #080f1a;
-    --row-hl:       #0f2030;
+:root {
+    /* --- Fonts --- */
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body:    'Rajdhani', system-ui, sans-serif;
+    --font-mono:    'Share Tech Mono', monospace;
+
+    /* --- Base surfaces --- */
+    --bg:           #080b0f;
+    --surface:      #0d1117;
+    --surface-2:    #111820;
+    --chrome:       #050810;
+    --row-alt:      #0a0f16;
+    --row-hl:       #111e2a;
+
+    /* --- Borders --- */
+    --border:       #1c2a38;
+    --border-bright:#2a3f52;
+
+    /* --- Primary accent: CS2 kill-feed orange-gold --- */
+    --accent:       #e8a020;
+    --accent-hover: #f0b030;
+    --accent-dim:   #9b6a10;
+    --accent-rgb:   232, 160, 32;
+
+    /* --- Secondary accent: radar cyan --- */
+    --cyan:         #38bdf8;
+    --cyan-dim:     #0e4a6a;
+    --cyan-glow:    rgba(56, 189, 248, 0.15);
+
+    /* --- Text --- */
+    --text:         #cbd5e1;
+    --text-bright:  #f1f5f9;
+    --muted:        #64748b;
+
+    /* --- Status --- */
+    --win:          #22c55e;
     --danger:       #ef4444;
-    --accent-rgb: 34, 197, 94;
-    --chrome: #060d1a;
-    --json-key:    var(--accent);
-    --json-string: #7dd3a8;
-    --json-number: #f0a500;
-    --json-bool:   #4d9fff;
-    --json-null:   var(--muted);
+    --warning:      #f59e0b;
+
+    /* --- JSON syntax --- */
+    --json-key:     #e4ae39;  /* Ancient / Contraband — gold */
+    --json-string:  #eb4b4b;  /* Covert — red-pink */
+    --json-number:  #8847ff;  /* Restricted — purple */
+    --json-bool:    #4b69ff;  /* Mil-Spec — blue */
+    --json-null:    #808080;  /* Consumer — grey */
 }
 
-
+/* Colorblind-safe theme */
 [data-theme="cb"] {
     --bg:           #000000;
     --surface:      #0a0a0a;
+    --surface-2:    #111111;
+    --chrome:       #050505;
     --border:       #333333;
-    --accent:       #33BBEE; /* optional main UI accent */
-    --accent-hover: #0077BB;
-    --accent-dim:   #0077BB;
-    --accent-rgb: 51, 187, 238;
-    --text:         #ffffff;
-    --muted:        #bbbbbb;
-    --warning:      #EE7733;
-    --danger:       #EE3377;  /* magenta from Paul Tol */
+    --border-bright:#444444;
     --row-alt:      #0d0d0d;
     --row-hl:       #1a2a2a;
-    --chrome:       #050505;
 
-    /* JSON Syntax Colors - Paul Tol Bright Palette */
-    --json-key:     var(--accent);  
-    --json-string:  #009988;  
-    --json-number:  var(--danger); 
-    --json-bool:    var(--accent-dim);  
-    --json-null:    var(--muted);  
+    --accent:       #33BBEE;
+    --accent-hover: #55CCFF;
+    --accent-dim:   #0077BB;
+    --accent-rgb:   51, 187, 238;
+
+    --cyan:         #33BBEE;
+    --cyan-dim:     #005577;
+
+    --text:         #ffffff;
+    --text-bright:  #ffffff;
+    --muted:        #bbbbbb;
+
+    --win:          #009988;
+    --danger:       #EE3377;
+    --warning:      #EE7733;
+
+    --json-key:     var(--accent);
+    --json-string:  #009988;
+    --json-number:  var(--danger);
+    --json-bool:    var(--accent-dim);
+    --json-null:    var(--muted);
 }

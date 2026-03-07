@@ -16,8 +16,8 @@ MOCK_ROSTER = {
 MOCK_MATCH = {
     "id": 1,
     "maps": [{"id": 1, "name": "Mirage", "team1_score": 16, "team2_score": 14}],
-    "team1": {"id": 1, "name": "NaVi", "score": 1},
-    "team2": {"id": 2, "name": "Astralis", "score": 0},
+    "team1": {"id": 1, "name": "NaVi", "score": 1, "rank": 1},
+    "team2": {"id": 2, "name": "Astralis", "score": 0, "rank": 2},
     "best_of": 1,
     "date": "2024-01-01",
     "event": "ESL Pro League",

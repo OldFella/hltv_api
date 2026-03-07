@@ -14,10 +14,11 @@ def assert_item(obj: dict):
 
 
 def assert_team_score(obj: dict):
-    """{ id: int, name: str, score: int }"""
+    """{ id: int, name: str, score: int , rank: int}"""
     assert isinstance(obj["id"], int)
     assert isinstance(obj["name"], str)
     assert isinstance(obj["score"], int)
+    assert isinstance(obj["rank"], int)
 
 
 def assert_team_response(obj: dict):

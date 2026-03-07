@@ -1,45 +1,52 @@
 const themes = [
-    { key: null, label: '[GRN]' },
-    { key: 'cb', label: '[CB]'  },
+    { key: null, label: 'DEFAULT' },
+    { key: 'cb',  label: 'CB'  },
 ];
 
 const toggle = document.getElementById('theme-toggle');
-const saved = localStorage.getItem('theme');
 
-if (saved) document.documentElement.setAttribute('data-theme', saved);
+function applyTheme(key) {
+    if (key) {
+        document.documentElement.setAttribute('data-theme', key);
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
 
-// set initial label
-const currentIndex = themes.findIndex(t => t.key === (saved || null));
-const next = themes[(currentIndex + 1) % themes.length];
-toggle.textContent = next.label;
+    const isAlt = key !== null;
+    toggle.classList.toggle('is-active', isAlt);
+    toggle.textContent = '🎨 ' + (themes.find(t => t.key === key)?.label ?? 'DEFAULT');
+}
+
+// Restore saved theme on load
+const saved = localStorage.getItem('theme') || null;
+applyTheme(saved);
 
 toggle.addEventListener('click', () => {
     const currentKey = document.documentElement.getAttribute('data-theme') || null;
     const currentIndex = themes.findIndex(t => t.key === currentKey);
     const next = themes[(currentIndex + 1) % themes.length];
-    const afterNext = themes[(currentIndex + 2) % themes.length];
 
     if (next.key) {
-        document.documentElement.setAttribute('data-theme', next.key);
         localStorage.setItem('theme', next.key);
     } else {
-        document.documentElement.removeAttribute('data-theme');
         localStorage.removeItem('theme');
     }
-    toggle.textContent = afterNext.label;
+
+    applyTheme(next.key);
 });
 
+// Last updated fetch
 fetch("https://api.csapi.de/status")
-.then(r => r.json())
-.then(({ updated_at }) => {
-    const date = new Date(updated_at);
-    const formatted = date.toLocaleString("en-GB", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-    timeZone: "UTC", timeZoneName: "short"
+    .then(r => r.json())
+    .then(({ updated_at }) => {
+        const date = new Date(updated_at);
+        const formatted = date.toLocaleString("en-GB", {
+            day: "2-digit", month: "short", year: "numeric",
+            hour: "2-digit", minute: "2-digit",
+            timeZone: "UTC", timeZoneName: "short"
+        });
+        document.getElementById("last-updated").textContent = `Last updated: ${formatted}`;
+    })
+    .catch(() => {
+        document.getElementById("last-updated").textContent = "";
     });
-    document.getElementById("last-updated").textContent = `Last updated: ${formatted}`;
-})
-.catch(() => {
-    document.getElementById("last-updated").textContent = "";
-});

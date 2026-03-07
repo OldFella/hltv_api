@@ -1,8 +1,22 @@
 <a href="/" class="home-logo">
-    <span class="logo-accent">&gt;&gt;</span> CS API
+    <div class="logo-crosshair">
+        <div class="logo-crosshair-ring"></div>
+        <div class="logo-crosshair-dot"></div>
+    </div>
+    <span class="logo-text"><span class="logo-bracket">[</span>CS<span class="logo-hi">API</span><span class="logo-bracket">]</span></span>
 </a>
+
+<nav class="header-nav">
+    <a href="/" class="nav-link {% if current_page == 'home' %}active{% endif %}">Home</a>
+    <!-- <a href="/teams/" class="nav-link {% if current_page == 'teams' %}active{% endif %}">Teams</a>
+    <a href="/matches/" class="nav-link {% if current_page == 'matches' %}active{% endif %}">Matches</a>
+    <a href="/players/" class="nav-link {% if current_page == 'players' %}active{% endif %}">Players</a>
+    <a href="/rankings/" class="nav-link {% if current_page == 'rankings' %}active{% endif %}">Rankings</a> -->
+    <a href="/blog/rating-analysis" class="nav-link {% if current_page == 'blog' %}active{% endif %}">Blog</a>
+    <a href="/spreadsheet/" class="nav-link {% if current_page == 'Fantasy' %}active{% endif %}">Spreadsheets</a>
+</nav>
+
 <div class="header-actions">
-    <button id="theme-toggle" title="Switch theme">[GRN]</button>
-    <a class="button" href="/blog/rating-analysis">Blog</a>
-    <a class="button" href="/spreadsheet/">Spreadsheets</a>
+    <button id="theme-toggle" title="Switch theme">&#127912; DEFAULT</button>
+    <a class="button button-outline" href="https://api.csapi.de/docs" target="_blank">API Docs</a>
 </div>

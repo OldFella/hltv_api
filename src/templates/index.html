@@ -5,66 +5,61 @@
     {% include "includes/css/api.css" %}
 </style>
 {% endblock %}
-
 {% block title %}CS API{% endblock %}
-
 {% block content %}
 
-<div class="info-box">
-  <h2 class="info-title">{{ hero_card.title }}</h2>
-  <p class="info-text">{{ hero_card.description }}</p>
+<!-- ===== HERO ===== -->
+<div class="hero">
+    <div class="hero-label">Counter-Strike 2 · Pro Match Data</div>
+    <h1>{{ hero_card.title }}</h1>
+    <p>{{ hero_card.description }}</p>
+    <div class="hero-stats">
+        <div class="hero-stat"><span class="num" id="hero-matches">—</span><span class="lbl">Matches</span></div>
+        <div class="hero-stat"><span class="num" id="hero-players">—</span><span class="lbl">Players</span></div>
+        <div class="hero-stat"><span class="num" id="hero-teams">—</span><span class="lbl">Teams</span></div>
+        <div class="hero-stat"><span class="num">Daily</span><span class="lbl">Refresh</span></div>
+    </div>
 </div>
 
+<!-- ===== MAIN CARDS ===== -->
 <div class="cards-container">
-  <div class="card">
-    <h2 class="card-title">Endpoints</h2>
-      <div class="info-available">
-        Available at <a href="https://api.csapi.de" target="_blank">https://api.csapi.de</a>
-      </div>
-      <div class="info-description">
-          PUBLIC API &nbsp;·&nbsp; NO KEY REQUIRED
-      </div>
-    
-    <div class="example-requests">
-       <div class="endpoint-category">Example Requests</div>
-    {% for example in example_requests %}
-      <details>
-        <summary>{{ example.url }}</summary>
-        <pre>{{ example.response }}</pre>
-      </details>
-    {% endfor %}
-  </div>
-    <div class="api-links">
-        {% for category, routes in endpoints.items() %}
-            
-            <h3 class="endpoint-category">{{ category }}</h3>
 
-            {% for route in routes %}
-            <a href="{{ api_base }}{{ route.path }}" target="_blank">
-                {{ route.path }} — {{ route.description }}
-            </a>
-            {% endfor %}
-        {% endfor %}
+    <!-- RANKINGS CARD -->
+    <div class="card rankings-card">
+        <div class="section-label">
+            <h2>World Rankings</h2>
+            <span class="section-tag">GET /rankings</span>
         </div>
-        <a href="https://api.csapi.de/docs" target="_blank" class="button card-cta">View Full API Docs →</a>
+        <div id="rankings" class="loading-text">Loading…</div>
+    </div>
 
+    <!-- LATEST RESULTS CARD -->
+    <div class="card results-card">
+        <div class="section-label">
+            <h2>Latest Results</h2>
+            <span class="section-tag">GET /matches/latest</span>
+        </div>
+        <div id="results" class="loading-text">Loading…</div>
+    </div>
 
-  </div>
-    
-
-
-  <div class="card results-card">
-    <h2 class="card-title">Latest Results</h2>
-    <div id="results" class="loading-text">Loading…</div>
 </div>
+
+<!-- ===== API BANNER ===== -->
+<div class="api-banner">
+    <div class="api-banner-left">
+        <span class="api-banner-label">// PUBLIC REST API</span>
+        <span class="api-banner-url">api.csapi.de</span>
+        <span class="api-banner-sub">No key required · Updated daily</span>
+    </div>
+    <a href="https://api.csapi.de/docs" target="_blank" class="button">View API Docs →</a>
 </div>
 
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
   {% include "includes/js/main.js" %}
   {% include "includes/js/highlight.js" %}
-
 </script>
 {% endblock %}

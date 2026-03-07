@@ -13,6 +13,7 @@ class TeamResponse(Item):
 
 class TeamScore(Item):
     score: int
+    rank: int
 
 class MapScore(Item):
     team1_score: int

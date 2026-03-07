@@ -5,7 +5,8 @@ from src.db.session import engine
 from src.db.classes import (
     teams, sides, maps, 
     matches, match_overview, 
-    player_stats, players
+    player_stats, players,
+    rankings
 )
 
 from src.repositories.player_repository import FIELDS
@@ -56,12 +57,14 @@ def format_matches(rows)->list[dict]:
             'team1': {
                 'id': row['team1_id'],
                 'name': row['team1_name'],
-                'score': team1_score
+                'score': team1_score,
+                'rank': row['team1_rank']
                 },
             'team2': {
                 'id': row['team2_id'],
                 'name': row['team2_name'],
-                'score': team2_score
+                'score': team2_score,
+                'rank': row['team2_rank']
                 },
             'best_of': best_of,
             'date': row['date'],
@@ -189,6 +192,18 @@ def build_match_query(
     offset = 0):
 
 
+    latest_ranking_date = select(func.max(rankings.date)).scalar_subquery()
+
+    ranked = (
+        select(
+            rankings.teamid,
+            rankings.points,
+            func.rank().over(order_by=rankings.points.desc()).label('rank')
+        )
+        .where(rankings.date == latest_ranking_date)
+        .subquery()
+    )
+
     # --- Aliases ---
 
     m1 = aliased(matches)
@@ -197,19 +212,22 @@ def build_match_query(
     t1 = aliased(teams)
     t2 = aliased(teams)
 
+    r1 = aliased(ranked)
+    r2 = aliased(ranked)
+
 
     # --- Filters ---
 
     filters = [
         m1.sideid == sideid,
-        m1.mapid == m2.mapid
+        m1.mapid == m2.mapid,
+        r1.c.rank < r2.c.rank
     ]
 
     optional_filters = [
         (matchid, m1.matchid, None),
-        (mapid, m1.mapid, None),
-        (teamid, m1.teamid, lambda col: col < m2.teamid)
-        ]
+        (mapid, m1.mapid, None)
+    ]
     
     for value, column, default in optional_filters:
         if value is not None:
@@ -224,8 +242,10 @@ def build_match_query(
     else:
         filters.append(m1.sideid == m2.sideid)
     
-    if teamid is not None and vsid is not None:
-        filters.append(m2.teamid == vsid)
+    if teamid is not None:
+        filters.append(m1.teamid == teamid)
+        if vsid is not None:
+            filters.append(m2.teamid == vsid)
 
     
     # --- Selects ---
@@ -236,6 +256,8 @@ def build_match_query(
         t1.name.label('team1_name'),
         m2.teamid.label('team2_id'),
         t2.name.label('team2_name'),
+        r1.c.rank.label('team1_rank'),
+        r2.c.rank.label('team2_rank'),
         match_overview.date.label('date'),
         match_overview.event.label('event'),
         func.array_agg(
@@ -253,7 +275,8 @@ def build_match_query(
     group_bys = [
         m1.matchid, m1.teamid, t1.name,
         m2.teamid, t2.name,
-        match_overview.date, match_overview.event
+        match_overview.date, match_overview.event,
+        r1.c.rank, r2.c.rank
     ]
 
 
@@ -270,9 +293,11 @@ def build_match_query(
             .join(t2, m2.teamid == t2.teamid)
             .join(match_overview, m1.matchid == match_overview.matchid)
             .join(maps, maps.mapid == m1.mapid)
+            .join(r1, r1.c.teamid == m1.teamid, isouter=True)
+            .join(r2, r2.c.teamid == m2.teamid, isouter=True)
             .group_by(*group_bys)
             .where(*filters)
-            .order_by(match_overview.date.desc(),m1.matchid.desc())
+            .order_by(match_overview.date.desc(),r1.c.rank)
             .offset(offset)
             .limit(limit)
     )

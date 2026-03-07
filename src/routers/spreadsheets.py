@@ -67,6 +67,7 @@ def show_folders(request: Request):
         {
             "request": request,
             "folders": fantasies,
+            "current_page": "Fantasy"
         }
     )
 
@@ -89,5 +90,6 @@ def display_spreadsheet(fantasyid: int, request: Request):
         "fantasies": fantasies,
         "sheets": sheets,
         "fantasy_map": fantasies,
+        "current_page": "Fantasy"
     })
 

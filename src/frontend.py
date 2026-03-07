@@ -36,7 +36,7 @@ include_routers(app)
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 static_dir = os.getenv("STATIC_DIR", "static")
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+app.mount("/static", StaticFiles(directory='static'), name="static")
 
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
@@ -55,16 +55,17 @@ async def homepage(request: Request):
         "api_base": "https://api.csapi.de",
         "endpoints": endpoints,
         "hero_card": hero_card,
-        "example_requests": example_requests},
+        "example_requests": example_requests,
+        "current_page": "home"},
     )
 
 @app.get("/imprint")
 def impressum(request: Request):
-    return templates.TemplateResponse("imprint.html", {"request": request})
+    return templates.TemplateResponse("imprint.html", {"request": request, "current_page": "imprint"})
 
 @app.get("/about")
 def impressum(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
+    return templates.TemplateResponse("about.html", {"request": request, "current_page": "about"})
 
 
 @app.get("/blog/rating-analysis")
@@ -74,5 +75,6 @@ async def rating_analysis(request: Request):
     return templates.TemplateResponse("blog.html", {
         "request": request,
         "content": content,
-        "title": "Modelling CS Player Performance"
+        "title": "Modelling CS Player Performance",
+        "current_page": "blog"
     })

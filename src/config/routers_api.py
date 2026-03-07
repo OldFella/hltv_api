@@ -6,7 +6,8 @@ from src.routers import (
     goat,
     players,
     fantasy,
-    rankings
+    rankings,
+    counts
 )
 
 def include_routers(app):
@@ -18,5 +19,7 @@ def include_routers(app):
     app.include_router(players.router)
     app.include_router(fantasy.router)
     app.include_router(rankings.router)
+    app.include_router(counts.router)
+
 
 
