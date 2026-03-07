@@ -31,7 +31,7 @@ jobs:
       POSTGRES_SERVER: localhost
       POSTGRES_PORT: 5432
       POSTGRES_DB: csapi_test
-      STATIC_DIR: src/static
+      STATIC_DIR: /static
 
     steps:
       - uses: actions/checkout@v4
