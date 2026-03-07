@@ -19,7 +19,7 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 
 ### Matches
 - Retrieve all matches with pagination
-- Retrieve latest matches
+- Retrieve latest matches including current world ranking for each team
 - Retrieve a specific match by ID including maps and scores
 - Get player stats for a match, optionally broken down per map
 
@@ -41,6 +41,9 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 ### Maps & Sides
 - Get all maps
 - Get all sides
+
+### Counts
+- Get distinct counts of players, teams, and matches in the database
 
 ### API Design
 - Read-only (GET requests only)
@@ -110,7 +113,7 @@ By default, the local API will be available at http://localhost:8000
 | Endpoint | Params | Description |
 |---|---|---|
 | `GET /matches/` | `limit=100`, `offset=0` | Get all matches |
-| `GET /matches/latest` | `limit=10`, `offset=0` | Get latest matches |
+| `GET /matches/latest` | `limit=10`, `offset=0` | Get latest matches with team rankings |
 | `GET /matches/{matchid}` | — | Get a match by ID |
 | `GET /matches/{matchid}/stats` | `by_map=false` | Get player stats for a match (`by_map=true` for per-map breakdown) |
 
@@ -127,6 +130,11 @@ By default, the local API will be available at http://localhost:8000
 | Endpoint | Params | Description |
 |---|---|---|
 | `GET /rankings/` | — | Get most recent VRS ranking with team points |
+
+### Counts
+| Endpoint | Params | Description |
+|---|---|---|
+| `GET /counts/` | — | Get distinct counts of players, teams, and matches |
 
 ### Fantasy
 | Endpoint | Params | Description |
@@ -162,12 +170,12 @@ By default, the local API will be available at http://localhost:8000
 }
 ```
 
-### Match with maps and winner
+### Match with maps, winner and team rankings
 ```json
 {
   "id": 2389666,
-  "team1": {"id": 8297, "name": "FURIA",    "score": 1},
-  "team2": {"id": 9565, "name": "Vitality", "score": 3},
+  "team1": {"id": 8297, "name": "FURIA",    "score": 1, "rank": 3},
+  "team2": {"id": 9565, "name": "Vitality", "score": 3, "rank": 1},
   "date": "2026-02-08",
   "event": "IEM Kraków 2026",
   "maps": [
@@ -207,6 +215,15 @@ By default, the local API will be available at http://localhost:8000
     {"id": 9565, "name": "Vitality", "rank": 1, "points": 1000},
     {"id": 8297, "name": "FURIA",    "rank": 2, "points": 845}
   ]
+}
+```
+
+### Counts
+```json
+{
+  "players": 1547,
+  "teams": 334,
+  "matches": 2163
 }
 ```
 
@@ -279,6 +296,11 @@ curl https://api.csapi.de/rankings/
 #### Get paginated matches
 ```sh
 curl "https://api.csapi.de/matches/?limit=20&offset=0"
+```
+
+#### Get database counts
+```sh
+curl https://api.csapi.de/counts/
 ```
 
 ---
