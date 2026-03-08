@@ -1,29 +1,31 @@
-from fastapi import APIRouter
-from sqlalchemy import select
-from src.db.classes import sides
-from src.db.models import Item
-from src.repositories.base import execute_query
+from fastapi import APIRouter, Depends
+from sqlalchemy.engine import Connection
+from src.domain.models import Side
+from src.domain.use_cases.reference_data import get_one, get_all
+from src.db.get_db import get_db
+from src.adapters.sqlalchemy_reference_data import get_side_adapter
 
 router = APIRouter(prefix='/sides', tags=['sides'])
 
 
-@router.get("/", response_model=list[Item], summary="List sides")
-async def get_sides() -> list[Item]:
+@router.get("/", response_model=list[Side], summary="List sides")
+def list_sides(connection: Connection = Depends(get_db)) -> list[Side]:
     """
     Returns all available sides (T/CT) with their names and unique IDs.
     """
-    stmnt = select(sides.sideid.label('id'), sides.name.label('name'))
-    rows = execute_query(stmnt)
-    return [{'id': r['id'], 'name': r['name']} for r in rows]
+    adapter = get_side_adapter(connection)
+    return get_all(adapter)
+       
 
-
-@router.get("/{sideid}", response_model=Item, summary="Side details")
-async def get_side(sideid: int) -> Item:
+@router.get("/{sideid}", response_model=Side, summary="Side details")
+def list_side(
+    sideid: int,
+    connection: Connection = Depends(get_db)) -> Side:
     """
     Returns a specific side by its unique ID.
 
     - **sideid**: unique side ID
     """
-    stmnt = select(sides.name.label('name')).where(sides.sideid == sideid)
-    row = execute_query(stmnt, many=False)
-    return {'id': sideid, 'name': row['name']}
+    adapter = get_side_adapter(connection)
+    return get_one(sideid, adapter)
+    

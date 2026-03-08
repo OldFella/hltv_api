@@ -71,8 +71,9 @@
     --text-bright:  #ffffff;
     --muted:        #bbbbbb;
 
-    --win:          #009988;
+    --win:          var(--accent);
     --danger:       #EE3377;
+    --danger-rgb: 238, 51, 119;
     --warning:      #EE7733;
 
     --json-key:     var(--accent);

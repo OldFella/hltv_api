@@ -7,6 +7,8 @@ from src.db.session import engine
 from src.db.base_class import Base
 from src.config.routers_api import include_routers
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from src.domain.errors import NotFoundError
 
 
 def create_tables():
@@ -17,7 +19,6 @@ def start_application():
     app = FastAPI(title=settings.PROJECT_NAME,version=settings.PROJECT_VERSION)
     app.add_event_handler("startup", create_tables)  # run on startup, not import
     return app
-
 
 app = start_application()
 
@@ -30,6 +31,11 @@ app.add_middleware(
 )
 
 include_routers(app)
+
+@app.exception_handler(NotFoundError)
+async def not_found_handler(request: Request, exc: NotFoundError):
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
 
 @app.get("/")
 async def homepage(request: Request):

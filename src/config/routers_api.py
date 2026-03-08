@@ -1,6 +1,5 @@
 from src.routers import (
-    sides,
-    maps,
+    reference_data,
     matches,
     teams,
     goat,
@@ -11,8 +10,8 @@ from src.routers import (
 )
 
 def include_routers(app):
-    app.include_router(sides.router)
-    app.include_router(maps.router)
+    app.include_router(reference_data.sides_router)
+    app.include_router(reference_data.maps_router)
     app.include_router(matches.router)
     app.include_router(teams.router)
     app.include_router(goat.router)
