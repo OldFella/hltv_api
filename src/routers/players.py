@@ -42,11 +42,11 @@ async def list_players(
 
 @router.get("/stats", response_model=list[PlayerAggregatedStats], summary="Aggregated player stats")
 async def list_player_aggregated_stats(
-    mapid: Optional[int] = Query(0, description="Map ID. 0 for overall match stats."),
+    mapid: Optional[int] = Query(None, description="Map ID. 0 for overall match stats."),
     sideid: Optional[int] = Query(0, description="Side ID. 0 for both sides."),
     limit: Optional[int] = Query(20, description="Max results to return"),
     offset: Optional[int] = Query(0, description="Pagination offset"),
-    min_played: Optional[int] = Query(10, description="Minimum maps played to be included in rankings"),
+    min_played: Optional[int] = Query(20, description="Minimum maps played to be included in rankings"),
     connection: Connection = Depends(get_db),
 ) -> list[PlayerAggregatedStats]:
     """
@@ -56,7 +56,7 @@ async def list_player_aggregated_stats(
     - **sideid**: side ID to filter by, 0 for both sides
     - **limit**: number of results to return (default 20)
     - **offset**: pagination offset (default 0)
-    - **min_played**: minimum maps played threshold to qualify for rankings (default 10)
+    - **min_played**: minimum maps played threshold to qualify for rankings (default 20)
     """
     adapter = SqlAlchemyPlayersAdapter(connection)
     return get_aggregated_stats(adapter, mapid, sideid, limit, offset, min_played)

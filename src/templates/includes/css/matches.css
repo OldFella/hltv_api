@@ -226,7 +226,7 @@
 
 .rank-num {
     font-family: var(--font-display);
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--muted);
     text-align: center;
@@ -236,7 +236,7 @@
 
 .rank-team {
     font-family: var(--font-display);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -248,7 +248,7 @@
 
 .rank-pts {
     font-family: var(--font-mono);
-    font-size: 0.66rem;
+    font-size: 0.9rem;
     color: var(--muted);
     white-space: nowrap;
 }
@@ -337,7 +337,7 @@
 .lb-header,
 .leaderboard-row {
     display: grid;
-    grid-template-columns: 28px minmax(80px, 1fr) 36px 48px 48px 52px 90px;
+    grid-template-columns: 28px minmax(80px, 1fr) 36px 48px 48px 52px 52px 90px;
     align-items: center;
     gap: 16px;
     padding: 7px 10px;
@@ -345,7 +345,7 @@
 
 .lb-header {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: var(--muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -479,15 +479,13 @@
 }
 
 @media (max-width: 600px) {
-    .lb-header span:nth-child(3),
-    .leaderboard-row .lb-maps,
-    .lb-header span:nth-child(4),
-    .leaderboard-row .lb-stat:nth-child(4) {
+    .lb-header span:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:last-child),
+    .leaderboard-row > :not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:last-child) {
         display: none;
     }
 
     .lb-header,
     .leaderboard-row {
-        grid-template-columns: 24px 1fr 42px 48px 80px;
+        grid-template-columns: 24px minmax(60px, 1fr) 30px 80px;
     }
 }

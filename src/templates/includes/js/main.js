@@ -101,7 +101,7 @@ fetch("https://api.csapi.de/rankings/")
         }
         el.innerHTML = "";
         el.classList.remove("loading-text");
-        data.rankings.slice(0, 12).forEach(r => el.appendChild(createRankItem(r)));
+        data.rankings.slice(0, 11).forEach(r => el.appendChild(createRankItem(r)));
     })
     .catch(() => {
         document.getElementById("rankings").textContent = "Could not load rankings.";
@@ -134,6 +134,7 @@ const createLeaderboardRow = (p) => {
         <div class="lb-name">${p.name}</div>
         <div class="lb-maps">${p.N}</div>
         <div class="lb-stat">${kd}</div>
+        <div class="lb-stat">${p.swing.toFixed(2)}%</div>
         <div class="lb-stat">${p.adr.toFixed(1)}</div>
         <div class="lb-stat">${p.kast.toFixed(2)}%</div>
         <div class="lb-rating-wrap">
@@ -160,6 +161,7 @@ fetch("https://api.csapi.de/players/stats?limit=10")
                 <span>Player</span>
                 <span>Maps</span>
                 <span>K/D</span>
+                <span>Swing%</span>
                 <span>ADR</span>
                 <span>KAST%</span>
                 <span>Rating</span>
