@@ -351,7 +351,7 @@ header .wrap::after {
 .cards-container {
     display: flex;
     gap: 16px;
-    padding:8px;
+    padding-bottom:16px;
     flex-wrap: nowrap;
     align-items: stretch;
 }
