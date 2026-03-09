@@ -44,7 +44,9 @@ class CountResponse:
 # --- Players ---
 
 @dataclass
-class PlayerStatRow(Item):
+class PlayerStatRow:
+    id: int
+    name: str
     team_id: int
     team_name: str
     k: float
@@ -66,7 +68,9 @@ class PlayerStats:
     N: int
 
 @dataclass
-class PlayerDetail(Item):
+class PlayerDetail:
+    id: int
+    name: str
     team: Item
     stats: PlayerStats
 
@@ -83,7 +87,9 @@ class PlayerGroupedStats:
     N: int
 
 @dataclass
-class PlayerAggregatedStats(Item):
+class PlayerAggregatedStats:
+    id: int
+    name: str
     rank: int
     k: int
     d: int

@@ -177,7 +177,7 @@ class TestGetPlayer:
             data = client.get("/players/1").json()
             print(data)
             assert all(k in data for k in ["id", "name", "team", "stats"])
-            assert all(k in data["stats"] for k in ["k", "d", "swing", "adr", "kast", "rating", "n"])
+            assert all(k in data["stats"] for k in ["k", "d", "swing", "adr", "kast", "rating", "N"])
 
     def test_team_shape(self):
         with patch("src.routers.players.get_player", return_value=MOCK_PLAYER_DETAIL):
