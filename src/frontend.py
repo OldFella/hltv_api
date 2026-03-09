@@ -5,10 +5,8 @@ from fastapi.requests import Request
 from src.core.config import settings
 from src.db.session import engine 
 from src.db.base_class import Base
-from src.config.routers_fe import include_routers
-from src.config.endpoints import endpoints
-from src.config.hero_card import hero_card
-from src.config.example_requests import example_requests
+from src.config.routers_frontend import include_routers
+from src.content.index.hero_card import hero_card
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 import markdown
@@ -53,9 +51,7 @@ async def homepage(request: Request):
         "index.html",
         {"request": request,
         "api_base": "https://api.csapi.de",
-        "endpoints": endpoints,
         "hero_card": hero_card,
-        "example_requests": example_requests,
         "current_page": "home"},
     )
 
