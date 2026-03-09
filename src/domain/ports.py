@@ -1,5 +1,10 @@
-from typing import Protocol, TypeVar
-from src.domain.models import Ranking, CountResponse
+from typing import Protocol, TypeVar, Literal
+from src.domain.models import (
+    Ranking, CountResponse,
+    PlayerDetail, PlayerStatRow,
+    PlayerGroupedStats, Item
+
+)
 from datetime import date
 
 T = TypeVar('T')
@@ -20,8 +25,42 @@ class TeamsPort(Protocol):
     def get_matchhistory(self): ...
     def get_stats(self): ...
 
-def PlayersPort(Protocol):
-    def get_all(self): ...
-    def get_one(self): ...
-    def get_stats(self): ...
+class PlayersPort(Protocol):
+    def get_all_fuzzy(
+        self, 
+        name: str | None, 
+        limit: int, 
+        offset: int,
+    ) -> list[Item]: ...
 
+    def get_one(
+        self, 
+        playerid: int, 
+        start_date: date, 
+        end_date:date,
+    ) -> PlayerDetail: ...
+
+    def get_player_stats(
+        self, 
+        mapid: int | None, 
+        sideid: int | None, 
+        limit: int, 
+        offset: int,
+    ) -> list[PlayerStatRow]: ...
+
+    def get_player_stats_by_outcome(
+        self, 
+        outcome: Literal["win", "lose"], 
+        mapid: int | None, 
+        limit: int, 
+        offset: int,
+    ) -> list[PlayerStatRow]: ...
+
+    def get_player_grouped_stats(
+        self,
+        playerid:int, 
+        group: Literal["maps", "sides", "events"], 
+        mapid: int | None, 
+        start_date:date, 
+        end_date:date,
+    )-> list[PlayerGroupedStats]: ...

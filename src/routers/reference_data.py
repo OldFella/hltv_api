@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.engine import Connection
 from src.domain.models import Item, Ranking, Fantasy, CountResponse
-from src.domain.use_cases.reference_data import get_one, get_all, get_rankings, get_counts
+from src.domain.use_cases import get_one, get_all, get_rankings, get_counts
 from src.db.get_db import get_db
 from src.adapters.sqlalchemy_reference_data import (
     get_side_adapter, get_map_adapter,

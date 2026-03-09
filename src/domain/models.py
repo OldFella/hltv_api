@@ -33,9 +33,51 @@ class Fantasy(Item):
     currency: str
     teams: list[FantasyTeam]
 
+# --- Counts ---
+
 @dataclass
 class CountResponse:
     players: int
     teams: int
     matches: int
 
+# --- Players ---
+
+@dataclass
+class PlayerStatRow(Item):
+    team_id: int
+    team_name: str
+    k: float
+    d: float
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+    N: int
+
+@dataclass
+class PlayerStats:
+    k: float
+    d: float
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+    N: int
+
+@dataclass
+class PlayerDetail(Item):
+    team: Item
+    stats: PlayerStats
+
+@dataclass
+class PlayerGroupedStats:
+    id: int | None
+    name: str
+    k: float
+    d: float
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+    N: int
