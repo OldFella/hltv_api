@@ -7,8 +7,8 @@ from src.domain.models import Item, PlayerDetail, PlayerStatRow, PlayerGroupedSt
 from src.domain.use_cases import (
     get_all_fuzzy,
     get_player,
-    get_player_stats,
-    get_player_stats_by_outcome,
+    get_raw_stats,
+    get_raw_stats_by_outcome,
     get_player_grouped_stats,
 )
 from src.adapters.sqlalchemy_players import SqlAlchemyPlayersAdapter
@@ -39,7 +39,7 @@ async def list_players(
     return get_all_fuzzy(adapter, name, limit, offset)
 
 
-@router.get("/stats", response_model=list[PlayerStatRow], summary="All player stats")
+@router.get("/stats/raw", response_model=list[PlayerStatRow], summary="All player stats")
 async def list_player_stats(
     mapid: Optional[int] = Query(0, description="Map ID. 0 for overall match stats."),
     sideid: Optional[int] = Query(0, description="Side ID. 0 for both sides."),
@@ -56,10 +56,10 @@ async def list_player_stats(
     - **offset**: pagination offset (default 0)
     """
     adapter = SqlAlchemyPlayersAdapter(connection)
-    return get_player_stats(adapter, mapid, sideid, limit, offset)
+    return get_raw_stats(adapter, mapid, sideid, limit, offset)
 
 
-@router.get("/stats/{outcome}", response_model=list[PlayerStatRow], summary="Player stats by outcome")
+@router.get("/stats/raw/{outcome}", response_model=list[PlayerStatRow], summary="Player stats by outcome")
 async def list_player_stats_by_outcome(
     outcome: Literal["win", "lose"],
     mapid: Optional[int] = Query(0, description="Map ID. 0 for overall match stats."),
@@ -76,7 +76,7 @@ async def list_player_stats_by_outcome(
     - **offset**: pagination offset (default 0)
     """
     adapter = SqlAlchemyPlayersAdapter(connection)
-    return get_player_stats_by_outcome(adapter, outcome, None if mapid == -1 else mapid, limit, offset)
+    return get_raw_stats_by_outcome(adapter, outcome, None if mapid == -1 else mapid, limit, offset)
 
 
 @router.get("/{playerid}", response_model=PlayerDetail, summary="Player details")

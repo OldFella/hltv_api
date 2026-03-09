@@ -78,7 +78,7 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
             )
         )
 
-    def get_stats(
+    def get_raw_stats(
         self,
         mapid: int | None,
         sideid: int | None,
@@ -111,7 +111,7 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
             for r in rows
         ]
 
-    def get_stats_by_outcome(
+    def get_raw_stats_by_outcome(
         self,
         outcome: Literal["win", "lose"],
         mapid: int | None,

@@ -73,7 +73,7 @@ def get_player(
     return player
 
 
-def get_player_stats(
+def get_raw_stats(
     port: PlayersPort,
     mapid: int | None,
     sideid: int | None,
@@ -84,10 +84,10 @@ def get_player_stats(
     Return a paginated log of raw per-player per-match stat rows.
     Pass mapid=0 or sideid=0 for overall stats; None excludes the id=0 summary rows.
     """
-    return port.get_stats(mapid, sideid, limit, offset)
+    return port.get_raw_stats(mapid, sideid, limit, offset)
 
 
-def get_player_stats_by_outcome(
+def get_raw_stats_by_outcome(
     port: PlayersPort,
     outcome: Literal["win", "lose"],
     mapid: int | None,
@@ -98,7 +98,7 @@ def get_player_stats_by_outcome(
     Return a paginated log of raw stat rows filtered by match outcome.
     Outcome is derived at query time by comparing scores across teams.
     """
-    return port.get_stats_by_outcome(outcome, mapid, limit, offset)
+    return port.get_raw_stats_by_outcome(outcome, mapid, limit, offset)
 
 
 def get_player_grouped_stats(
