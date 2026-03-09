@@ -337,7 +337,7 @@
 .lb-header,
 .leaderboard-row {
     display: grid;
-    grid-template-columns: 28px minmax(80px, 1fr) 36px 48px 48px 52px 52px 90px;
+    grid-template-columns: 28px minmax(80px, 1fr) 36px 48px 56px 48px 52px 90px;
     align-items: center;
     gap: 16px;
     padding: 7px 10px;
@@ -346,6 +346,7 @@
 .lb-header {
     font-family: var(--font-mono);
     font-size: 0.9rem;
+    min-height: 38px;
     color: var(--muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
