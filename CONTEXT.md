@@ -8,7 +8,7 @@
 
 ## Architecture
 
-- **Repository pattern** — routers never touch the DB directly; all queries live in `src/repositories/`
+- **Ports & adapters** — routers depend on ports (Protocols); SQLAlchemy adapters implement them; all queries live in `src/adapters/`
 - **Read-only** — GET endpoints only, no mutations
 - **Hybrid app** — JSON API (`routers_api.py`) + SSR frontend (`routers_fe.py` / `frontend.py`)
 - **Fuzzy search** — powered by pg_trgm `similarity()` via `add_fuzzy_filter()`; used on `name` fields across teams, players
@@ -45,25 +45,67 @@
 | `GET /players/{playerid}` | `start_date`, `end_date` (default: last 3 months) | aggregated stats + current team |
 | `GET /players/{playerid}/stats/{group}` | `group`: `maps`\|`sides`\|`events`, `mapid`, `start_date`, `end_date` | `mapid` only applies for `sides`/`events` |
 
-### Rankings `src/routers/rankings.py`
+### Reference Data `src/routers/reference_data.py` *(migrated)*
 | Endpoint | Params | Notes |
 |---|---|---|
-| `GET /rankings/` | — | most recent VRS snapshot; returns `date` + ordered list of `{id, name, rank, points}` |
-
-### Counts `src/routers/counts.py` *(new)*
-| Endpoint | Params | Notes |
-|---|---|---|
+| `GET /sides/` | — | |
+| `GET /sides/{sideid}` | — | |
+| `GET /maps/` | — | |
+| `GET /maps/{mapid}` | — | |
+| `GET /fantasy/` | — | |
+| `GET /fantasy/{fantasyid}` | — | includes teams, players, costs (salary cap $1,000) |
+| `GET /rankings/` | `date` (optional) | defaults to most recent snapshot; returns `date` + ordered list of `{id, name, rank, points}` |
 | `GET /counts/` | — | returns `{players, teams, matches}` as distinct counts from DB; used by homepage hero stats |
-
-### Other
-- `GET /fantasy/`, `GET /fantasy/{fantasyid}` — fantasy details with teams, players, costs (salary cap $1,000)
-- `GET /maps/`, `GET /maps/{id}`
-- `GET /sides/`, `GET /sides/{id}`
-- `GET /download/`, `GET /spreadsheets/`, `GET /goat/`
 
 ---
 
-## Response Models `src/db/models.py`
+## Ports & Adapters `src/domain/`
+
+### Domain Models `src/domain/models.py`
+| Model | Shape |
+|---|---|
+| `Item` | `{id, name}` |
+| `Side(Item)` | `{id, name}` |
+| `Map(Item)` | `{id, name}` |
+| `TeamRank(Item)` | `{id, name, rank, points}` |
+| `Ranking` | `{date, rankings: list[TeamRank]}` |
+| `FantasyPlayer(Item)` | `{id, name, cost}` |
+| `FantasyTeam(Item)` | `{id, name, players: list[FantasyPlayer]}` |
+| `Fantasy(Item)` | `{id, name, salary_cap, currency, teams: list[FantasyTeam]}` |
+| `CountResponse` | `{players, teams, matches}` |
+
+### Ports `src/domain/ports.py`
+| Port | Methods |
+|---|---|
+| `ReadPort[T]` | `get_all() -> list[T]`, `get_one(id) -> T \| None` |
+| `RankingsPort` | `get_rankings(date) -> Ranking \| None` |
+| `CountsPort` | `get_counts() -> CountResponse` |
+
+### Errors `src/domain/errors.py`
+- `DomainError` — base exception
+- `NotFoundError(DomainError)` — raised by use cases when adapter returns `None`; mapped to HTTP 404 in `main.py`
+
+### Use Cases `src/domain/use_cases/reference_data.py`
+| Function | Signature |
+|---|---|
+| `get_all` | `(port: ReadPort[T]) -> list[T]` |
+| `get_one` | `(port: ReadPort[T], id: int, label: str = "Item") -> T` |
+| `get_rankings` | `(port: RankingsPort, date: date \| None = None) -> Ranking` |
+| `get_counts` | `(port: CountsPort) -> CountResponse` |
+
+---
+
+## Adapters `src/adapters/sqlalchemy_reference_data.py`
+| Adapter | Implements | Notes |
+|---|---|---|
+| `SqlAlchemyReadAdapter` | `ReadPort[T]` | generic; configured with `table`, `id_col`, `name_col`, `model` at instantiation |
+| `SqlAlchemyRankingsAdapter` | `RankingsPort` | derives rank via `RANK() OVER (ORDER BY points DESC)`; defaults to `max(date)` when no date passed |
+| `SqlAlchemyFantasyAdapter` | `ReadPort[Fantasy]` | `get_all` uses `query_all` helper; `get_one` runs two queries + groups players by team |
+| `SqlAlchemyCountsAdapter` | `CountsPort` | three count queries; returns `CountResponse` |
+
+---
+
+## Response Models `src/db/models.py` *(legacy — used by unmigrated endpoints)*
 
 | Model | Shape |
 |---|---|
@@ -78,7 +120,7 @@
 
 ---
 
-## Repositories
+## Repositories *(legacy — used by unmigrated endpoints)*
 
 ### `src/repositories/base.py`
 - `execute_query(stmt, *, many=True)` — runs statement, raises **HTTP 404** if no rows; pass `many=False` to get single mapping
@@ -157,11 +199,13 @@ Every route passes `current_page` string to templates for active nav highlightin
 ## Key Files
 | Path | Purpose |
 |---|---|
-| `src/main.py` | FastAPI app entry point |
+| `src/main.py` | FastAPI app entry point; registers `NotFoundError` → 404 exception handler |
 | `src/frontend.py` | Jinja2 SSR routes |
 | `src/core/config.py` | App settings from `.env` |
 | `src/db/session.py` | SQLAlchemy engine setup |
+| `src/db/get_db.py` | `get_db` — yields `Connection` per request via `Depends` |
 | `src/config/active_maps.py` | `ACTIVE_MAPS: dict[int, str]` — map_id → name |
+| `src/config/fantasy.py` | `SALARY_CAP`, `CURRENCY` constants |
 | `src/config/routers_api.py` | API router registration |
 | `src/config/routers_fe.py` | Frontend router registration |
 

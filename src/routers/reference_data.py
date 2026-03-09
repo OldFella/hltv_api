@@ -66,7 +66,7 @@ def list_rankings(date:date|None= None, connection: Connection = Depends(get_db)
 counts_router = APIRouter(prefix = '/counts',
                    tags = ['counts'])
 
-@counts_router.get("/", response_model=CountResponse, summary="Get Most Recent VRS Ranking")
+@counts_router.get("/", response_model=CountResponse, summary="Record Counts")
 def list_counts(connection: Connection = Depends(get_db)) -> CountResponse:
     adapter = SqlAlchemyCountsAdapter(connection)
     return get_counts(adapter)
