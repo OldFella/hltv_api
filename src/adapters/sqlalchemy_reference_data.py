@@ -54,11 +54,17 @@ class SqlAlchemyReadAdapter(ReadPort):
             return None
         return self.model(id = id, name = row[0]['name'])
 
+class SqlAlchemySideAdapter(SqlAlchemyReadAdapter):
+    pass
+
+class SqlAlchemyMapAdapter(SqlAlchemyReadAdapter):
+    pass
+
 def get_side_adapter(conn: Connection):
-    return SqlAlchemyReadAdapter(conn, sides, sides.sideid, sides.name, Item)
+    return SqlAlchemySideAdapter(conn, sides, sides.sideid, sides.name, Item)
 
 def get_map_adapter(conn: Connection):
-    return SqlAlchemyReadAdapter(conn, maps, maps.mapid, maps.name, Item)
+    return SqlAlchemyMapAdapter(conn, maps, maps.mapid, maps.name, Item)
 
 
 @dataclass
