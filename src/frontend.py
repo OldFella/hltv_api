@@ -36,6 +36,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 static_dir = os.getenv("STATIC_DIR", "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
     return templates.TemplateResponse(

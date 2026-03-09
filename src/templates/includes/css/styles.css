@@ -351,6 +351,7 @@ header .wrap::after {
 .cards-container {
     display: flex;
     gap: 16px;
+    padding:8px;
     flex-wrap: nowrap;
     align-items: stretch;
 }
@@ -498,6 +499,195 @@ header .wrap::after {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     display: block;
+}
+
+
+.hero--enhanced {
+  padding: 40px 32px 36px;
+  /* Stronger radial glow top-left */
+  background-image:
+    radial-gradient(ellipse 55% 70% at -5% 0%, rgba(var(--accent-rgb), 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 105% 100%, rgba(var(--accent-rgb), 0.04) 0%, transparent 60%);
+}
+
+/* Corner bracket decorations */
+.hero-corner-tl,
+.hero-corner-br {
+  position: absolute;
+  width: 16px; height: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+.hero-corner-tl {
+  top: 8px; left: 8px;
+  border-top: 2px solid var(--accent);
+  border-left: 2px solid var(--accent);
+  opacity: 0.5;
+}
+.hero-corner-br {
+  bottom: 8px; right: 8px;
+  border-bottom: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+  opacity: 0.5;
+}
+
+/* Two-column layout */
+.hero-body {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-left  { flex: 1; min-width: 0; }
+.hero-right { flex-shrink: 0; width: 360px; }
+
+/* Title accent color */
+.hero-title-accent { color: var(--accent); }
+
+/* Feature pills */
+.hero-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0 20px;
+}
+
+.hero-feature {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.hero-feature:hover {
+  color: var(--text);
+  border-color: var(--border-bright);
+}
+
+.hero-feature--active {
+  color: var(--win);
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+/* Stats row — override existing to add top border spacing */
+.hero--enhanced .hero-stats {
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+/* CTA row */
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+/* ── Endpoint preview card ── */
+.hero-endpoint-card {
+  background: var(--chrome);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  /* Subtle gold top accent */
+  border-top: 2px solid var(--accent);
+}
+
+.hero-endpoint-header {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.hero-endpoint-badge {
+  background: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+}
+
+.hero-endpoint-host { color: var(--text); font-size: 0.8rem; }
+
+.hero-endpoint-status {
+  margin-left: auto;
+  color: var(--win);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  animation: pulse-live 1.5s ease-in-out infinite;
+}
+
+.hero-endpoint-body { padding: 4px 0; }
+
+.hero-endpoint-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.hero-endpoint-row:last-child { border-bottom: none; }
+.hero-endpoint-row:hover { background: var(--surface); }
+
+.ep-method {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  min-width: 30px;
+  padding-top: 1px;
+}
+
+.ep-info { display: flex; flex-direction: column; gap: 2px; }
+
+.ep-path {
+  color: var(--text);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
+.ep-desc {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.hero-endpoint-footer {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 9px 16px;
+  display: flex;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 800px) {
+  .hero-right { display: none; }
+  .hero-body  { flex-direction: column; }
 }
 
 /* ===== INFO BOX ===== */

@@ -114,3 +114,60 @@ fetch("https://api.csapi.de/matches/latest")
         console.error("Failed to fetch results:", err);
         document.getElementById("results").textContent = "Could not load results.";
     });
+
+const ratingColor = (rating) => {
+    if (rating >= 1.3) return 'var(--win)';        // green
+    if (rating >= 1.15) return 'var(--accent)';    // gold
+    if (rating >= 1.0) return 'var(--warning)';    // orange
+    return 'var(--danger)';                         // red
+};
+
+
+const createLeaderboardRow = (p) => {
+    const row = document.createElement("div");
+    row.className = `leaderboard-row ${p.rank <= 3 ? 'top3' : ''}`;
+    const color = ratingColor(p.rating);
+    const barPct = Math.min(100, Math.max(0, ((p.rating - 0.8) / 0.7) * 100)).toFixed(1);
+    const kd = p.d > 0 ? (p.k / p.d).toFixed(2) : p.k.toFixed(2);
+    row.innerHTML = `
+        <div class="lb-rank">${p.rank}</div>
+        <div class="lb-name">${p.name}</div>
+        <div class="lb-maps">${p.N}</div>
+        <div class="lb-stat">${kd}</div>
+        <div class="lb-stat">${p.adr.toFixed(1)}</div>
+        <div class="lb-stat">${p.kast.toFixed(2)}%</div>
+        <div class="lb-rating-wrap">
+            <div class="lb-rating-bar">
+                <div class="lb-rating-fill" style="width:${barPct}%; background:${color}"></div>
+            </div>
+            <span class="lb-rating-val" style="color:${color}">${p.rating.toFixed(2)}</span>
+        </div>
+    `;
+    return row;
+};
+
+fetch("https://api.csapi.de/players/stats?limit=10")
+    .then(r => r.json())
+    .then(data => {
+        const el = document.getElementById("leaderboard");
+        if (!data || !data.length) {
+            el.textContent = "No data available.";
+            return;
+        }
+        el.innerHTML = `
+            <div class="lb-header">
+                <span>#</span>
+                <span>Player</span>
+                <span>Maps</span>
+                <span>K/D</span>
+                <span>ADR</span>
+                <span>KAST%</span>
+                <span>Rating</span>
+            </div>
+        `;
+        el.classList.remove("loading-text");
+        data.forEach(p => el.appendChild(createLeaderboardRow(p)));
+    })
+    .catch(() => {
+        document.getElementById("leaderboard").textContent = "Could not load leaderboard.";
+    });
