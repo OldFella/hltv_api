@@ -32,6 +32,7 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 
 ### Rankings
 - Get the most recent Valve Regional Standings (VRS) ranking with team points
+- Optionally filter by date to retrieve historical snapshots
 
 ### Fantasy
 - Get all available fantasies
@@ -39,8 +40,8 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 - Salary cap: $1,000 (costs expressed in units of $1,000)
 
 ### Maps & Sides
-- Get all maps
-- Get all sides
+- Get all maps and sides
+- Look up a specific map or side by ID
 
 ### Counts
 - Get distinct counts of players, teams, and matches in the database
@@ -65,11 +66,23 @@ Built in Python, this API provides structured endpoints for accessing HLTV.org�
 - **Reverse Proxy:** Nginx
 - **Database:** PostgreSQL
 - **ORM:** SQLAlchemy
+- **Architecture:** Ports & Adapters (Hexagonal)
 - **Data Source:** HLTV.org
 - **API Style:** REST
 - **Response Format:** JSON
 - **Deployment:** Self-hosted (Linux server + Docker)
 - **Version Control:** Git + GitHub
+
+---
+
+## 🏗️ Architecture
+
+This project follows a **ports & adapters** (hexagonal) architecture:
+
+- **Domain** (`src/domain/`) — models, ports (Protocols), use cases, and errors; no framework dependencies
+- **Adapters** (`src/adapters/`) — SQLAlchemy implementations of domain ports
+- **Routers** (`src/routers/`) — FastAPI route handlers; depend only on ports, never on DB directly
+- **Error handling** — domain exceptions (`NotFoundError`) are raised in use cases and mapped to HTTP responses once in `main.py`
 
 ---
 
@@ -129,7 +142,7 @@ By default, the local API will be available at http://localhost:8000
 ### Rankings
 | Endpoint | Params | Description |
 |---|---|---|
-| `GET /rankings/` | — | Get most recent VRS ranking with team points |
+| `GET /rankings/` | `date` (optional) | Get VRS ranking; defaults to most recent snapshot |
 
 ### Counts
 | Endpoint | Params | Description |
@@ -291,6 +304,11 @@ curl https://api.csapi.de/teams/9565/stats
 #### Get current VRS rankings
 ```sh
 curl https://api.csapi.de/rankings/
+```
+
+#### Get VRS rankings for a specific date
+```sh
+curl "https://api.csapi.de/rankings/?date=2026-03-01"
 ```
 
 #### Get paginated matches
