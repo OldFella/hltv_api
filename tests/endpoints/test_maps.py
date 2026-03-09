@@ -19,7 +19,7 @@ class TestMapsEndpoints:
     @pytest.mark.asyncio
     async def test_map_by_id(self, client: AsyncClient):
         maps = (await client.get("/maps/")).json()
-        if maps == None:
+        if not maps:
             pytest.skip("No maps in DB")
         r = await client.get(f"/maps/{maps[0]['id']}")
         assert r.status_code == 200
