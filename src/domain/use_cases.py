@@ -5,6 +5,7 @@ from src.domain.models import (
     Ranking, Item, CountResponse,
     PlayerDetail, PlayerStatRow,
     PlayerGroupedStats,
+    PlayerAggregatedStats,
 )
 from datetime import date
 
@@ -117,3 +118,13 @@ def get_player_grouped_stats(
     if not result:
         raise NotFoundError(f"Player {playerid}")
     return result
+
+def get_aggregated_stats(
+    port: PlayersPort,
+    mapid: int | None,
+    sideid: int | None,
+    limit: int,
+    offset: int,
+    min_played: int,
+) -> list[PlayerAggregatedStats]:
+    return port.get_aggregated_stats(mapid, sideid, limit, offset, min_played)

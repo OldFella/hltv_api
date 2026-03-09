@@ -81,3 +81,14 @@ class PlayerGroupedStats:
     kast: float
     rating: float
     N: int
+
+@dataclass
+class PlayerAggregatedStats(Item):
+    rank: int
+    k: int
+    d: int
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+    N: int

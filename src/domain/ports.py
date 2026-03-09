@@ -2,7 +2,8 @@ from typing import Protocol, TypeVar, Literal
 from src.domain.models import (
     Ranking, CountResponse,
     PlayerDetail, PlayerStatRow,
-    PlayerGroupedStats, Item
+    PlayerGroupedStats, Item,
+    PlayerAggregatedStats
 
 )
 from datetime import date
@@ -39,6 +40,15 @@ class PlayersPort(Protocol):
         start_date: date,
         end_date: date,
     ) -> PlayerDetail | None: ...
+
+    def get_aggregated_stats(
+        self,
+        mapid: int | None,
+        sideid: int | None,
+        limit: int,
+        offset: int,
+        min_played: int,
+    ) -> list[PlayerAggregatedStats]: ...
 
     def get_raw_stats(
         self,

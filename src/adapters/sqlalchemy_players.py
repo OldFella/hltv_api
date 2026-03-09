@@ -10,6 +10,7 @@ from src.domain.ports import PlayersPort
 from src.domain.models import (
     Item, PlayerDetail, PlayerStats,
     PlayerStatRow, PlayerGroupedStats,
+    PlayerAggregatedStats
 )
 from src.db.classes import (
     players, matches, sides, maps,
@@ -77,6 +78,45 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
                 N=row['n'],
             )
         )
+    
+    def get_aggregated_stats(
+        self,
+        mapid: int | None,
+        sideid: int | None,
+        limit: int,
+        offset: int,
+        min_played: int,
+    ) -> list[PlayerAggregatedStats]:
+
+        ps = aliased(player_stats)
+        stmnt = query_player_stats(
+            mapid=mapid,
+            sideid=sideid,
+            group_by=['players'],
+            ps = ps,
+            sum_fields=['k', 'd'],
+        )
+        stmnt = stmnt.having(func.count() >= min_played)
+        subq = stmnt.subquery()
+        final = select(subq, func.rank().over(order_by=subq.c.rating.desc()).label('rank')).limit(limit).offset(offset)
+
+        rows = self.conn.execute(final).mappings().all()
+
+        return [
+            PlayerAggregatedStats(
+                rank=r['rank'],
+                id=r['player_id'],
+                name=r['player_name'],
+                k=int(r['k']),
+                d=int(r['d']),
+                swing=float(round(r['roundswing'], 3)),
+                adr=float(round(r['adr'], 3)),
+                kast=float(round(r['kast'], 3)),
+                rating=float(round(r['rating'], 3)),
+                N=r['n'],
+            )
+            for i, r in enumerate(rows)
+        ]
 
     def get_raw_stats(
         self,
@@ -227,6 +267,7 @@ def query_player_stats(
     group_by=None,
     include_teams=False,
     ps=None,
+    sum_fields: list[str] | None = None,
 ):
     """
     Flexible player stats query builder.
@@ -266,6 +307,7 @@ def query_player_stats(
         group_bys += [ps.playerid, players.name]
 
     group_mapping = {
+        'players': ([], [ps.playerid, players.name]),
         'maps': ([ps.mapid.label('map_id'), maps.name.label('map_name')], [ps.mapid, maps.name]),
         'sides': ([ps.sideid.label('side_id'), sides.name.label('side_name')], [ps.sideid, sides.name]),
         'events': ([match_overview.event.label('events')], [match_overview.event]),
@@ -281,9 +323,14 @@ def query_player_stats(
     is_aggregating = len(group_bys) > 0
 
     stat_cols = [
-        func.coalesce(func.avg(getattr(ps, col)), 0).label(col) if is_aggregating
-        else getattr(ps, col).label(col)
-        for col in FIELDS.values()
+        (
+            func.coalesce(func.sum(getattr(ps, col)), 0).label(col)
+            if is_aggregating and sum_fields and key in sum_fields
+            else func.coalesce(func.avg(getattr(ps, col)), 0).label(col)
+            if is_aggregating
+            else getattr(ps, col).label(col)
+        )
+        for key, col in FIELDS.items()
     ]
 
     count_col = func.count().label('n') if is_aggregating else literal(1).label('n')
@@ -298,6 +345,8 @@ def query_player_stats(
 
     if include_teams:
         selects += [ps.teamid.label('team_id'), teams.name.label('team_name')]
+        if is_aggregating:
+            group_bys += [ps.teamid, teams.name]
 
     stmnt = (
         select(*selects)
