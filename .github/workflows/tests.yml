@@ -51,4 +51,4 @@ jobs:
             -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 
       - name: Run tests
-        run: pytest -v
+        run: pytest -s -v
