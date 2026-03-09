@@ -14,9 +14,9 @@ class TestAPIContract:
         "/matches/latest",
         "/teams/",
         "/players/",
-        "/players/stats",
-        "/players/stats/win",
-        "/players/stats/lose",
+        "/players/stats/raw",
+        "/players/stats/raw/win",
+        "/players/stats/raw/lose",
         "/fantasy/",
         "/rankings/",
     ])

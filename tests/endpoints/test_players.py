@@ -25,7 +25,7 @@ class TestPlayersEndpoints:
 
     @pytest.mark.asyncio
     async def test_player_stats_default(self, client: AsyncClient):
-        r = await client.get("/players/stats")
+        r = await client.get("/players/stats/raw")
         assert r.status_code == 200
         data = r.json()
         assert isinstance(data, list)
@@ -54,7 +54,7 @@ class TestPlayersEndpoints:
     @pytest.mark.asyncio
     async def test_player_stats_overall(self, client: AsyncClient):
         """sideid=0 and mapid=0 should return overall stats (the defaults)."""
-        r = await client.get("/players/stats", params={"mapid": 0, "sideid": 0})
+        r = await client.get("/players/stats/raw", params={"mapid": 0, "sideid": 0})
         assert r.status_code == 200
 
     @pytest.mark.asyncio
