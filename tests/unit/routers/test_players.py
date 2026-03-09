@@ -94,7 +94,6 @@ class TestGetPlayerAggregatedStats:
     def test_returns_correct_shape(self):
         with patch("src.routers.players.get_aggregated_stats", return_value=[MOCK_AGGREGATED_STATS]):
             data = client.get("/players/stats").json()[0]
-            print(data)
             assert all(k in data for k in ["rank", "id", "name", "k", "d", "rating", 'N'])
 
     def test_mapid_filter(self):
@@ -175,7 +174,6 @@ class TestGetPlayer:
     def test_returns_correct_shape(self):
         with patch("src.routers.players.get_player", return_value=MOCK_PLAYER_DETAIL):
             data = client.get("/players/1").json()
-            print(data)
             assert all(k in data for k in ["id", "name", "team", "stats"])
             assert all(k in data["stats"] for k in ["k", "d", "swing", "adr", "kast", "rating", "N"])
 
