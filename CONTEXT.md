@@ -13,7 +13,7 @@
 - **Hybrid app** — JSON API (`routers_api.py`) + SSR frontend (`routers_fe.py` / `frontend.py`)
 - **Fuzzy search** — powered by pg_trgm `similarity()` via `add_fuzzy_filter()`; used on `name` fields across teams, players
 - **Stat rows** — the DB stores stats at multiple granularities controlled by `mapid` and `sideid`: `id=0` means "overall/both"; non-zero means a specific map or side. Query builders default `mapid=None` / `sideid=None` to **exclude** the `id=0` summary rows (filter `!= 0`)
-- **Outcome join** — win/loss is not stored directly; it is derived at query time by self-joining `matches` on `matchid` where `teamid != teamid` and comparing scores (`build_outcome_query`)
+- **Outcome join** — win/loss is not stored directly; it is derived at query time by self-joining `matches` on `matchid` where `teamid != teamid` and comparing scores (`query_outcomes`)
 - **Active maps** — `ACTIVE_MAPS` (config) is materialised as a VALUES subquery in team stats so every active map always appears in results even with zero matches
 
 ---
@@ -36,12 +36,13 @@
 | `GET /matches/{matchid}` | — | includes per-map scores + derived `best_of` and `winner` |
 | `GET /matches/{matchid}/stats` | `by_map=false` | player stats for both teams; `by_map=true` splits by map |
 
-### Players `src/routers/players.py`
+### Players `src/routers/players.py` *(migrated)*
 | Endpoint | Params | Notes |
 |---|---|---|
 | `GET /players/` | `name` (fuzzy), `limit=20`, `offset=0` | |
-| `GET /players/stats` | `mapid=0`, `sideid=0`, `limit=20`, `offset=0` | raw per-player-per-match rows |
-| `GET /players/stats/{outcome}` | `outcome`: `win`\|`lose`, `mapid`, `limit=100`, `offset=0` | filters via outcome subquery |
+| `GET /players/stats` | `mapid=0`, `sideid=0`, `limit=20`, `offset=0`, `min_played=10` | aggregated stats ranked by composite score of rating and experience |
+| `GET /players/stats/raw` | `mapid=0`, `sideid=0`, `limit=20`, `offset=0` | raw per-player-per-match rows |
+| `GET /players/stats/raw/{outcome}` | `outcome`: `win`\|`lose`, `mapid`, `limit=100`, `offset=0` | filters via outcome subquery |
 | `GET /players/{playerid}` | `start_date`, `end_date` (default: last 3 months) | aggregated stats + current team |
 | `GET /players/{playerid}/stats/{group}` | `group`: `maps`\|`sides`\|`events`, `mapid`, `start_date`, `end_date` | `mapid` only applies for `sides`/`events` |
 
@@ -73,6 +74,11 @@
 | `FantasyTeam(Item)` | `{id, name, players: list[FantasyPlayer]}` |
 | `Fantasy(Item)` | `{id, name, salary_cap, currency, teams: list[FantasyTeam]}` |
 | `CountResponse` | `{players, teams, matches}` |
+| `PlayerStatRow(Item)` | `{id, name, team_id, team_name, k, d, swing, adr, kast, rating, N}` |
+| `PlayerStats` | `{k, d, swing, adr, kast, rating, N}` |
+| `PlayerDetail(Item)` | `{id, name, team: Item, stats: PlayerStats}` |
+| `PlayerGroupedStats` | `{id, name, k, d, swing, adr, kast, rating, N}` |
+| `PlayerAggregatedStats(Item)` | `{id, name, rank, k, d, swing, adr, kast, rating, N}` |
 
 ### Ports `src/domain/ports.py`
 | Port | Methods |
@@ -80,28 +86,57 @@
 | `ReadPort[T]` | `get_all() -> list[T]`, `get_one(id) -> T \| None` |
 | `RankingsPort` | `get_rankings(date) -> Ranking \| None` |
 | `CountsPort` | `get_counts() -> CountResponse` |
+| `TeamsPort` | `get_all()`, `get_one(id)`, `get_matchhistory()`, `get_stats()` |
+| `PlayersPort` | `get_all_fuzzy(name, limit, offset)`, `get_one(playerid, start_date, end_date)`, `get_stats(mapid, sideid, limit, offset)`, `get_stats_by_outcome(outcome, mapid, limit, offset)`, `get_grouped_stats(playerid, group, mapid, start_date, end_date)`, `get_aggregated_stats(mapid, sideid, limit, offset, min_played)` |
 
 ### Errors `src/domain/errors.py`
 - `DomainError` — base exception
 - `NotFoundError(DomainError)` — raised by use cases when adapter returns `None`; mapped to HTTP 404 in `main.py`
 
-### Use Cases `src/domain/use_cases/reference_data.py`
+### Use Cases `src/domain/use_cases.py`
 | Function | Signature |
 |---|---|
 | `get_all` | `(port: ReadPort[T]) -> list[T]` |
-| `get_one` | `(port: ReadPort[T], id: int, label: str = "Item") -> T` |
+| `get_one` | `(port: ReadPort[T], id: int, label: str) -> T` |
 | `get_rankings` | `(port: RankingsPort, date: date \| None = None) -> Ranking` |
 | `get_counts` | `(port: CountsPort) -> CountResponse` |
+| `get_all_fuzzy` | `(port: PlayersPort, name, limit, offset) -> list[Item]` |
+| `get_player` | `(port: PlayersPort, playerid, start_date, end_date) -> PlayerDetail` |
+| `get_player_stats` | `(port: PlayersPort, mapid, sideid, limit, offset) -> list[PlayerStatRow]` — calls `port.get_raw_stats` |
+| `get_player_stats_by_outcome` | `(port: PlayersPort, outcome, mapid, limit, offset) -> list[PlayerStatRow]` — calls `port.get_raw_stats_by_outcome` |
+| `get_player_grouped_stats` | `(port: PlayersPort, playerid, group, mapid, start_date, end_date) -> list[PlayerGroupedStats]` |
+| `get_aggregated_stats` | `(port: PlayersPort, mapid, sideid, limit, offset, min_played) -> list[PlayerAggregatedStats]` |
 
 ---
 
-## Adapters `src/adapters/sqlalchemy_reference_data.py`
+## Adapters
+
+### `src/adapters/sqlalchemy_reference_data.py`
 | Adapter | Implements | Notes |
 |---|---|---|
 | `SqlAlchemyReadAdapter` | `ReadPort[T]` | generic; configured with `table`, `id_col`, `name_col`, `model` at instantiation |
 | `SqlAlchemyRankingsAdapter` | `RankingsPort` | derives rank via `RANK() OVER (ORDER BY points DESC)`; defaults to `max(date)` when no date passed |
 | `SqlAlchemyFantasyAdapter` | `ReadPort[Fantasy]` | `get_all` uses `query_all` helper; `get_one` runs two queries + groups players by team |
 | `SqlAlchemyCountsAdapter` | `CountsPort` | three count queries; returns `CountResponse` |
+
+### `src/adapters/sqlalchemy_players.py`
+| Adapter | Implements | Notes |
+|---|---|---|
+| `SqlAlchemyPlayersAdapter` | `PlayersPort` | all query builders live in this file; no imports from `repositories/` |
+
+#### Query Builders `src/adapters/sqlalchemy_players.py`
+| Function | Notes |
+|---|---|
+| `query_current_team(playerid)` | resolves team from player's most recent match |
+| `query_player_stats(...)` | flexible builder; aggregates with `avg()`/`sum()` when `group_by` set; `sum_fields` overrides specific cols to use `SUM`; `mapid=None`/`sideid=None` excludes id=0 rows |
+| `query_outcomes()` | self-joins `matches` aliased `m1`/`m2`; labels each `(matchid, mapid, teamid)` as `win=1` or `win=0`; filters to `sideid=0` |
+| `query_player_stats_by_outcome(mode, mapid, sideid)` | wraps `query_player_stats` and joins `query_outcomes()` subquery |
+
+### `src/adapters/sqlalchemy_helpers.py`
+| Function | Notes |
+|---|---|
+| `add_fuzzy_filter(col, value, filters, order_bys, threshold=0.3)` | appends pg_trgm similarity filter + ordering when value is provided |
+| `query_all_fuzzy(conn, table, id_col, name_col, name, limit, offset)` | shared fuzzy name search helper used by players and teams adapters |
 
 ---
 
@@ -134,19 +169,15 @@
 - `format_match_stats(rows, by_map)` — reshapes flat player rows into `{team1: {players[]}, team2: {players[]}}` structure per map
 - `get_streak(match_history, teamid)` — returns positive int for win streak, negative for loss streak
 
-### `src/repositories/player_repository.py`
+### `src/repositories/player_repository.py` *(legacy — kept for reference until fully removed)*
 - `FIELDS` — API key → DB column: `k→k`, `d→d`, `swing→roundswing`, `adr→adr`, `kast→kast`, `rating→rating`
 - `GROUP_CONFIG` — maps format mode to id/name field names: `players`, `players_w_teams`, `maps`, `sides`, `events`
 - `default_date_range()` — returns `(today - 3 months, today)`
 - `format_stats(rows, group)` — rounds stats to 3dp, reshapes via `GROUP_CONFIG`, appends `maps_played` from `n`
 - `build_team_query(playerid)` — resolves current team from player's most recent match
-- `build_player_stats_query(playerid, mapid, sideid, matchid, event, start_date, end_date, group_by, include_teams, ps)`:
-  - when `group_by` is set → aggregates with `avg()`; otherwise returns raw per-row stats
-  - `mapid=None` → excludes `mapid=0` rows; `sideid=None` → excludes `sideid=0` rows
-  - `group_by` accepts list of `maps`, `sides`, `events`
-  - `include_teams=True` adds `team_id`/`team_name` to selects
-- `build_outcome_query()` — self-joins `matches` to label each `(matchid, mapid, teamid)` row as `win=1` or `win=0`; filters to `sideid=0`
-- `build_player_stats_query_outcome(mode, mapid, sideid)` — wraps `build_player_stats_query` and joins outcome subquery, filtering to `win=1` (win) or `win=0` (lose)
+- `build_player_stats_query(...)` — migrated to `query_player_stats` in `sqlalchemy_players.py`
+- `build_outcome_query()` — migrated to `query_outcomes` in `sqlalchemy_players.py`
+- `build_player_stats_query_outcome(...)` — migrated to `query_player_stats_by_outcome` in `sqlalchemy_players.py`
 
 ### `src/repositories/team_repository.py`
 - `build_team_stats_query(teamid, start_date, end_date)`:
