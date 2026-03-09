@@ -3,10 +3,7 @@ from src.routers import (
     matches,
     teams,
     goat,
-    players,
-    fantasy,
-    rankings,
-    counts
+    players
 )
 
 def include_routers(app):
@@ -16,9 +13,9 @@ def include_routers(app):
     app.include_router(teams.router)
     app.include_router(goat.router)
     app.include_router(players.router)
-    app.include_router(fantasy.router)
-    app.include_router(rankings.router)
-    app.include_router(counts.router)
+    app.include_router(reference_data.fantasy_router)
+    app.include_router(reference_data.rankings_router)
+    app.include_router(reference_data.counts_router)
 
 
 

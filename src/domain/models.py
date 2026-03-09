@@ -6,22 +6,36 @@ class Item:
     id: int
     name: str
 
-# --- Sides ---
-@dataclass
-class Side(Item):
-    ...
-
-# --- Maps ---
-@dataclass
-class Map(Item):
-    ...
-
 @dataclass()
 class TeamRank(Item):
     rank: int
     points: int
 
+# --- Rankings ---
 @dataclass
 class Ranking:
     date: date    
     rankings: list[TeamRank]
+
+# --- Fantasy ---
+
+@dataclass
+class FantasyPlayer(Item):
+    cost: int
+
+@dataclass
+class FantasyTeam(Item):
+    players: list[FantasyPlayer]
+
+@dataclass
+class Fantasy(Item):
+    salary_cap: int
+    currency: str
+    teams: list[FantasyTeam]
+
+@dataclass
+class CountResponse:
+    players: int
+    teams: int
+    matches: int
+
