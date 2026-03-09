@@ -27,40 +27,40 @@ class TeamsPort(Protocol):
 
 class PlayersPort(Protocol):
     def get_all_fuzzy(
-        self, 
-        name: str | None, 
-        limit: int, 
+        self,
+        name: str | None,
+        limit: int,
         offset: int,
     ) -> list[Item]: ...
 
     def get_one(
-        self, 
-        playerid: int, 
-        start_date: date, 
-        end_date:date,
-    ) -> PlayerDetail: ...
-
-    def get_player_stats(
-        self, 
-        mapid: int | None, 
-        sideid: int | None, 
-        limit: int, 
-        offset: int,
-    ) -> list[PlayerStatRow]: ...
-
-    def get_player_stats_by_outcome(
-        self, 
-        outcome: Literal["win", "lose"], 
-        mapid: int | None, 
-        limit: int, 
-        offset: int,
-    ) -> list[PlayerStatRow]: ...
-
-    def get_player_grouped_stats(
         self,
-        playerid:int, 
-        group: Literal["maps", "sides", "events"], 
-        mapid: int | None, 
-        start_date:date, 
-        end_date:date,
-    )-> list[PlayerGroupedStats]: ...
+        playerid: int,
+        start_date: date,
+        end_date: date,
+    ) -> PlayerDetail | None: ...
+
+    def get_stats(
+        self,
+        mapid: int | None,
+        sideid: int | None,
+        limit: int,
+        offset: int,
+    ) -> list[PlayerStatRow]: ...
+
+    def get_stats_by_outcome(
+        self,
+        outcome: Literal["win", "lose"],
+        mapid: int | None,
+        limit: int,
+        offset: int,
+    ) -> list[PlayerStatRow]: ...
+
+    def get_grouped_stats(
+        self,
+        playerid: int,
+        group: Literal["maps", "sides", "events"],
+        mapid: int | None,
+        start_date: date,
+        end_date: date,
+    ) -> list[PlayerGroupedStats]: ...

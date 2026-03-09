@@ -26,27 +26,33 @@ FIELDS: dict[str, str] = {
     "rating": "rating",
 }
 
+
 @dataclass
 class SqlAlchemyPlayersAdapter(PlayersPort):
+    """SQLAlchemy implementation of PlayersPort."""
+
     conn: Connection
 
     def get_all_fuzzy(
-        self, 
-        name: str | None, 
-        limit: int, 
+        self,
+        name: str | None,
+        limit: int,
         offset: int,
     ) -> list[Item]:
-
+        """Return a paginated list of players, optionally filtered by fuzzy name match."""
         return query_all_fuzzy(self.conn, players, players.playerid, players.name, name, limit, offset)
 
     def get_one(
-        self, 
-        playerid: int, 
-        start_date: date, 
+        self,
+        playerid: int,
+        start_date: date,
         end_date: date,
     ) -> PlayerDetail | None:
-
-        stmnt_stats = build_player_stats_query(
+        """
+        Return aggregated stats and current team for a single player.
+        Returns None if the player has no stats in the given date range.
+        """
+        stmnt_stats = query_player_stats(
             playerid=playerid,
             sideid=0,
             start_date=start_date,
@@ -55,32 +61,32 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
         row = self.conn.execute(stmnt_stats).mappings().one_or_none()
         if row is None:
             return None
-        stmnt_team = build_team_query(playerid)
+        stmnt_team = query_current_team(playerid)
         team = self.conn.execute(stmnt_team).mappings().one_or_none()
         return PlayerDetail(
             id=row['player_id'],
             name=row['player_name'],
             team=Item(id=team['id'], name=team['name']),
             stats=PlayerStats(
-                k=round(row['k'], 3),
-                d=round(row['d'], 3),
-                swing=round(row['roundswing'], 3),
-                adr=round(row['adr'], 3),
-                kast=round(row['kast'], 3),
-                rating=round(row['rating'], 3),
+                k=float(round(row['k'], 3)),
+                d=float(round(row['d'], 3)),
+                swing=float(round(row['roundswing'], 3)),
+                adr=float(round(row['adr'], 3)),
+                kast=float(round(row['kast'], 3)),
+                rating=float(round(row['rating'], 3)),
                 N=row['n'],
             )
         )
 
-    def get_player_stats(
-        self, 
-        mapid: int | None, 
-        sideid: int | None, 
-        limit: int, 
+    def get_stats(
+        self,
+        mapid: int | None,
+        sideid: int | None,
+        limit: int,
         offset: int,
     ) -> list[PlayerStatRow]:
-
-        stmnt = build_player_stats_query(
+        """Return a paginated log of raw per-player per-match stat rows."""
+        stmnt = query_player_stats(
             mapid=mapid,
             sideid=sideid,
             include_teams=True,
@@ -105,15 +111,15 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
             for r in rows
         ]
 
-    def get_player_stats_by_outcome(
-        self, 
-        outcome: Literal["win", "lose"], 
-        mapid: int | None, 
-        limit: int, 
+    def get_stats_by_outcome(
+        self,
+        outcome: Literal["win", "lose"],
+        mapid: int | None,
+        limit: int,
         offset: int,
-    ) -> list[PlayerStatRow]: 
-
-        stmnt = build_player_stats_query_outcome(
+    ) -> list[PlayerStatRow]:
+        """Return a paginated log of raw stat rows filtered by match outcome (win or lose)."""
+        stmnt = query_player_stats_by_outcome(
             mode=outcome,
             mapid=mapid,
         ).limit(limit).offset(offset)
@@ -135,16 +141,19 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
             for r in rows
         ]
 
-    def get_player_grouped_stats(
+    def get_grouped_stats(
         self,
-        playerid:int, 
-        group: Literal["maps", "sides", "events"], 
-        mapid: int | None, 
-        start_date:date, 
-        end_date:date,
-    )-> list[PlayerGroupedStats] | None:
-
-        stmnt = build_player_stats_query(
+        playerid: int,
+        group: Literal["maps", "sides", "events"],
+        mapid: int | None,
+        start_date: date,
+        end_date: date,
+    ) -> list[PlayerGroupedStats] | None:
+        """
+        Return a player's stats aggregated by the given dimension.
+        Returns None if no rows are found.
+        """
+        stmnt = query_player_stats(
             playerid=playerid,
             mapid=mapid,
             sideid=None if group == 'sides' else 0,
@@ -174,9 +183,15 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
         ]
 
 
-# --- Query Builders ---
+# ---------------------------------------------------------------------------
+# Query Builders
+# ---------------------------------------------------------------------------
 
-def build_team_query(playerid: int):
+def query_current_team(playerid: int):
+    """
+    Return the team a player most recently appeared for.
+    Resolves via their latest match in match_overview.
+    """
     last_match_stmnt = (
         select(match_overview.matchid)
         .join(player_stats, player_stats.matchid == match_overview.matchid)
@@ -201,60 +216,59 @@ def build_team_query(playerid: int):
     return stmnt
 
 
-def build_player_stats_query(
-    playerid = None,
-    mapid = None,
-    sideid = None,
-    matchid = None,
-    event = None,
+def query_player_stats(
+    playerid=None,
+    mapid=None,
+    sideid=None,
+    matchid=None,
+    event=None,
     start_date=None,
     end_date=None,
-    group_by = None,
-    include_teams = False,
-    ps = None
-    ):
+    group_by=None,
+    include_teams=False,
+    ps=None,
+):
+    """
+    Flexible player stats query builder.
 
-    # --- Aliases ---
+    Aggregates with avg() when group_by is provided, otherwise returns raw rows.
+    - mapid=None excludes the id=0 overall rows (filters mapid != 0)
+    - sideid=None excludes the id=0 overall rows (filters sideid != 0)
+    - group_by accepts a list of: 'maps', 'sides', 'events'
+    - include_teams=True adds team_id and team_name to the select
+    """
     if ps is None:
         ps = aliased(player_stats)
 
-
-    # --- Filters ---
-
     filters = []
-    
-    # (value, column, fallback_filter_when_value_is_none)
+
     optional_filters = [
         (playerid, ps.playerid, None),
-        (mapid, ps.mapid, lambda col: col !=0),
-        (sideid, ps.sideid, lambda col: col !=0),
-        (matchid, ps.matchid, None)
-        ]
-    
+        (mapid, ps.mapid, lambda col: col != 0),
+        (sideid, ps.sideid, lambda col: col != 0),
+        (matchid, ps.matchid, None),
+    ]
+
     for value, column, default in optional_filters:
         if value is not None:
             filters.append(column == value)
         elif default:
             filters.append(default(column))
 
-    add_fuzzy_filter(match_overview.event, event, filters,order_bys := [])
-    
+    add_fuzzy_filter(match_overview.event, event, filters, order_bys := [])
+
     if start_date and end_date:
         filters += [match_overview.date >= start_date, match_overview.date <= end_date]
-    
-
-
-    # --- Group-by columns ---
 
     group_bys = []
 
     if playerid:
-        group_bys +=[ps.playerid, players.name]
+        group_bys += [ps.playerid, players.name]
 
     group_mapping = {
         'maps': ([ps.mapid.label('map_id'), maps.name.label('map_name')], [ps.mapid, maps.name]),
         'sides': ([ps.sideid.label('side_id'), sides.name.label('side_name')], [ps.sideid, sides.name]),
-        'events': ([match_overview.event.label('events')], [match_overview.event])
+        'events': ([match_overview.event.label('events')], [match_overview.event]),
     }
 
     extra_selects: list = []
@@ -264,9 +278,6 @@ def build_player_stats_query(
             extra_selects.extend(select_cols)
             group_bys.extend(gb_cols)
 
-    
-
-    # --- SELECT columns ---
     is_aggregating = len(group_bys) > 0
 
     stat_cols = [
@@ -277,35 +288,36 @@ def build_player_stats_query(
 
     count_col = func.count().label('n') if is_aggregating else literal(1).label('n')
 
-    selects =[
+    selects = [
         ps.playerid.label('player_id'),
         players.name.label('player_name'),
         *stat_cols,
         count_col,
-        *extra_selects
+        *extra_selects,
     ]
 
     if include_teams:
-        selects += [ps.teamid.label('team_id'),
-        teams.name.label('team_name')]
+        selects += [ps.teamid.label('team_id'), teams.name.label('team_name')]
 
-    
     stmnt = (
         select(*selects)
-            .join(players, players.playerid == ps.playerid)
-            .join(maps, maps.mapid == ps.mapid)
-            .join(sides, sides.sideid == ps.sideid)
-            .join(match_overview, match_overview.matchid == ps.matchid)
-            .join(teams, teams.teamid == ps.teamid)
-            .where(*filters)
-            .group_by(*group_bys)
+        .join(players, players.playerid == ps.playerid)
+        .join(maps, maps.mapid == ps.mapid)
+        .join(sides, sides.sideid == ps.sideid)
+        .join(match_overview, match_overview.matchid == ps.matchid)
+        .join(teams, teams.teamid == ps.teamid)
+        .where(*filters)
+        .group_by(*group_bys)
     )
 
     return stmnt
 
 
-def build_outcome_query():
-
+def query_outcomes():
+    """
+    Build a subquery labelling each (matchid, mapid, teamid) row as win=1 or lose=0.
+    Self-joins matches aliased as m1/m2 and compares scores. Filters to sideid=0 (overall).
+    """
     m1 = aliased(matches)
     m2 = aliased(matches)
 
@@ -325,34 +337,32 @@ def build_outcome_query():
             m2.matchid == m1.matchid,
             m2.teamid != m1.teamid,
             m1.mapid == m2.mapid,
-            m1.sideid == m2.sideid
-            ))
+            m1.sideid == m2.sideid,
+        ))
         .where(m1.sideid == 0)
     )
     return stmnt
 
 
-def build_player_stats_query_outcome(
-    mode = 'win',
-    mapid = None,
-    sideid = 0
-    ):
-    # --- Aliases ---
-
-    m1 = aliased(matches)
-    m2 = aliased(matches)
+def query_player_stats_by_outcome(
+    mode='win',
+    mapid=None,
+    sideid=0,
+):
+    """
+    Extend query_player_stats with an outcome join, filtering to wins or losses.
+    Uses query_outcomes() as a subquery joined on (matchid, mapid, teamid).
+    """
     ps = aliased(player_stats)
 
-
-    outcome_sq = build_outcome_query().subquery()
-        
+    outcome_sq = query_outcomes().subquery()
     outcome_filter = 1 if mode == 'win' else 0
 
-    stmnt = build_player_stats_query(
-        mapid = mapid,
-        sideid = sideid,
-        include_teams = True,
-        ps = ps
+    stmnt = query_player_stats(
+        mapid=mapid,
+        sideid=sideid,
+        include_teams=True,
+        ps=ps,
     )
 
     stmnt = (
@@ -360,7 +370,7 @@ def build_player_stats_query_outcome(
         .join(outcome_sq, and_(
             outcome_sq.c.match_id == ps.matchid,
             outcome_sq.c.map_id == ps.mapid,
-            outcome_sq.c.team_id == ps.teamid
+            outcome_sq.c.team_id == ps.teamid,
         ))
         .where(outcome_sq.c.win == outcome_filter)
     )

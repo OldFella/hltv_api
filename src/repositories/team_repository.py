@@ -3,7 +3,7 @@ from sqlalchemy import select, func, text, literal, and_, case
 from sqlalchemy.orm import aliased
 from datetime import date
 
-from src.repositories.player_repository import build_outcome_query
+from src.adapters.sqlalchemy_players import query_outcomes
 from src.config.active_maps import ACTIVE_MAPS
 
 
@@ -25,7 +25,7 @@ def build_team_stats_query(
     active_maps_sq = active_map_rows[0].union_all(*active_map_rows[1:]).subquery()
 
 
-    outcome_sq = build_outcome_query().subquery()
+    outcome_sq = query_outcomes().subquery()
 
     filters = [
         matches.sideid == 0,

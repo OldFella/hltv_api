@@ -9,7 +9,7 @@ from src.db.classes import (
     rankings
 )
 
-from src.repositories.player_repository import FIELDS
+from src.adapters.sqlalchemy_players import FIELDS
 
 
 # ---------------------------------------------------------------------------

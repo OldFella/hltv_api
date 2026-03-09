@@ -9,7 +9,7 @@ from src.db.models import Item, MatchResponse, TeamResponse, TeamStatsResponse
 from src.repositories.match_repository import format_matches, build_match_query, build_roster_query, get_streak
 from src.repositories.base import execute_query, add_fuzzy_filter
 from src.repositories.team_repository import build_team_stats_query
-from src.repositories.player_repository import default_date_range
+from src.routers.players import default_date_range
 
 router = APIRouter(prefix='/teams', tags=['teams'])
 
