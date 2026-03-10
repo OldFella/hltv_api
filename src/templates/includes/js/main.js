@@ -62,6 +62,22 @@ const formatCount = (n) => {
     return n.toString();
 };
 
+const animateCount = (el, target, suffix = '') => {
+    const rounded = target >= 1000 ? Math.floor(target / 100) * 100
+                  : target >= 100  ? Math.floor(target / 10)  * 10
+                  : target;
+    const duration = 1200;
+    const start = performance.now();
+    const update = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease out cubic
+        const current = Math.floor(eased * rounded);
+        el.textContent = current.toLocaleString() + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+};
+
 const populateHeroStats = () => {
     fetch("https://api.csapi.de/counts/")
         .then(r => r.json())
@@ -69,9 +85,9 @@ const populateHeroStats = () => {
             const matchEl  = document.getElementById('hero-matches');
             const playerEl = document.getElementById('hero-players');
             const teamEl   = document.getElementById('hero-teams');
-            if (matchEl)  matchEl.textContent  = formatCount(data.matches);
-            if (playerEl) playerEl.textContent = formatCount(data.players);
-            if (teamEl)   teamEl.textContent   = formatCount(data.teams);
+            if (matchEl)  animateCount(matchEl,  data.matches,  '+');
+            if (playerEl) animateCount(playerEl, data.players, '+');
+            if (teamEl)   animateCount(teamEl,   data.teams,   '+');
         })
         .catch(() => {});
 };
@@ -117,7 +133,7 @@ fetch("https://api.csapi.de/matches/latest")
 
 const ratingColor = (rating) => {
     if (rating >= 1.3) return 'var(--win)';        // green
-    if (rating >= 1.15) return 'var(--accent)';    // gold
+    if (rating >= 1.15) return 'var(--yellow)';    // gold
     if (rating >= 1.0) return 'var(--warning)';    // orange
     return 'var(--danger)';                         // red
 };
@@ -139,11 +155,18 @@ const createLeaderboardRow = (p) => {
         <div class="lb-stat">${p.kast.toFixed(2)}%</div>
         <div class="lb-rating-wrap">
             <div class="lb-rating-bar">
-                <div class="lb-rating-fill" style="width:${barPct}%; background:${color}"></div>
+                <div class="lb-rating-fill" style="width:0%; background:${color}; transition: width 0.6s ease ${p.rank * 0.05}s"></div>
             </div>
             <span class="lb-rating-val" style="color:${color}">${p.rating.toFixed(2)}</span>
         </div>
     `;
+
+    // After inserting, trigger the animation
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            row.querySelector('.lb-rating-fill').style.width = `${barPct}%`;
+        });
+    });
     return row;
 };
 
@@ -170,6 +193,7 @@ fetch("https://api.csapi.de/players/stats?limit=10")
         el.classList.remove("loading-text");
         data.forEach(p => el.appendChild(createLeaderboardRow(p)));
     })
+
     .catch(() => {
         document.getElementById("leaderboard").textContent = "Could not load leaderboard.";
     });

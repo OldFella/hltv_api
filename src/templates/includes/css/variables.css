@@ -39,6 +39,7 @@
     --danger:       #ef4444;
     --danger-rgb: 239, 68, 68;
     --warning:      #f59e0b;
+    --yellow:       #FFD700;
 
     /* --- JSON syntax --- */
     --json-key:     #e4ae39;  /* Ancient / Contraband — gold */
@@ -64,21 +65,22 @@
     --accent-dim:   #0077BB;
     --accent-rgb:   51, 187, 238;
 
-    --cyan:         #33BBEE;
-    --cyan-dim:     #005577;
+    --cyan:         #88CCEE;
+    --cyan-dim:     #226688;
+    --cyan-glow:    rgba(136, 204, 238, 0.15);
 
     --text:         #ffffff;
     --text-bright:  #ffffff;
     --muted:        #bbbbbb;
 
-    --win:          var(--accent);
+    --win:          #33BBEE;
     --danger:       #EE3377;
     --danger-rgb: 238, 51, 119;
     --warning:      #EE7733;
 
     --json-key:     var(--accent);
-    --json-string:  #009988;
+    --json-string:  #EE3377;
     --json-number:  var(--danger);
-    --json-bool:    var(--accent-dim);
+    --json-bool:    #EE7733;
     --json-null:    var(--muted);
 }
