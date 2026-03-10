@@ -39,8 +39,19 @@ async def not_found_handler(request: Request, exc: NotFoundError):
 
 @app.get("/")
 async def homepage(request: Request):
-    return {'Hello':'Welcome to my api service!',
-            'docs': "https://api.csapi.de/docs"}
+    return {
+        "name": "CSAPI",
+        "description": "CS2 pro match, team and player data. No key required.",
+        "docs": "https://api.csapi.de/docs",
+        "base_url": "https://api.csapi.de",
+        "endpoints": {
+            "matches": "/matches/latest",
+            "rankings": "/rankings/",
+            "players": "/players/stats",
+            "teams": "/teams/",
+            "counts": "/counts/"
+        }
+    }
 
 @app.get("/status")
 def status():
