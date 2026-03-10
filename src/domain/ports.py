@@ -45,6 +45,8 @@ class PlayersPort(Protocol):
         self,
         mapid: int | None,
         sideid: int | None,
+        start_date: int | None,
+        end_date: int | None,
         limit: int,
         offset: int,
         min_played: int,

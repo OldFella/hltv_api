@@ -83,17 +83,19 @@ class SqlAlchemyPlayersAdapter(PlayersPort):
         self,
         mapid: int | None,
         sideid: int | None,
+        start_date: date | None,
+        end_date: date | None,
         limit: int,
         offset: int,
         min_played: int,
     ) -> list[PlayerAggregatedStats]:
 
-        ps = aliased(player_stats)
         stmnt = query_player_stats(
             mapid=mapid,
             sideid=sideid,
+            start_date = start_date,
+            end_date = end_date,
             group_by=['players'],
-            ps = ps,
             sum_fields=['k', 'd'],
         )
         stmnt = stmnt.having(func.count() >= min_played)

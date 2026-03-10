@@ -123,8 +123,10 @@ def get_aggregated_stats(
     port: PlayersPort,
     mapid: int | None,
     sideid: int | None,
+    start_date: date | None,
+    end_date: date | None,
     limit: int,
     offset: int,
     min_played: int,
 ) -> list[PlayerAggregatedStats]:
-    return port.get_aggregated_stats(mapid, sideid, limit, offset, min_played)
+    return port.get_aggregated_stats(mapid, sideid, start_date, end_date, limit, offset, min_played)
