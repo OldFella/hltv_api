@@ -8,7 +8,7 @@
     overflow: hidden;
     position: relative;
     transition: border-color 0.15s, transform 0.15s;
-    background: var(--surface);
+    background: var(--chrome);
 }
 
 .match:last-child { margin-bottom: 0; }
@@ -33,7 +33,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 6px 14px;
-    background: var(--surface-2);
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
 }
 
@@ -106,7 +106,7 @@
     display: flex;
     gap: 8px;
     align-items: center;
-    font-size: 1.8rem;
+    font-size: 2.6rem;
     font-weight: 800;
 }
 
@@ -118,7 +118,7 @@
 
 .score-label {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.52rem;
     color: var(--muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -152,7 +152,7 @@
     display: flex;
     gap: 4px;
     padding: 8px 14px;
-    background: var(--surface-2);
+    background: var(--surface);
     border-top: 1px solid var(--border);
     flex-wrap: wrap;
 }
@@ -161,7 +161,7 @@
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--muted);
-    background: var(--surface);
+    background: var(--chrome);
     border: 1px solid var(--border);
     padding: 3px 8px;
     border-radius: 2px;
@@ -207,8 +207,9 @@
     grid-template-columns: 28px 1fr auto;
     align-items: center;
     gap: 8px;
+    min-height: 45px;
     padding: 7px 10px;
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 2px;
     transition: border-color 0.15s, background 0.15s;
@@ -216,7 +217,7 @@
 }
 
 .rank-item:hover {
-    background: var(--surface);
+    background: var(--chrome);
     border-color: var(--border-bright);
 }
 
@@ -360,14 +361,14 @@
 .lb-header span:nth-child(3) { text-align: right; }
 
 .leaderboard-row {
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 2px;
     transition: border-color 0.15s, background 0.15s;
 }
 
 .leaderboard-row:hover {
-    background: var(--surface);
+    background: var(--chrome);
     border-color: var(--border-bright);
 }
 

@@ -357,7 +357,7 @@ header .wrap::after {
 }
 
 .card {
-    background: var(--surface);
+    background: var(--surface-2);
     border-radius: 2px;
     border: 1px solid var(--border);
     padding: 20px;
@@ -418,6 +418,65 @@ header .wrap::after {
     border-top: 1px solid var(--border);
     display: block;
     text-align: center;
+}
+
+/* ===== HOME LAYOUT ===== */
+.home-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.home-grid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 16px;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* optional: same top accent bar as your other cards */
+.home-grid::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--cyan) 60%, transparent);
+    opacity: 0.5;
+}
+
+.home-grid .results-card {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.home-grid .rankings-card {
+    grid-column: 2;
+    grid-row: 1;
+    flex: unset !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+.home-grid .leaderboard-card {
+    grid-column: 1 / -1;  /* full width */
+    grid-row: 2;
+}
+
+@media (max-width: 900px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+    .home-grid .results-card,
+    .home-grid .rankings-card,
+    .home-grid .leaderboard-card {
+        grid-column: 1;
+        grid-row: auto;
+    }
 }
 
 /* ===== HERO ===== */

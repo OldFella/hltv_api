@@ -101,7 +101,7 @@ fetch("https://api.csapi.de/rankings/")
         }
         el.innerHTML = "";
         el.classList.remove("loading-text");
-        data.rankings.slice(0, 11).forEach(r => el.appendChild(createRankItem(r)));
+        data.rankings.slice(0, 10).forEach(r => el.appendChild(createRankItem(r)));
     })
     .catch(() => {
         document.getElementById("rankings").textContent = "Could not load rankings.";
