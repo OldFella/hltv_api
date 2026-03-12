@@ -75,3 +75,7 @@ async def rating_analysis(request: Request):
         "title": "Modelling CS Player Performance",
         "current_page": "blog"
     })
+
+@app.get("/predict")
+def predict_page(request: Request):
+    return templates.TemplateResponse(request, "predict.html", {"current_page": "predict"})

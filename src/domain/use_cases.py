@@ -6,8 +6,13 @@ from src.domain.models import (
     PlayerDetail, PlayerStatRow,
     PlayerGroupedStats, PlayerAggregatedStats,
     TeamDetail, TeamMapStats, MatchResult,
+    MatchupProbabilities,
 )
+from src.utils.stats import strength_maps, strength_ranking, bradley_terry
+
 from datetime import date
+
+import numpy as np
 
 T = TypeVar('T')
 
@@ -157,3 +162,54 @@ def get_team_stats(
     end_date: date,
     ) -> list[TeamMapStats]:
     return port.get_stats(teamid, start_date, end_date)
+
+# --- predict ---
+
+def get_map_win_probs(
+    teams_port: TeamsPort,
+    rankings_port: RankingsPort,
+    team_id_a: int,
+    team_id_b: int,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    use_rankings: bool = True,
+) -> MatchupProbabilities:
+    stats_a = teams_port.get_stats(team_id_a, start_date, end_date)
+    stats_b = teams_port.get_stats(team_id_b, start_date, end_date)
+    rankings = rankings_port.get_rankings()
+
+    if not stats_a:
+        raise NotFoundError(f"Team {team_id_a}")
+    if not stats_b:
+        raise NotFoundError(f"Team {team_id_b}")
+
+    # compute map_win_probs here
+    stats_b_lookup = {s.id: s for s in stats_b}
+
+    map_win_probs = []
+
+    for map_a in stats_a:
+        map_b = stats_b_lookup.get(map_a.id)
+        if map_b is None:
+            continue
+        
+        strengths = [0,0]
+        for i,m in enumerate([map_a, map_b]):
+            n_wins = np.array([m.n_wins])
+            n = np.array([m.n])
+            strength = strength_maps(n_wins, n)[0]
+            strengths[i] = strength
+
+        map_win_probs.append(bradley_terry(strengths[0], strengths[1])) 
+
+
+    rankings_lookup = {r.id: r.points for r in rankings.rankings}
+    points_a = rankings_lookup.get(team_id_a)
+    points_b = rankings_lookup.get(team_id_b)
+
+    ranking_win_prob = bradley_terry(strength_ranking(points_a), strength_ranking(points_b))
+
+    return MatchupProbabilities(
+        map_win_probs = map_win_probs,
+        ranking_win_prob = ranking_win_prob
+    )

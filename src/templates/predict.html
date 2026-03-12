@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Match Predictor · CS API{% endblock %}
+
+{% block extra_css %}
+<style>
+    {% include "includes/css/predict.css" %}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="hero predict-hero">
+    <div class="hero-label">CS2 · Match Predictor</div>
+    <h1>WIN PROBABILITY</h1>
+    <p>Select two teams to simulate match outcomes using per-map Bradley-Terry strength ratings and global rankings.</p>
+</div>
+
+<div class="home-grid">
+
+    <div class="card">
+        <div class="section-label">
+            <h2>Match Setup</h2>
+        </div>
+
+        <div class="team-row">
+            <div class="team-input-wrap">
+                <label class="field-label">Team A</label>
+                <input class="predict-input" type="text" id="inputA" placeholder="Search team..." autocomplete="off">
+                <div class="dropdown" id="dropdownA"></div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team-input-wrap">
+                <label class="field-label">Team B</label>
+                <input class="predict-input" type="text" id="inputB" placeholder="Search team..." autocomplete="off">
+                <div class="dropdown" id="dropdownB"></div>
+            </div>
+        </div>
+
+        <div class="format-row">
+            <label class="field-label">Format</label>
+            <div class="format-btns">
+                <button class="fmt-btn" data-bo="1">BO1</button>
+                <button class="fmt-btn active" data-bo="3">BO3</button>
+                <button class="fmt-btn" data-bo="5">BO5</button>
+            </div>
+        </div>
+
+        <div>
+            <button class="toggle-btn active" id="rankingsToggle">
+                <span id="rankingsIndicator">●</span> Include VRS
+            </button>
+        </div>
+
+        <div>
+            <button class="advanced-toggle" id="advToggle">▼ Advanced settings</button>
+            <div class="advanced-panel" id="advPanel">
+                <div class="slider-wrap">
+                    <label class="field-label slider-label">
+                        <span>Alpha <span class="tooltip" data-tip="Blend weight between rankings and map stats">?</span></span>
+                        <span class="slider-val" id="alphaVal">0.30</span>
+                    </label>
+                    <input type="range" id="alphaSlider" min="0" max="1" step="0.01" value="0.3">
+                </div>
+                <div class="slider-wrap">
+                    <label class="field-label slider-label">
+                    <span>Tau <span class="tooltip" data-tip="Draft randomness — lower means more deterministic picks">?</span></span>                        <span class="slider-val" id="tauVal">0.20</span>
+                    </label>
+                    <input type="range" id="tauSlider" min="0.01" max="1" step="0.01" value="0.2">
+                </div>
+                <div class="slider-wrap">
+                    <label class="field-label">Simulations</label>
+                    <input class="predict-input" type="number" id="nSimInput" min="1000" max="100000" step="1000" value="10000">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-predict" id="predictBtn" disabled>Predict</button>
+    </div>
+
+    <div class="card">
+         <div class="section-label">
+            <h2>Result</h2>
+        </div>
+
+        <div class="result-panel" id="result">
+            <div class="win-probs">
+                <div>
+                    <div class="team-prob-name" id="nameA">—</div>
+                    <div class="team-prob-val winner" id="valA">—</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="team-prob-name" id="nameB">—</div>
+                    <div class="team-prob-val" id="valB">—</div>
+                </div>
+            </div>
+            <div class="dist-title">Outcome distribution</div>
+            <div id="bars"></div>
+        </div>
+
+        <div id="resultEmpty" style="padding: 40px 0; text-align:center;">
+            <span class="loading-text">Select two teams to see predictions</span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+    {% include "includes/js/predict.js" %}
+</script>
+{% endblock %}

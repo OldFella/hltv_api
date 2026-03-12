@@ -141,3 +141,8 @@ class MatchResult:
     date: date
     event: str
     winner: Item
+
+@dataclass
+class MatchupProbabilities:
+    map_win_probs: list[float]
+    ranking_win_prob: float
