@@ -3,8 +3,9 @@ from src.domain.models import (
     Ranking, CountResponse,
     PlayerDetail, PlayerStatRow,
     PlayerGroupedStats, Item,
-    PlayerAggregatedStats
-
+    PlayerAggregatedStats,
+    TeamDetail, MatchResult,
+    TeamMapStats,
 )
 from datetime import date
 
@@ -19,12 +20,6 @@ class RankingsPort(Protocol):
 
 class CountsPort(Protocol):
     def get_counts(self) -> CountResponse: ...
-
-class TeamsPort(Protocol):
-    def get_all(self): ...
-    def get_one(self, id:int): ...
-    def get_matchhistory(self): ...
-    def get_stats(self): ...
 
 class PlayersPort(Protocol):
     def get_all_fuzzy(
@@ -76,3 +71,34 @@ class PlayersPort(Protocol):
         start_date: date,
         end_date: date,
     ) -> list[PlayerGroupedStats]: ...
+
+class TeamsPort(Protocol):
+    def get_all_fuzzy(
+        self,
+        name: str | None,
+        limit: int,
+        offset: int,
+    ) -> list[Item]: ...
+
+    def get_one(
+        self,
+        teamid: int,
+        start_date: date,
+        end_date: date,
+    ) -> TeamDetail | None: ...
+
+
+    def get_matchhistory(
+        self,
+        teamid: int,
+        limit: int,
+        offset: int,
+    ) -> list[MatchResult]: ...
+
+    def get_stats(
+        self,
+        teamid: int,
+        start_date: date,
+        end_date: date,
+        ) -> list[TeamMapStats]: ...
+ 

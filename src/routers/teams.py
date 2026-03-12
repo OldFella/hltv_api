@@ -1,94 +1,51 @@
-from typing import Optional
-from fastapi import APIRouter, Query
-from sqlalchemy import select
-from datetime import date
-
-from src.db.classes import teams
-from src.db.models import Item, MatchResponse, TeamResponse, TeamStatsResponse
-
-from src.repositories.match_repository import format_matches, build_match_query, build_roster_query, get_streak
-from src.repositories.base import execute_query, add_fuzzy_filter
-from src.repositories.team_repository import build_team_stats_query
+from fastapi import APIRouter, Query, Depends
+from datetime import date, timedelta
+from sqlalchemy.engine import Connection
+from src.db.get_db import get_db
+from src.domain import use_cases
+from src.domain.models import Item, TeamDetail, MatchResult, TeamMapStats
+from src.adapters.sqlalchemy_teams import SqlAlchemyTeamsAdapter
 from src.routers.players import default_date_range
-
 router = APIRouter(prefix='/teams', tags=['teams'])
 
-
-@router.get("/", response_model=list[Item], summary="List teams")
-async def get_teams(
-    name: Optional[str] = Query(None, description="Filter by team name (fuzzy match)"),
-    limit: Optional[int] = Query(20, description="Max results to return"),
-    offset: Optional[int] = Query(0, description="Pagination offset")
+@router.get("/", response_model=list[Item])
+def get_teams(
+    name: str | None = Query(None),
+    limit: int = Query(20),
+    offset: int = Query(0),
+    conn: Connection = Depends(get_db)
 ) -> list[Item]:
-    """
-    Returns a paginated list of all professional CS teams.
+    port = SqlAlchemyTeamsAdapter(conn)
+    return use_cases.get_all_fuzzy(port, name, limit, offset)
 
-    - **name**: optionally filter by name using fuzzy matching
-    - **limit**: number of results to return (default 20)
-    - **offset**: pagination offset (default 0)
-    """
-    filters, order_bys = [], []
-    add_fuzzy_filter(teams.name, name, filters, order_bys)
-    stmnt = (
-        select(teams.teamid.label('id'), teams.name.label('name'))
-        .where(*filters)
-        .offset(offset)
-        .limit(limit)
-        .order_by(*order_bys)
-    )
-    rows = execute_query(stmnt)
-    return [{'id': r['id'], 'name': r['name']} for r in rows]
-
-
-@router.get("/{teamid}", response_model=TeamResponse, summary="Team details")
-async def get_team_info(teamid: int) -> TeamResponse:
-    """
-    Returns detailed information for a specific team including their current
-    win/loss streak and most recent roster.
-
-    - **teamid**: unique team ID
-    """
-    stmnt = select(teams.teamid.label('id'), teams.name.label('name')).where(teams.teamid == teamid)
-    row = execute_query(stmnt, many=False)
-
-    history_stmnt = build_match_query(teamid=teamid, limit=20)
-    history = format_matches(execute_query(history_stmnt))
-    streak = get_streak(history, teamid)
-
-    roster = execute_query(build_roster_query(teamid=teamid))
-    return {
-        'id': row['id'],
-        'name': row['name'],
-        'streak': streak,
-        'roster': [{'id': r['id'], 'name': r['name']} for r in roster]
-    }
-
-
-@router.get("/{teamid}/matchhistory", response_model=list[MatchResponse], summary="Team match history")
-async def get_matchhistory(
+@router.get("/{teamid}", response_model=TeamDetail)
+def get_team(
     teamid: int,
-    limit: Optional[int] = Query(5, description="Max results to return"),
-    offset: Optional[int] = Query(0, description="Pagination offset")
-) -> list[MatchResponse]:
-    """
-    Returns the most recent matches played by a specific team.
-
-    - **teamid**: unique team ID
-    - **limit**: number of results to return (default 5)
-    - **offset**: pagination offset (default 0)
-    """
-    stmnt = build_match_query(teamid=teamid, limit=limit, offset=offset)
-    rows = execute_query(stmnt)
-    return format_matches(rows)
-
-
-@router.get("/{teamid}/stats", response_model = list[TeamStatsResponse], summary="Team stats")
-async def get_team_stats(
-    teamid: int,
-    start_date: Optional[date] = Query(None, description="Start date for stats filter (default: 3 months ago)"),
-    end_date: Optional[date] = Query(None, description="End date for stats filter (default: today)")
-    ):
+    start_date: date | None = Query(None),
+    end_date: date | None = Query(None),
+    conn: Connection = Depends(get_db)
+) -> TeamDetail:
     start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]
-    rows = execute_query(build_team_stats_query(teamid = teamid, start_date = start, end_date = end))
+    port = SqlAlchemyTeamsAdapter(conn)
+    return use_cases.get_team(port, teamid, start, end)
 
-    return rows
+@router.get("/{teamid}/matchhistory", response_model=list[MatchResult])
+def get_matchhistory(
+    teamid: int,
+    limit: int = Query(5),
+    offset: int = Query(0),
+    conn: Connection = Depends(get_db)
+) -> list[MatchResult]:
+    port = SqlAlchemyTeamsAdapter(conn)
+    return use_cases.get_team_matchhistory(port, teamid, limit, offset)
+
+@router.get("/{teamid}/stats", response_model=list[TeamMapStats])
+def get_team_stats(
+    teamid: int,
+    start_date: date | None = Query(None),
+    end_date: date | None = Query(None),
+    conn: Connection = Depends(get_db)
+) -> list[TeamMapStats]:
+    start, end = start_date or default_date_range()[0], end_date or default_date_range()[1]
+    port = SqlAlchemyTeamsAdapter(conn)
+    return use_cases.get_team_stats(port, teamid, start, end)

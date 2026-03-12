@@ -1,11 +1,11 @@
 from src.domain.errors import NotFoundError
 from typing import TypeVar, Literal
-from src.domain.ports import ReadPort, RankingsPort, CountsPort, PlayersPort
+from src.domain.ports import ReadPort, RankingsPort, CountsPort, PlayersPort, TeamsPort
 from src.domain.models import (
     Ranking, Item, CountResponse,
     PlayerDetail, PlayerStatRow,
-    PlayerGroupedStats,
-    PlayerAggregatedStats,
+    PlayerGroupedStats, PlayerAggregatedStats,
+    TeamDetail, TeamMapStats, MatchResult,
 )
 from datetime import date
 
@@ -46,7 +46,7 @@ def get_counts(port: CountsPort) -> CountResponse:
 
 
 def get_all_fuzzy(
-    port: PlayersPort,
+    port: PlayersPort | TeamsPort,
     name: str | None,
     limit: int,
     offset: int,
@@ -130,3 +130,30 @@ def get_aggregated_stats(
     min_played: int,
 ) -> list[PlayerAggregatedStats]:
     return port.get_aggregated_stats(mapid, sideid, start_date, end_date, limit, offset, min_played)
+
+def get_team(
+    port: TeamsPort, 
+    teamid:int, 
+    start_date: date,
+    end_date: date,
+    ) -> TeamDetail:
+    result = port.get_one(teamid = teamid, start_date = start_date, end_date = end_date)
+    if not result:
+        raise NotFoundError(f"Team {teamid}")
+    return result
+
+def get_team_matchhistory(
+    port: TeamsPort,
+    teamid: int,
+    limit: int,
+    offset: int,
+    ) -> list[MatchResult]:
+    return port.get_matchhistory(teamid = teamid, limit = limit, offset = offset)
+
+def get_team_stats(
+    port: TeamsPort,
+    teamid: int,
+    start_date: date,
+    end_date: date,
+    ) -> list[TeamMapStats]:
+    return port.get_stats(teamid, start_date, end_date)

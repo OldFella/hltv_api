@@ -98,3 +98,46 @@ class PlayerAggregatedStats:
     kast: float
     rating: float
     N: int
+
+# --- Teams ---
+@dataclass
+class TeamDetail:
+    id: int
+    name: str
+    streak: int
+    roster: list[Item]
+
+@dataclass
+class TeamMapStats:
+    id: int
+    name: str
+    n: int
+    n_wins: int
+
+
+# --- Matches ---
+
+@dataclass
+class TeamScore:
+    id: int
+    name: str
+    score: int
+    rank: int
+
+@dataclass
+class MapScore:
+    id: int
+    name: str
+    team1_score: int
+    team2_score: int
+
+@dataclass
+class MatchResult:
+    id: int
+    team1: TeamScore
+    team2: TeamScore
+    maps: list[MapScore]
+    best_of: int
+    date: date
+    event: str
+    winner: Item
