@@ -1,0 +1,92 @@
+# src/content/index/page.yaml
+# All user-facing content for the homepage.
+# Referenced in templates as {{ content.* }}
+
+# ── Hero section ──────────────────────────────────────────────
+hero:
+  label: "Counter-Strike 2 · Pro Match Data"
+  title_line1: "The CS2"
+  title_accent: "Pro Data API"
+  description: >
+    Match results, team stats and player data from the top 100 CS teams.
+    No key required — updated daily.
+
+  # Feature pills — hero-feature--active items render with green styling
+  features:
+    - label: "✓ No API Key"
+      active: true
+    - label: "✓ Free"
+      active: true
+    - label: "✓ JSON"
+      active: true
+    - label: "Rankings"
+      active: false
+    - label: "Player Stats"
+      active: false
+    - label: "Map Data"
+      active: false
+    - label: "Match History"
+      active: false
+
+  # Live stat counters — values are fetched client-side; labels are static
+  stats:
+    - id: "hero-matches"
+      label: "Matches"
+    - id: "hero-players"
+      label: "Players"
+    - id: "hero-teams"
+      label: "Teams"
+    - id: null          # null id = no JS counter, value is static
+      value: "Daily"
+      label: "Refresh"
+
+  # CTA buttons
+  actions:
+    - label: "View API Docs →"
+      href: "https://api.csapi.de/docs"
+      style: "button"
+      external: true
+    - label: "Latest Results"
+      href: "#results-section"
+      style: "button button-ghost"
+      external: false
+
+# ── Endpoint preview card (hero right panel) ──────────────────
+endpoint_card:
+  host: "api.csapi.de"
+  status_label: "● LIVE"
+  endpoints:
+    - path: "/matches/latest"
+      description: "Recent pro match results"
+    - path: "/rankings"
+      description: "World team rankings"
+    - path: "/players/stats"
+      description: "Top player performance"
+    - path: "/teams/{id}"
+      description: "Team details & roster"
+    - path: "/counts"
+      description: "Dataset size stats"
+  footer_tags:
+    - "No auth required"
+    - "JSON"
+    - "REST"
+
+# ── Results / Rankings / Leaderboard section ──────────────────
+sections:
+  results:
+    title: "Latest Results"
+    api_tag: "GET /matches/latest"
+  rankings:
+    title: "World Rankings"
+    api_tag: "GET /rankings"
+  leaderboard:
+    title: "Top Players"
+    api_tag: "GET /players/stats"
+
+# ── API banner (below the grid) ───────────────────────────────
+api_banner:
+  label: "// PUBLIC REST API"
+  url: "api.csapi.de"
+  sub: "No key required · Updated daily"
+  cta_label: "View API Docs →"
+  cta_href: "https://api.csapi.de/docs"

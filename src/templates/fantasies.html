@@ -1,31 +1,51 @@
 {% extends "base.html" %}
 
 {% block extra_css %}
-<style>
-    {% include "includes/css/fantasies.css" %}
-</style>
+<link rel="stylesheet" href="/static/css/fantasies.css">
 {% endblock %}
 
-
-{% block title %}Available Fantasies{% endblock %}
+{% block title %}{{ content.page_title }} · CS API{% endblock %}
 
 {% block content %}
 <div class="card">
-    <h2 class="card-title">Available Fantasy Spreadsheets</h2>
-    <input type="text" id="searchInput" placeholder="Search Fantasies...">
-    <ul id="folderList">
-        {% for folder, fantasy_name in folders.items() %}
-        <li>
-            <a href="/spreadsheet/{{ folder | urlencode }}">{{ fantasy_name }}</a>
-        </li>
-        {% endfor %}
-    </ul>
+  <div class="section-label">
+    <h2>{{ content.page_title }}</h2>
+  </div>
+
+  <input
+    type="text"
+    id="searchInput"
+    class="search-input"
+    placeholder="{{ content.search.placeholder }}"
+    autocomplete="off"
+    aria-label="{{ content.search.label }}">
+
+  <div class="fantasy-count">
+    <span>TOURNAMENTS</span>
+    <span class="fantasy-count-num" id="visibleCount">{{ fantasies | length }}</span>
+  </div>
+
+  <ul id="folderList">
+    {% for folder, fantasy_name in fantasies.items() %}
+      <li>
+        <a href="/spreadsheet/{{ folder | urlencode }}"
+           class="fantasy-item">
+          <span class="fantasy-num"></span>
+          <span class="fantasy-name">{{ fantasy_name }}</span>
+          <span class="fantasy-arrow">→</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <p id="emptyMessage" class="loading-text" style="display:none;">
+    {{ content.empty_message }}
+  </p>
+
+  <div class="pagination" id="pagination"></div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-
-<script>
-  {% include "includes/js/fantasies.js" %}
-</script>
+<script src="/static/js/fantasies.js" defer></script>
 {% endblock %}

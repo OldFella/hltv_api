@@ -1,92 +1,91 @@
 {% extends "base.html" %}
 
 {% block extra_css %}
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
-  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"/>
-  <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css"/>
-  <style>
-    {% include "includes/css/sidebar.css" %}
-    {% include "includes/css/table.css" %}
-</style>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
+<link rel="stylesheet" href="/static/css/table.css">
 {% endblock %}
 
-{% block title %}{{ fantasy_name }}{% endblock %}
-
+{% block title %}{{ fantasy_name }} · CS API{% endblock %}
 
 {% block content %}
 
-<!-- Page content -->
-<h1 class="page-title">{{ fantasy_name }}</h1>
+<div class="card table-card">
 
-<div class="page-actions">
-    <a href="/download/{{ fantasyid }}.ods" class="button">Download Spreadsheet</a>
-</div>
-
-<div class="tabs">
-  {% for sheet_name in sheets.keys() %}
-    <button class="tab-button {% if loop.first %}active{% endif %}"
-            data-tab="{{ loop.index0 }}">
-      {{ sheet_name }}
-    </button>
-  {% endfor %}
-</div>
-
-{% for sheet_name, sheet in sheets.items() %}
-<div id="tab_{{ loop.index0 }}"
-     class="tab-content {% if loop.first %}active{% endif %}">
-
-  <div class="table-wrapper">
-    <table id="table_{{ loop.index0 }}" class="display nowrap">
-      <thead>
-        <tr>
-          {% for col in sheet.columns %}
-            <th>{{ col }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% set prev_team = None %}
-        {% for row in sheet.rows %}
-        {% set team_name = team_col and row[sheet.columns.index(team_col)] %}
-        {% set row_class = '' %}
-        {% if prev_team is not none and team_name != prev_team %}
-            {% set row_class = 'team-separator' %}
-        {% endif %}
-        <tr class="{{ row_class }}">
-            {% for cell in row %}
-                {% if cell is number %}
-                    {% if cell != cell %}
-                        <td data-order="-999999999">-</td>
-                    {% else %}
-                        <td data-order="{{ cell }}">{{ cell | round(4) }}</td>
-                    {% endif %}
-                {% else %}
-                    <td data-order="{{ cell | string | lower }}">{{ cell }}</td>
-                {% endif %}
-            {% endfor %}
-        </tr>
-        {% set prev_team = team_name %}
-        {% endfor %}
-      </tbody>
-    </table>
+  <!-- Title row -->
+  <div class="table-page-header">
+    <div class="section-label">
+      <h2>{{ fantasy_name }}</h2>
+    </div>
+    <a href="/download/{{ fantasyid }}.ods" class="button button-ghost">
+      ↓ Download .ods
+    </a>
   </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    {% for sheet_name in sheets.keys() %}
+      <button class="tab-button {% if loop.first %}active{% endif %}"
+              data-tab="{{ loop.index0 }}">
+        {{ sheet_name }}
+      </button>
+    {% endfor %}
+  </div>
+
+  <!-- Tab panels -->
+  {% for sheet_name, sheet in sheets.items() %}
+    <div id="tab_{{ loop.index0 }}"
+         class="tab-content {% if loop.first %}active{% endif %}"
+         data-sheet-name="{{ sheet_name }}">
+      <div class="table-wrapper">
+        <table id="table_{{ loop.index0 }}" class="display nowrap">
+          <thead>
+            <tr>
+              {% for col in sheet.columns %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% set prev_team = None %}
+            {% for row in sheet.rows %}
+              {% set team_name = team_col and row[sheet.columns.index(team_col)] %}
+              {% set row_class = '' %}
+              {% if prev_team is not none and team_name != prev_team %}
+                {% set row_class = 'team-separator' %}
+              {% endif %}
+              <tr class="{{ row_class }}">
+                {% for cell in row %}
+                  {% if cell is number %}
+                    {% if cell != cell %}
+                      <td data-order="-999999999">-</td>
+                    {% else %}
+                      <td data-order="{{ cell }}">{{ cell | round(4) }}</td>
+                    {% endif %}
+                  {% else %}
+                    <td data-order="{{ cell | string | lower }}">{{ cell }}</td>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+              {% set prev_team = team_name %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+
 </div>
-{% endfor %}
 
 {% endblock %}
 
 {% block scripts %}
-  <!-- jQuery + DataTables JS -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-  <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
-
-  <!-- Page-specific JS -->
-  <script>
-    {% include "includes/js/table.js" %}
-  </script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+<script src="/static/js/table.js" defer></script>
 {% endblock %}

@@ -1,0 +1,239 @@
+/* =============================================
+   CSAPI — TABLE.CSS
+   Fantasy spreadsheet table page.
+   ============================================= */
+
+/* ===== PAGE CARD ===== */
+.table-card {
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* ===== HEADER ROW ===== */
+/* Title (section-label) on the left, download button on the right */
+.table-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* section-label inside the header shouldn't have its own bottom margin */
+.table-page-header .section-label {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.table-page-header .section-label h2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.tab-button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.tab-button:hover {
+  border-color: var(--border-bright);
+  color: var(--text-bright);
+  background: var(--chrome);
+}
+
+.tab-button.active {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ===== TAB CONTENT ===== */
+.tab-content        { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== TABLE WRAPPER ===== */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+/* ===== DATATABLES CONTROLS ROW =====
+   Wraps the CSV button (left) and search input (right)
+   in a styled bar above the table.
+   ======================================= */
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dt-buttons {
+  margin-bottom: 10px;
+}
+
+.dataTables_wrapper .dataTables_filter {
+  float: right;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  background: var(--chrome);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  margin-left: 6px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.25) !important;
+}
+
+.dataTables_wrapper .dataTables_filter label {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+}
+
+/* ===== DATATABLES TABLE ===== */
+table.dataTable {
+  width: max-content !important;
+  min-width: 100%;
+  table-layout: auto !important;
+  border-collapse: collapse !important;
+}
+
+table.dataTable thead th {
+  background-color: var(--surface-2) !important;
+  color: var(--accent) !important;
+  border-bottom: 1px solid var(--border) !important;
+  white-space: normal !important;
+  word-break: break-word;
+  line-height: 1.25;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Sort indicator colours */
+table.dataTable thead th.sorting::after,
+table.dataTable thead th.sorting_asc::after,
+table.dataTable thead th.sorting_desc::after {
+  color: var(--muted) !important;
+  opacity: 0.6;
+}
+
+table.dataTable thead th.sorting_asc::after  { color: var(--accent) !important; opacity: 1; }
+table.dataTable thead th.sorting_desc::after { color: var(--accent) !important; opacity: 1; }
+
+table.dataTable tbody td {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  white-space: nowrap;
+  font-family: var(--font-body) !important;
+  font-size: 0.92rem !important;
+  padding: 7px 10px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+table.dataTable tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+table.dataTable tbody tr:nth-child(even) td {
+  background-color: var(--row-alt) !important;
+}
+
+table.dataTable tbody tr:hover td {
+  background-color: var(--row-hl) !important;
+}
+
+/* Team separator — visual group break between teams */
+table.dataTable tbody tr.team-separator td {
+  border-top: 1px solid var(--border-bright) !important;
+}
+
+/* ===== DATATABLES SCROLL ===== */
+.dataTables_wrapper,
+.dataTables_scroll   { height: 100%; }
+
+.dataTables_scrollBody {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  width: 100% !important;
+}
+
+.dataTables_scrollHead {
+  background: var(--surface-2) !important;
+}
+
+/* ===== FIXED COLUMNS ===== */
+.dtfc-right-top-blocker,
+.dtfc-left-top-blocker {
+  background-color: var(--surface-2) !important;
+}
+
+/* ===== DOWNLOAD CSV BUTTON ===== */
+.dt-buttons {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.dt-buttons a,
+.dt-buttons button {
+  color: var(--muted) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  padding: 6px 14px !important;
+  border-radius: 2px !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: color 0.15s, border-color 0.15s, background 0.15s !important;
+  box-shadow: none !important;
+}
+
+.dt-buttons a:hover,
+.dt-buttons button:hover {
+  color: var(--text-bright) !important;
+  background: var(--chrome) !important;
+  border-color: var(--border-bright) !important;
+  box-shadow: none !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px) {
+  .table-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tabs { justify-content: flex-start; }
+}

@@ -1,0 +1,162 @@
+/* =============================================
+   CSAPI — ANIMATION.CSS
+   Stagger delays are injected per-element by
+   applyStagger() in main.js after each fetch,
+   since items are dynamically rendered and
+   nth-child rules fire before DOM insertion.
+   ============================================= */
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== LOGO CROSSHAIR ===== */
+.logo-crosshair-ring {
+  animation: crosshairPulse 4s ease-in-out infinite;
+}
+
+.logo-crosshair-dot {
+  animation: crosshairPulseBG 4s ease-in-out infinite;
+}
+
+@keyframes crosshairPulse {
+  0%, 25%   { border-color: rgba(var(--accent-rgb), 1); }
+  25%, 75%  { border-color: rgba(var(--danger-rgb), 1); }
+  75%, 100% { border-color: rgba(var(--accent-rgb), 1); }
+}
+
+@keyframes crosshairPulseBG {
+  0%, 25%   { background-color: rgba(var(--accent-rgb), 1); }
+  25%, 75%  { background-color: rgba(var(--danger-rgb), 1); }
+  75%, 100% { background-color: rgba(var(--accent-rgb), 1); }
+}
+
+/* ===== HEADER ACCENT LINE ===== */
+header .wrap::after {
+  animation: growLine 0.8s ease both;
+}
+
+@keyframes growLine {
+  from { opacity: 0; transform: scaleX(0); transform-origin: left; }
+  to   { opacity: 0.35; transform: scaleX(1); transform-origin: left; }
+}
+
+/* ===== CARDS ===== */
+.card {
+  animation: fadeUp 0.4s ease both;
+}
+
+.card:nth-child(1) { animation-delay: 0s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+
+.info-box::before,
+.card::before {
+  animation: pulseLine 3s ease-in-out infinite;
+}
+
+@keyframes pulseLine {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.15; }
+}
+
+/* ===== DYNAMICALLY RENDERED LISTS =====
+   Items start invisible. applyStagger() sets
+   --stagger-delay on each element after fetch,
+   then the animation fires in sequence.
+   ======================================= */
+.match,
+.rank-item,
+.leaderboard-row {
+  opacity: 0;
+}
+
+.stagger-ready {
+  animation: fadeIn 0.3s ease forwards;
+  animation-delay: var(--stagger-delay);
+}
+
+.rank-item.stagger-ready {
+  animation-name: fadeInRight;
+}
+
+.rank-item {
+  animation-name: fadeInRight;
+}
+
+/* ===== API LINKS ===== */
+.api-links a {
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ===== SHARED KEYFRAMES ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== CTA BUTTON PULSE ===== */
+.button.card-cta {
+  animation: ctaPulse 3s ease-in-out infinite;
+}
+
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 0px rgba(var(--accent-rgb), 0); }
+  50%       { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4); }
+}
+
+/* ===== LIVE BADGE ===== */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+/* ===== 404 / ERROR PAGE ===== */
+.error-code {
+  animation: glitchIn 0.5s ease both, glitch 6s ease-in-out infinite 2s, errorGlow 3s ease-in-out infinite 0.5s;
+}
+
+@keyframes errorGlow {
+  0%, 100% { text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.3); }
+  50%       { text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.6); }
+}
+
+@keyframes glitch {
+  0%, 90%, 100% { transform: skewX(0); opacity: 1; }
+  91%            { transform: skewX(-8deg); opacity: 0.8; }
+  92%            { transform: skewX(6deg); opacity: 1; }
+  93%            { transform: skewX(-4deg); opacity: 0.9; }
+  94%            { transform: skewX(0); opacity: 1; }
+}
+
+@keyframes glitchIn {
+  0%   { opacity: 0; transform: translateY(-10px) skewX(-5deg); }
+  60%  { opacity: 1; transform: translateY(2px) skewX(2deg); }
+  100% { opacity: 1; transform: translateY(0) skewX(0); }
+}
+
+.error-label {
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards 0.4s;
+}
+
+.error-message {
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards 0.6s;
+}

@@ -1,0 +1,90 @@
+/* =============================================
+   CSAPI — VARIABLES.CSS
+   Design tokens only. No @import here —
+   fonts are loaded via <link> in base.html.
+   ============================================= */
+
+:root {
+  /* --- Fonts --- */
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body:    'Rajdhani', system-ui, sans-serif;
+  --font-mono:    'Share Tech Mono', monospace;
+
+  /* --- Base surfaces --- */
+  --bg:        #080b0f;
+  --surface:   #0d1117;
+  --surface-2: #111820;
+  --chrome:    #050810;
+  --row-alt:   #0a0f16;
+  --row-hl:    #111e2a;
+
+  /* --- Borders --- */
+  --border:        #1c2a38;
+  --border-bright: #2a3f52;
+
+  /* --- Primary accent: CS2 kill-feed orange-gold --- */
+  --accent:       #e8a020;
+  --accent-hover: #f0b030;
+  --accent-dim:   #9b6a10;
+  --accent-rgb:   232, 160, 32;
+
+  /* --- Secondary accent: radar cyan --- */
+  --cyan:      #38bdf8;
+  --cyan-dim:  #0e4a6a;
+  --cyan-glow: rgba(56, 189, 248, 0.15);
+
+  /* --- Text --- */
+  --text:        #cbd5e1;
+  --text-bright: #f1f5f9;
+  --muted:       #7a8aa0;
+
+  /* --- Status --- */
+  --win:        #22c55e;
+  --danger:     #ef4444;
+  --danger-rgb: 239, 68, 68;
+  --warning:    #f59e0b;
+  --yellow:     #FFD700;
+
+  /* --- JSON syntax --- */
+  --json-key:    #e4ae39;
+  --json-string: #eb4b4b;
+  --json-number: #8847ff;
+  --json-bool:   #4b69ff;
+  --json-null:   #808080;
+}
+
+/* Colorblind-safe theme */
+[data-theme="cb"] {
+  --bg:        #000000;
+  --surface:   #0a0a0a;
+  --surface-2: #111111;
+  --chrome:    #050505;
+  --border:        #333333;
+  --border-bright: #444444;
+  --row-alt: #0d0d0d;
+  --row-hl:  #1a2a2a;
+
+  --accent:       #33BBEE;
+  --accent-hover: #55CCFF;
+  --accent-dim:   #0077BB;
+  --accent-rgb:   51, 187, 238;
+
+  --cyan:      #88CCEE;
+  --cyan-dim:  #226688;
+  --cyan-glow: rgba(136, 204, 238, 0.15);
+
+  --text:        #ffffff;
+  --text-bright: #ffffff;
+  --muted:       #bbbbbb;
+
+  --win:        #33BBEE;
+  --danger:     #EE3377;
+  --danger-rgb: 238, 51, 119;
+  --warning:    #EE7733;
+
+  --json-key:    var(--accent);
+  --json-string: #EE3377;
+  --json-number: var(--danger);
+  --json-bool:   #EE7733;
+  --json-null:   var(--muted);
+}

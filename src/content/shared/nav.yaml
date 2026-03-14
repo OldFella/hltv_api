@@ -1,0 +1,21 @@
+# src/content/shared/nav.yaml
+# Single source of truth for navigation links.
+# Adding a page = one entry here, nothing else to touch.
+
+links:
+  - label: "Home"
+    href: "/"
+    page_key: "home"
+  - label: "Matchup Predictor"
+    href: "/matchup-predictor"
+    page_key: "predict"
+  - label: "Blog"
+    href: "/blog/rating-analysis"
+    page_key: "blog"
+  - label: "Spreadsheets"
+    href: "/spreadsheet/"
+    page_key: "Fantasy"
+
+header:
+  api_docs_label: "API Docs"
+  api_docs_href: "https://api.csapi.de/docs"

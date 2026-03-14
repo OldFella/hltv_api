@@ -1,173 +1,134 @@
 {% extends "base.html" %}
+
 {% block extra_css %}
-<style>
-    {% include "includes/css/matches.css" %}
-    {% include "includes/css/api.css" %}
-</style>
+<link rel="stylesheet" href="/static/css/matches.css">
 {% endblock %}
+
 {% block title %}CS API{% endblock %}
+
 {% block content %}
 
 <!-- ===== HERO ===== -->
 <div class="hero hero--enhanced">
-  <!-- Decorative corner bracket top-right -->
   <div class="hero-corner-tl"></div>
   <div class="hero-corner-br"></div>
 
   <div class="hero-body">
-    <!-- Left: text + stats -->
+
     <div class="hero-left">
-      <div class="hero-label">Counter-Strike 2 · Pro Match Data</div>
+      <div class="hero-label">{{ content.hero.label }}</div>
 
-      <h1>The CS2<br><span class="hero-title-accent">Pro Data API</span></h1>
+      <h1>{{ content.hero.title_line1 }}<br><span class="hero-title-accent">{{ content.hero.title_accent }}</span></h1>
 
-      <p>Match results, team stats and player data from the top 100 CS teams. No key required — updated daily.</p>
+      <p>{{ content.hero.description }}</p>
 
-      <!-- Feature pills -->
       <div class="hero-features">
-        <span class="hero-feature hero-feature--active">✓ No API Key</span>
-        <span class="hero-feature hero-feature--active">✓ Free</span>
-        <span class="hero-feature hero-feature--active">✓ JSON</span>
-        <span class="hero-feature">Rankings</span>
-        <span class="hero-feature">Player Stats</span>
-        <span class="hero-feature">Map Data</span>
-        <span class="hero-feature">Match History</span>
+        {% for feature in content.hero.features %}
+          <span class="hero-feature{% if feature.active %} hero-feature--active{% endif %}">
+            {{ feature.label }}
+          </span>
+        {% endfor %}
       </div>
 
-      <!-- Stats row -->
       <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="num" id="hero-matches">—</span>
-          <span class="lbl">Matches</span>
-        </div>
-        <div class="hero-stat">
-          <span class="num" id="hero-players">—</span>
-          <span class="lbl">Players</span>
-        </div>
-        <div class="hero-stat">
-          <span class="num" id="hero-teams">—</span>
-          <span class="lbl">Teams</span>
-        </div>
-        <div class="hero-stat">
-          <span class="num">Daily</span>
-          <span class="lbl">Refresh</span>
-        </div>
+        {% for stat in content.hero.stats %}
+          <div class="hero-stat">
+            {% if stat.id %}
+              <span class="num" id="{{ stat.id }}">—</span>
+            {% else %}
+              <span class="num">{{ stat.value }}</span>
+            {% endif %}
+            <span class="lbl">{{ stat.label }}</span>
+          </div>
+        {% endfor %}
       </div>
 
-      <!-- CTA -->
       <div class="hero-actions">
-        <a href="https://api.csapi.de/docs" target="_blank" class="button">
-          View API Docs →
-        </a>
-        <a href="#results-section" class="button button-ghost">
-          Latest Results
-        </a>
+        {% for action in content.hero.actions %}
+          <a href="{{ action.href }}"
+             class="{{ action.style }}"
+             {% if action.external %}target="_blank"{% endif %}>
+            {{ action.label }}
+          </a>
+        {% endfor %}
       </div>
     </div>
 
-    <!-- Right: endpoint preview card -->
+    <!-- Endpoint preview card -->
     <div class="hero-right">
       <div class="hero-endpoint-card">
         <div class="hero-endpoint-header">
           <span class="hero-endpoint-badge">GET</span>
-          <span class="hero-endpoint-host">api.csapi.de</span>
-          <span class="hero-endpoint-status">● LIVE</span>
+          <span class="hero-endpoint-host">{{ content.endpoint_card.host }}</span>
+          <span class="hero-endpoint-status">{{ content.endpoint_card.status_label }}</span>
         </div>
         <div class="hero-endpoint-body">
-          <div class="hero-endpoint-row">
-            <span class="ep-method">GET</span>
-            <div class="ep-info">
-              <span class="ep-path">/matches/latest</span>
-              <span class="ep-desc">Recent pro match results</span>
+          {% for ep in content.endpoint_card.endpoints %}
+            <div class="hero-endpoint-row">
+              <span class="ep-method">GET</span>
+              <div class="ep-info">
+                <span class="ep-path">{{ ep.path }}</span>
+                <span class="ep-desc">{{ ep.description }}</span>
+              </div>
             </div>
-          </div>
-          <div class="hero-endpoint-row">
-            <span class="ep-method">GET</span>
-            <div class="ep-info">
-              <span class="ep-path">/rankings</span>
-              <span class="ep-desc">World team rankings</span>
-            </div>
-          </div>
-          <div class="hero-endpoint-row">
-            <span class="ep-method">GET</span>
-            <div class="ep-info">
-              <span class="ep-path">/players/stats</span>
-              <span class="ep-desc">Top player performance</span>
-            </div>
-          </div>
-          <div class="hero-endpoint-row">
-            <span class="ep-method">GET</span>
-            <div class="ep-info">
-              <span class="ep-path">/teams/{id}</span>
-              <span class="ep-desc">Team details & roster</span>
-            </div>
-          </div>
-          <div class="hero-endpoint-row">
-            <span class="ep-method">GET</span>
-            <div class="ep-info">
-              <span class="ep-path">/counts</span>
-              <span class="ep-desc">Dataset size stats</span>
-            </div>
-          </div>
+          {% endfor %}
         </div>
         <div class="hero-endpoint-footer">
-          <span>No auth required</span>
-          <span>·</span>
-          <span>JSON</span>
-          <span>·</span>
-          <span>REST</span>
+          {% for tag in content.endpoint_card.footer_tags %}
+            <span>{{ tag }}</span>
+            {% if not loop.last %}<span>·</span>{% endif %}
+          {% endfor %}
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
+<!-- ===== MAIN GRID ===== -->
 <div class="home-grid" id="results-section">
 
-    <!-- LATEST RESULTS CARD -->
-    <div class="card results-card">
-        <div class="section-label">
-            <h2>Latest Results</h2>
-            <span class="section-tag">GET /matches/latest</span>
-        </div>
-        <div id="results" class="loading-text">Loading…</div>
+  <div class="card results-card">
+    <div class="section-label">
+      <h2>{{ content.sections.results.title }}</h2>
+      <span class="section-tag">{{ content.sections.results.api_tag }}</span>
     </div>
+    <div id="results" class="loading-text">Loading…</div>
+  </div>
 
-    <!-- RANKINGS CARD -->
-    <div class="card rankings-card">
-        <div class="section-label">
-            <h2>World Rankings</h2>
-            <span class="section-tag">GET /rankings</span>
-        </div>
-        <div id="rankings" class="loading-text">Loading…</div>
+  <div class="card rankings-card">
+    <div class="section-label">
+      <h2>{{ content.sections.rankings.title }}</h2>
+      <span class="section-tag">{{ content.sections.rankings.api_tag }}</span>
     </div>
+    <div id="rankings" class="loading-text">Loading…</div>
+  </div>
 
-    <!-- PLAYER LEADERBOARD CARD -->
-    <div class="card leaderboard-card">
-        <div class="section-label">
-            <h2>Top Players</h2>
-            <span class="section-tag">GET /players/stats</span>
-        </div>
-        <div id="leaderboard" class="loading-text">Loading…</div>
+  <div class="card leaderboard-card">
+    <div class="section-label">
+      <h2>{{ content.sections.leaderboard.title }}</h2>
+      <span class="section-tag">{{ content.sections.leaderboard.api_tag }}</span>
     </div>
+    <div id="leaderboard" class="loading-text">Loading…</div>
+  </div>
+
 </div>
 
 <!-- ===== API BANNER ===== -->
 <div class="api-banner">
-    <div class="api-banner-left">
-        <span class="api-banner-label">// PUBLIC REST API</span>
-        <span class="api-banner-url">api.csapi.de</span>
-        <span class="api-banner-sub">No key required · Updated daily</span>
-    </div>
-    <a href="https://api.csapi.de/docs" target="_blank" class="button">View API Docs →</a>
+  <div class="api-banner-left">
+    <span class="api-banner-label">{{ content.api_banner.label }}</span>
+    <span class="api-banner-url">{{ content.api_banner.url }}</span>
+    <span class="api-banner-sub">{{ content.api_banner.sub }}</span>
+  </div>
+  <a href="{{ content.api_banner.cta_href }}" target="_blank" class="button">
+    {{ content.api_banner.cta_label }}
+  </a>
 </div>
 
-</div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-  {% include "includes/js/main.js" %}
-  {% include "includes/js/highlight.js" %}
-</script>
+<script src="/static/js/main.js" defer></script>
+<script src="/static/js/highlight.js" defer></script>
 {% endblock %}

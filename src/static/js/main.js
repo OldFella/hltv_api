@@ -44,6 +44,14 @@ const createMatchRow = (m) => {
     return row;
 };
 
+// Injects --stagger-delay on each child element after they're in the DOM
+const applyStagger = (selector, stepMs = 100) => {
+    document.querySelectorAll(selector).forEach((el, i) => {
+        el.style.setProperty('--stagger-delay', `${i * stepMs}ms`);
+        el.classList.add('stagger-ready');
+    });
+};
+
 const renderResults = (data) => {
     const el = document.getElementById("results");
     if (!data || !data.length) {
@@ -52,7 +60,8 @@ const renderResults = (data) => {
     }
     el.innerHTML = "";
     el.classList.remove("loading-text");
-    data.slice(0,3).forEach(m => el.appendChild(createMatchRow(m)));
+    data.slice(0, 3).forEach(m => el.appendChild(createMatchRow(m)));
+    applyStagger("#results .match", 100);
 };
 
 // Hero stat counters from /counts/
@@ -70,7 +79,7 @@ const animateCount = (el, target, suffix = '') => {
     const start = performance.now();
     const update = (now) => {
         const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
         const current = Math.floor(eased * rounded);
         el.textContent = current.toLocaleString() + suffix;
         if (progress < 1) requestAnimationFrame(update);
@@ -85,7 +94,7 @@ const populateHeroStats = () => {
             const matchEl  = document.getElementById('hero-matches');
             const playerEl = document.getElementById('hero-players');
             const teamEl   = document.getElementById('hero-teams');
-            if (matchEl)  animateCount(matchEl,  data.matches,  '+');
+            if (matchEl)  animateCount(matchEl,  data.matches, '+');
             if (playerEl) animateCount(playerEl, data.players, '+');
             if (teamEl)   animateCount(teamEl,   data.teams,   '+');
         })
@@ -118,6 +127,7 @@ fetch("https://api.csapi.de/rankings/")
         el.innerHTML = "";
         el.classList.remove("loading-text");
         data.rankings.slice(0, 10).forEach(r => el.appendChild(createRankItem(r)));
+        applyStagger("#rankings .rank-item", 50);
     })
     .catch(() => {
         document.getElementById("rankings").textContent = "Could not load rankings.";
@@ -132,12 +142,11 @@ fetch("https://api.csapi.de/matches/latest")
     });
 
 const ratingColor = (rating) => {
-    if (rating >= 1.3) return 'var(--win)';        // green
-    if (rating >= 1.15) return 'var(--yellow)';    // gold
-    if (rating >= 1.0) return 'var(--warning)';    // orange
-    return 'var(--danger)';                         // red
+    if (rating >= 1.3)  return 'var(--win)';
+    if (rating >= 1.15) return 'var(--yellow)';
+    if (rating >= 1.0)  return 'var(--warning)';
+    return 'var(--danger)';
 };
-
 
 const createLeaderboardRow = (p) => {
     const row = document.createElement("div");
@@ -161,7 +170,6 @@ const createLeaderboardRow = (p) => {
         </div>
     `;
 
-    // After inserting, trigger the animation
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             row.querySelector('.lb-rating-fill').style.width = `${barPct}%`;
@@ -192,8 +200,8 @@ fetch("https://api.csapi.de/players/stats?limit=10")
         `;
         el.classList.remove("loading-text");
         data.forEach(p => el.appendChild(createLeaderboardRow(p)));
+        applyStagger("#leaderboard .leaderboard-row", 50);
     })
-
     .catch(() => {
         document.getElementById("leaderboard").textContent = "Could not load leaderboard.";
     });

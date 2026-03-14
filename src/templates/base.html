@@ -1,37 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}CS API{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/static/icon/favicon.svg" type="image/svg+xml">
-    <style>
-        {% include "includes/css/variables.css" %}
-        {% include "includes/css/styles.css" %}
-        {% include "includes/css/animation.css" %}
-    </style>
-    {% block extra_css %}{% endblock %}
+  <meta charset="UTF-8" />
+  <title>{% block title %}CS API{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/static/icon/favicon.svg" type="image/svg+xml">
+
+  <!--
+    Inline theme script — intentionally NOT deferred.
+    Reads localStorage and sets data-theme before the browser paints,
+    preventing a flash of the default theme on page load.
+    Must stay in <head>, must stay inline. This is the one legitimate
+    use case for a blocking inline script.
+  -->
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&display=swap">
+
+  <!-- Core styles -->
+  <link rel="stylesheet" href="/static/css/variables.css">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/animation.css">
+
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <header>
-        <div class="wrap">
-            {% include "includes/header.html" %}
-        </div>
-    </header>
-
+  <header>
     <div class="wrap">
-        {% block content %}{% endblock %}
+      {% include "includes/header.html" %}
     </div>
+  </header>
 
-    <footer>
-        <div class="wrap">
-            {% include "includes/footer.html" %}
-        </div>
-    </footer>
+  <div class="wrap">
+    {% block content %}{% endblock %}
+  </div>
 
-    <script>
-        {% include "includes/js/base.js" %}
-    </script>
-    {% block scripts %}{% endblock %}
+  <footer>
+    <div class="wrap">
+      {% include "includes/footer.html" %}
+    </div>
+  </footer>
+
+  <script src="/static/js/base.js" defer></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,77 @@
+# src/content/predict/page.yaml
+# All user-facing content for the Matchup Predictor page.
+# Referenced in templates as {{ content.* }}
+
+# ── Hero section ──────────────────────────────────────────────
+hero:
+  label: "CS2 · Match Predictor"
+  title: "WIN PROBABILITY"
+  description: >
+    Select two teams to simulate match outcomes using per-map
+    Bradley-Terry strength ratings and global rankings.
+
+# ── Match setup card ──────────────────────────────────────────
+setup:
+  title: "Match Setup"
+
+  team_a:
+    label: "Team A"
+    placeholder: "Search team..."
+
+  team_b:
+    label: "Team B"
+    placeholder: "Search team..."
+
+  format:
+    label: "Format"
+    options:
+      - label: "BO1"
+        value: 1
+        default: false
+      - label: "BO3"
+        value: 3
+        default: true
+      - label: "BO5"
+        value: 5
+        default: false
+
+  rankings_toggle:
+    label: "Include VRS"
+
+  advanced:
+    toggle_label: "▼ Advanced settings"
+    fields:
+      - id: "alphaSlider"
+        label: "Alpha"
+        tooltip: "Blend weight between rankings and map stats"
+        type: "range"
+        min: 0
+        max: 1
+        step: 0.01
+        default: 0.30
+        display_id: "alphaVal"
+      - id: "tauSlider"
+        label: "Tau"
+        tooltip: "Draft randomness — lower means more deterministic picks"
+        type: "range"
+        min: 0.01
+        max: 1
+        step: 0.01
+        default: 0.20
+        display_id: "tauVal"
+      - id: "nSimInput"
+        label: "Simulations"
+        tooltip: null
+        type: "number"
+        min: 1000
+        max: 100000
+        step: 1000
+        default: 10000
+
+  predict_btn: "Predict"
+
+# ── Result card ───────────────────────────────────────────────
+result:
+  title: "Result"
+  empty_message: "Select two teams to see predictions"
+  distribution_label: "Outcome distribution"

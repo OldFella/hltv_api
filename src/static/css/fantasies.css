@@ -1,0 +1,169 @@
+/* ===== FANTASY LIST PAGE ===== */
+
+/* ── Search input ── */
+.search-input {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: var(--chrome);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2);
+}
+
+.search-input::placeholder { color: var(--muted); }
+
+/* ── Result count ── */
+.fantasy-count {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.fantasy-count-num { color: var(--accent); }
+
+/* ── List ── */
+#folderList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Fantasy item ── */
+.fantasy-item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  opacity: 0;
+  animation-name: fadeIn;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease;
+  animation-delay: var(--stagger-delay, 0s);
+}
+
+.fantasy-item.animate {
+  animation-name: fadeIn;
+}
+
+.fantasy-item:hover {
+  background: var(--chrome);
+  border-color: var(--border-bright);
+  transform: translateX(2px);
+}
+
+.fantasy-num {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-align: center;
+}
+
+.fantasy-name {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+
+.fantasy-item:hover .fantasy-name { color: var(--text-bright); }
+
+.fantasy-arrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.fantasy-item:hover .fantasy-arrow {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+/* ── Empty state ── */
+#emptyMessage { padding: 24px 0; text-align: center; }
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.page-btn {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  min-width: 32px;
+  text-align: center;
+}
+
+.page-btn:hover:not(:disabled) {
+  color: var(--text-bright);
+  border-color: var(--border-bright);
+  background: var(--chrome);
+}
+
+.page-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.page-nav { color: var(--accent); }
+
+.page-gap {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 5px 4px;
+}

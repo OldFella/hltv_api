@@ -28,6 +28,17 @@
 | `GET /teams/{teamid}/matchhistory` | `limit=5`, `offset=0` | |
 | `GET /teams/{teamid}/stats` | `start_date`, `end_date` (default: last 3 months) | per-map win/loss counts across all active maps |
 
+### Predict `src/routers/predict.py`
+| Endpoint | Params | Notes |
+|---|---|---|
+| `GET /predict/{team_id_a}/{team_id_b}` | `start_date`, `end_date` (default: last 3 months) | returns `MatchupProbabilities` |
+
+`MatchupProbabilities`:
+- `map_win_probs: list[float]` — per-map Bradley-Terry win probabilities (server-side)
+- `ranking_win_prob: float` — win probability from HLTV ranking points (server-side)
+- Client blends: `alpha * ranking_win_prob + (1 - alpha) * map_win_probs[i]`
+- Client runs Monte Carlo simulation via `simulation.js`
+
 ### Matches `src/routers/matches.py`
 | Endpoint | Params | Notes |
 |---|---|---|
@@ -79,6 +90,8 @@
 | `PlayerDetail(Item)` | `{id, name, team: Item, stats: PlayerStats}` |
 | `PlayerGroupedStats` | `{id, name, k, d, swing, adr, kast, rating, N}` |
 | `PlayerAggregatedStats(Item)` | `{id, name, rank, k, d, swing, adr, kast, rating, N}` |
+| `TeamMapStats` | `{id, name, n, n_wins}` |
+| `MatchupProbabilities` | `{map_win_probs: list[float], ranking_win_prob: float}` |
 
 ### Ports `src/domain/ports.py`
 | Port | Methods |
@@ -86,7 +99,7 @@
 | `ReadPort[T]` | `get_all() -> list[T]`, `get_one(id) -> T \| None` |
 | `RankingsPort` | `get_rankings(date) -> Ranking \| None` |
 | `CountsPort` | `get_counts() -> CountResponse` |
-| `TeamsPort` | `get_all()`, `get_one(id)`, `get_matchhistory()`, `get_stats()` |
+| `TeamsPort` | `get_all_fuzzy(name, limit, offset)`, `get_one(teamid, start_date, end_date)`, `get_matchhistory(teamid, limit, offset)`, `get_stats(teamid, start_date, end_date)` |
 | `PlayersPort` | `get_all_fuzzy(name, limit, offset)`, `get_one(playerid, start_date, end_date)`, `get_stats(mapid, sideid, limit, offset)`, `get_stats_by_outcome(outcome, mapid, limit, offset)`, `get_grouped_stats(playerid, group, mapid, start_date, end_date)`, `get_aggregated_stats(mapid, sideid, limit, offset, min_played)` |
 
 ### Errors `src/domain/errors.py`
@@ -100,10 +113,14 @@
 | `get_one` | `(port: ReadPort[T], id: int, label: str) -> T` |
 | `get_rankings` | `(port: RankingsPort, date: date \| None = None) -> Ranking` |
 | `get_counts` | `(port: CountsPort) -> CountResponse` |
-| `get_all_fuzzy` | `(port: PlayersPort, name, limit, offset) -> list[Item]` |
+| `get_all_fuzzy` | `(port: TeamsPort \| PlayersPort, name, limit, offset) -> list[Item]` |
+| `get_team` | `(port: TeamsPort, teamid, start_date, end_date) -> TeamDetail` |
+| `get_team_matchhistory` | `(port: TeamsPort, teamid, limit, offset) -> list[MatchResult]` |
+| `get_team_stats` | `(port: TeamsPort, teamid, start_date, end_date) -> list[TeamMapStats]` |
+| `get_map_win_probs` | `(teams_port: TeamsPort, rankings_port: RankingsPort, team_id_a, team_id_b, start_date, end_date) -> MatchupProbabilities` |
 | `get_player` | `(port: PlayersPort, playerid, start_date, end_date) -> PlayerDetail` |
-| `get_player_stats` | `(port: PlayersPort, mapid, sideid, limit, offset) -> list[PlayerStatRow]` — calls `port.get_raw_stats` |
-| `get_player_stats_by_outcome` | `(port: PlayersPort, outcome, mapid, limit, offset) -> list[PlayerStatRow]` — calls `port.get_raw_stats_by_outcome` |
+| `get_player_stats` | `(port: PlayersPort, mapid, sideid, limit, offset) -> list[PlayerStatRow]` |
+| `get_player_stats_by_outcome` | `(port: PlayersPort, outcome, mapid, limit, offset) -> list[PlayerStatRow]` |
 | `get_player_grouped_stats` | `(port: PlayersPort, playerid, group, mapid, start_date, end_date) -> list[PlayerGroupedStats]` |
 | `get_aggregated_stats` | `(port: PlayersPort, mapid, sideid, limit, offset, min_played) -> list[PlayerAggregatedStats]` |
 
@@ -118,6 +135,11 @@
 | `SqlAlchemyRankingsAdapter` | `RankingsPort` | derives rank via `RANK() OVER (ORDER BY points DESC)`; defaults to `max(date)` when no date passed |
 | `SqlAlchemyFantasyAdapter` | `ReadPort[Fantasy]` | `get_all` uses `query_all` helper; `get_one` runs two queries + groups players by team |
 | `SqlAlchemyCountsAdapter` | `CountsPort` | three count queries; returns `CountResponse` |
+
+### `src/adapters/sqlalchemy_teams.py`
+| Adapter | Implements | Notes |
+|---|---|---|
+| `SqlAlchemyTeamsAdapter` | `TeamsPort` | `get_all_fuzzy`, `get_one`, `get_matchhistory`, `get_stats` |
 
 ### `src/adapters/sqlalchemy_players.py`
 | Adapter | Implements | Notes |
@@ -137,6 +159,15 @@
 |---|---|
 | `add_fuzzy_filter(col, value, filters, order_bys, threshold=0.3)` | appends pg_trgm similarity filter + ordering when value is provided |
 | `query_all_fuzzy(conn, table, id_col, name_col, name, limit, offset)` | shared fuzzy name search helper used by players and teams adapters |
+
+---
+
+## Math / Model `src/utils/stats.py`
+Pure math helpers used by `get_map_win_probs` use case:
+- `strength_maps(n_wins, n, c=5, K=400)` — Bradley-Terry strength from map stats with Laplace smoothing
+- `ranking_strength(points, K=400)` — `(points / 1000) * K`
+- `bradley_terry(R_i, R_j, base=10, K=400)` — win probability from strengths
+- `softmax_t(x, tau)` — temperature softmax for map draft simulation
 
 ---
 
@@ -174,10 +205,6 @@
 - `GROUP_CONFIG` — maps format mode to id/name field names: `players`, `players_w_teams`, `maps`, `sides`, `events`
 - `default_date_range()` — returns `(today - 3 months, today)`
 - `format_stats(rows, group)` — rounds stats to 3dp, reshapes via `GROUP_CONFIG`, appends `maps_played` from `n`
-- `build_team_query(playerid)` — resolves current team from player's most recent match
-- `build_player_stats_query(...)` — migrated to `query_player_stats` in `sqlalchemy_players.py`
-- `build_outcome_query()` — migrated to `query_outcomes` in `sqlalchemy_players.py`
-- `build_player_stats_query_outcome(...)` — migrated to `query_player_stats_by_outcome` in `sqlalchemy_players.py`
 
 ### `src/repositories/team_repository.py`
 - `build_team_stats_query(teamid, start_date, end_date)`:
@@ -206,7 +233,24 @@ Every route passes `current_page` string to templates for active nav highlightin
 - Rankings: top 10 from `GET /rankings/`, staggered fade-in from right
 - Matches: 3 most recent from `GET /matches/latest`, staggered fade-in from left; each card shows team names, ranks (`#N`), series score, map chips with per-map scores
 - API banner below cards linking to `api.csapi.de/docs`
-- Endpoints card removed from homepage
+
+### Predict Page (`/matchup-predictor`)
+- **Template:** `templates/predict.html` extends `base.html`
+- **Layout:** Two-card `home-grid` — Match Setup + Result
+- **Features:** Team autocomplete search, BO1/3/5 format selector, rankings toggle, advanced settings (alpha slider + tooltip, tau slider + tooltip, n_simulations number input)
+- **Flow:** `GET /predict/{a}/{b}` → client blends with alpha → `mc_sim()` → `outcomeToResult()` → animated bars
+- **Outcome order:** `2-0, 2-1, 1-2, 0-2` — sorted in `outcomeToResult` by score descending
+- **Bar width:** Scaled relative to max probability outcome (not raw %)
+- **Tooltips:** `.tooltip` with `data-tip` attribute; appears to the right, width 160px, stays within card
+
+---
+
+## Frontend Design System
+- **Theme:** CS2 tactical dark theme with gold accent (`--accent`), cyan secondary
+- **Fonts:** `--font-display` (Bebas Neue), `--font-mono` (DM Mono), `--font-body`
+- **Components:** `.hero`, `.card`, `.card-title`, `.section-label`, `.badge`, `.panel`, `.button`, `.nav-link`, `.home-grid`
+- **Mobile:** Burger button (staggered 3-line design) → right-side sliding sidebar (280px) with overlay backdrop; sidebar links have left accent border on active
+- **CSS variables:** `--bg`, `--surface`, `--surface-2`, `--chrome`, `--border`, `--border-bright`, `--accent`, `--accent-rgb`, `--muted`, `--text`, `--text-bright`, `--win`, `--danger`, `--cyan`
 
 ---
 
@@ -215,15 +259,15 @@ Every route passes `current_page` string to templates for active nav highlightin
 | File | Purpose |
 |---|---|
 | `variables.css` | CSS custom properties / design tokens |
-| `styles.css` | Global layout, header, hero, cards, buttons, footer |
+| `styles.css` | Global layout, header, hero, cards, buttons, footer, sidebar |
 | `matches.css` | Match cards, score rows, map chips, rankings panel |
 | `animation.css` | All keyframe animations; matches fade left, rankings fade right |
-| `theme-toggle.css` | Theme toggle button styles (merge into styles.css) |
-| `base.js` | Theme toggle logic, last-updated fetch |
+| `base.js` | Theme toggle logic, last-updated fetch, mobile sidebar open/close |
 | `main.js` | Homepage: fetches counts, rankings, matches; renders cards |
-| `header.html` | Header template with crosshair logo + nav |
+| `simulation.js` | Client-side MC simulation ES module: `mc_sim`, `outcomeToResult`, `scoreToLabel` |
+| `header.html` | Header template with crosshair logo + nav + burger button |
 | `footer.html` | Footer template |
-| `base.html` | Base template; inlines CSS/JS via `{% include %}`; applies saved theme before render to prevent flash |
+| `base.html` | Base template; inlines CSS/JS via `{% include %}`; sidebar markup included |
 
 ---
 
@@ -242,6 +286,13 @@ Every route passes `current_page` string to templates for active nav highlightin
 
 ---
 
+## Tests
+- `TestClient(app, raise_server_exceptions=False)` — required to test 500 responses without re-raising
+- Teams router tests mock `src.routers.teams.use_cases.*` functions
+- Test fixtures use domain model objects (`TeamDetail`, `MatchResult`, etc.) as mock return values
+
+---
+
 ## Dev Commands
 ```bash
 uvicorn src.main:app --reload --host 0.0.0.0 --port 8000   # local dev
@@ -249,3 +300,10 @@ pip install -r requirements-dev.txt
 pytest / pytest -v
 ```
 Config: `.env` + `src/core/.env`
+
+---
+
+## Pending / Future Work
+- Single-elimination bracket simulator (exact probability propagation)
+- HLTV fantasy player performance prediction
+- Wire remaining nav links (Teams, Matches, Players, Rankings pages)

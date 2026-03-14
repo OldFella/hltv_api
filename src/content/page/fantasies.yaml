@@ -1,0 +1,9 @@
+# src/content/page/fantasies.yaml
+
+page_title: "Available Fantasy Spreadsheets"
+
+search:
+  placeholder: "Search fantasies..."
+  label: "Search"
+
+empty_message: "No fantasies match your search."
