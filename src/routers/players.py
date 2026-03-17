@@ -13,13 +13,10 @@ from src.domain.use_cases import (
     get_aggregated_stats,
 )
 from src.adapters.sqlalchemy_players import SqlAlchemyPlayersAdapter
-from dateutil.relativedelta import relativedelta
+
+from src.utils.helpers import default_date_range
 
 router = APIRouter(prefix='/players', tags=['players'])
-
-
-def default_date_range() -> tuple[date, date]:
-    return date.today() - relativedelta(months=3), date.today()
 
 
 @router.get("/", response_model=list[Item], summary="List players")

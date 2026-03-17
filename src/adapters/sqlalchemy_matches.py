@@ -1,7 +1,8 @@
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import aliased
+from sqlalchemy.engine import Connection
+from dataclasses import dataclass
 
-from src.db.session import engine
 from src.db.classes import (
     teams, sides, maps, 
     matches, match_overview, 
@@ -10,10 +11,44 @@ from src.db.classes import (
 )
 from src.domain.models import (
     MatchResult, TeamScore,
-    MapScore, Item
+    MapScore, Item, MatchPlayerStats,
+    PlayerMatchStats, MatchTeamStats
 )
 
 from src.adapters.sqlalchemy_players import FIELDS
+from src.domain.ports import MatchPort
+
+@dataclass
+class SqlAlchemyMatchesAdapter(MatchPort):
+    conn: Connection
+
+    def get_all(self, offset:int, limit:int) -> list[MatchResult]:
+        stmnt = query_matches(limit = limit, offset = offset)
+        rows = self.conn.execute(stmnt).mappings().all()
+        if not rows:
+            return None
+        return format_matches(rows)
+
+
+    def get_one(self, matchid:int) -> MatchResult:
+        stmnt = query_matches(matchid = matchid)
+        rows = self.conn.execute(stmnt).mappings().all()
+        if not rows:
+            return None
+        return format_matches(rows)[0]
+    
+    def get_player_stats(self, matchid:int, by_map: bool) -> list[MatchPlayerStats]:
+        stmnt = query_player_stats(matchid = matchid, by_map = by_map)
+        rows = self.conn.execute(stmnt).mappings().all()
+        if not rows:
+            return []
+        return format_player_stats(rows, by_map = by_map)
+        
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 
 def _parse_maps(raw_maps: list) -> tuple[list, int, int]:
@@ -99,6 +134,44 @@ def format_matches(rows)->list[dict]:
         ))
 
     return result
+
+
+def format_player_stats(rows, by_map: bool):
+    result = []
+    for row in rows:
+        teams = {}
+        for p in row['player_stats']:
+            tid = p['team_id']
+            if tid not in teams:
+                teams[tid] = {'id': tid, 'name': p['team_name'], 'players': []}
+            
+            teams[tid]['players'] += [PlayerMatchStats(
+                id= p['player_id'],
+                name = p['player_name'],
+                k=p['k'],
+                d=p['d'],
+                swing=p['roundswing'],
+                adr=p['adr'],
+                kast=p['kast'],
+                rating=p['rating']
+            )]
+        
+        team_items = sorted(list(teams.values()), key=lambda t: t['id'])
+        for i, team in enumerate(team_items):
+            team_stats = MatchTeamStats(id = team['id'], name = team['name'], players = team['players'])
+            team_items[i] = team_stats
+
+        result.append({
+            'id': row['map_id'],
+            'name': row['map_name'],
+            'team1': team_items[0],
+            'team2': team_items[1]
+        })
+    return result
+
+# ---------------------------------------------------------------------------
+# Query Builders
+# ---------------------------------------------------------------------------
 
 
 def query_roster(
@@ -246,5 +319,41 @@ def query_matches(
             .order_by(match_overview.date.desc(),r1.c.rank)
             .offset(offset)
             .limit(limit)
+    )
+    return stmnt
+
+def query_player_stats(matchid: int, by_map: bool):
+
+    ps = aliased(player_stats)
+
+    selects_array = [ 
+                'player_id',ps.playerid,
+                'player_name',players.name,
+                'team_id', ps.teamid,
+                'team_name', teams.name
+    ]
+    selects_array_fields = [[col, getattr(ps, col)] for col in FIELDS.values()]
+    for f in selects_array_fields:
+        selects_array += f
+
+    selects = [
+        ps.mapid.label('map_id'),
+        maps.name.label('map_name'),
+        func.array_agg(
+            func.json_build_object(*selects_array)
+        ).label("player_stats")
+    ]
+
+    filters = [ps.matchid == matchid, ps.sideid == 0]
+    if not by_map:
+        filters += [ps.mapid == 0]
+
+    stmnt = (
+        select(*selects)
+        .join(players, players.playerid == ps.playerid)
+        .join(teams, teams.teamid == ps.teamid)
+        .join(maps, ps.mapid == maps.mapid)
+        .group_by(maps.name, ps.mapid)
+        .where(*filters)
     )
     return stmnt

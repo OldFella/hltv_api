@@ -5,7 +5,7 @@ from src.domain.models import (
     PlayerGroupedStats, Item,
     PlayerAggregatedStats,
     TeamDetail, MatchResult,
-    TeamMapStats,
+    TeamMapStats, MatchPlayerStats
 )
 from datetime import date
 
@@ -102,3 +102,8 @@ class TeamsPort(Protocol):
         end_date: date,
         ) -> list[TeamMapStats]: ...
  
+
+class MatchPort(Protocol):
+    def get_all(self, offset:int, limit:int) -> list[MatchResult]:...
+    def get_one(self, matchid: int) -> MatchResult:...
+    def get_player_stats(self, matchid: int, by_map: bool)-> MatchPlayerStats:...

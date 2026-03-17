@@ -1,12 +1,12 @@
 from src.domain.errors import NotFoundError
 from typing import TypeVar, Literal
-from src.domain.ports import ReadPort, RankingsPort, CountsPort, PlayersPort, TeamsPort
+from src.domain.ports import ReadPort, RankingsPort, CountsPort, PlayersPort, TeamsPort, MatchPort
 from src.domain.models import (
     Ranking, Item, CountResponse,
     PlayerDetail, PlayerStatRow,
     PlayerGroupedStats, PlayerAggregatedStats,
     TeamDetail, TeamMapStats, MatchResult,
-    MatchupProbabilities,
+    MatchupProbabilities, MatchPlayerStats
 )
 from src.utils.stats import strength_maps, strength_ranking, bradley_terry
 
@@ -162,6 +162,31 @@ def get_team_stats(
     end_date: date,
     ) -> list[TeamMapStats]:
     return port.get_stats(teamid, start_date, end_date)
+
+# --- Matches ---
+
+def get_all_matches(
+    port: MatchPort,
+    offset: int,
+    limit: int,
+    ):
+    return port.get_all(offset, limit)
+
+def get_match(
+    port: MatchPort,
+    matchid: int,
+    ):
+    match = port.get_one(matchid)
+    if not match:
+        raise NotFoundError(f"Match {matchid}")
+    return match
+
+def get_match_player_stats(
+    port: MatchPort,
+    matchid: int,
+    by_map: bool,
+    ) -> list[MatchPlayerStats]:
+    return port.get_player_stats(matchid, by_map)
 
 # --- predict ---
 

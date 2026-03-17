@@ -1,77 +1,79 @@
 from typing import Optional
-from fastapi import APIRouter, Query
-from src.db.models import MatchResponse, MatchStats
-from src.repositories.base import execute_query
-from src.repositories.match_repository import (
-    build_match_query, format_matches, 
-    build_match_stats_query, 
-    format_match_stats
+from fastapi import APIRouter, Query, Depends
+from src.db.get_db import get_db
+from src.domain.models import(
+    MatchResult,
+    MatchPlayerStats,
 )
+from sqlalchemy.engine import Connection
+
+from src.domain.use_cases import (
+    get_all_matches,
+    get_match,
+    get_match_player_stats,
+)
+from src.adapters.sqlalchemy_matches import SqlAlchemyMatchesAdapter
+
 router = APIRouter(prefix = '/matches',
                    tags = ['matches'])
 
 
 
-def get_matches(limit, offset):
-    stmnt = build_match_query(limit = limit, offset = offset)
-
-    rows = execute_query(stmnt)
-
-    return format_matches(rows)
-
-@router.get("/", response_model=list[MatchResponse], summary="List matches")
-async def get_all_matches(
+@router.get("/", response_model=list[MatchResult], summary="List matches")
+def list_all_matches(
     limit: Optional[int] = Query(100, description="Limit number of entries"),
-    offset: Optional[int] = Query(0, description="Limit number of entries")
-    ) -> list[MatchResponse]:
+    offset: Optional[int] = Query(0, description="Limit number of entries"),
+    connection: Connection = Depends(get_db),
+    ) -> list[MatchResult]:
     """
     Returns a paginated list of all professional CS matches.
 
     - **limit**: number of results to return (default 100)
     - **offset**: pagination offset (default 0)
     """
-    return get_matches(limit = limit, offset = offset)
+    adapter = SqlAlchemyMatchesAdapter(connection)
+    m = get_all_matches(adapter, offset, limit)
+    return m
 
-@router.get("/latest", response_model=list[MatchResponse], summary="Latest match results")
-async def get_latest_matches(
+@router.get("/latest", response_model=list[MatchResult], summary="Latest match results")
+def get_latest_matches(
     limit: Optional[int] = Query(10, description="Limit number of entries"),
-    offset: Optional[int] = Query(0, description="Limit number of entries")
-    ) -> list[MatchResponse]:
+    offset: Optional[int] = Query(0, description="Limit number of entries"),
+    connection: Connection = Depends(get_db),
+    ) -> list[MatchResult]:
     """
     Returns the most recent professional CS match results.
     - **limit**: number of results to return (default 10)
     - **offset**: pagination offset (default 0)
     """
+    adapter = SqlAlchemyMatchesAdapter(connection)
+    return get_all_matches(adapter, offset, limit)
 
-    return get_matches(limit=limit, offset=offset)
 
-@router.get("/{matchid}", response_model=MatchResponse, summary="Match details")
-async def get_match_results(matchid:int) -> MatchResponse:
+@router.get("/{matchid}", response_model=MatchResult, summary="Match details")
+def get_match_results(matchid:int, connection: Connection = Depends(get_db)) -> MatchResult:
     """
     Returns detailed results for a specific match including map scores and winner.
 
     - **matchid**: unique match ID
     """
+    adapter = SqlAlchemyMatchesAdapter(connection)
 
-    stmnt = build_match_query(matchid = matchid)
-
-    rows = execute_query(stmnt)
-
-    return format_matches(rows)[0]
+    return get_match(adapter, matchid)
 
 
 @router.get("/{matchid}/stats", summary="Match player stats")
-async def get_match_stats(
+def get_match_stats(
     matchid: int,
-    by_map: bool = Query(False, description="Break down stats per map")
-)->list[MatchStats]:
+    by_map: bool = Query(False, description="Break down stats per map"),
+    connection: Connection = Depends(get_db),
+)->list[MatchPlayerStats]:
     """
     Returns player stats for both teams in a specific match.
 
     - **matchid**: unique match ID
     - **by_map**: if true, returns stats broken down per map
     """
-    stmnt = build_match_stats_query(matchid=matchid, by_map=by_map)
-    rows = execute_query(stmnt)
+    adapter = SqlAlchemyMatchesAdapter(connection)
 
-    return format_match_stats(rows, by_map=by_map)
+    return get_match_player_stats(adapter, matchid, by_map)

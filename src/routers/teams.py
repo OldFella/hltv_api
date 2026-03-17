@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Query, Depends
-from datetime import date, timedelta
+from datetime import date
 from sqlalchemy.engine import Connection
 from src.db.get_db import get_db
 from src.domain import use_cases
 from src.domain.models import Item, TeamDetail, MatchResult, TeamMapStats
 from src.adapters.sqlalchemy_teams import SqlAlchemyTeamsAdapter
-from src.routers.players import default_date_range
+
+from src.utils.helpers import default_date_range
+
+
 router = APIRouter(prefix='/teams', tags=['teams'])
 
 @router.get("/", response_model=list[Item])

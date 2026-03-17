@@ -143,6 +143,33 @@ class MatchResult:
     winner: Item
 
 @dataclass
+class PlayerMatchStats:
+    id: int
+    name: str
+    k: int
+    d: int
+    swing: float
+    adr: float
+    kast: float
+    rating: float
+
+@dataclass 
+class MatchTeamStats:
+    id: int
+    name: str
+    players: list[PlayerMatchStats]
+
+@dataclass
+class MatchPlayerStats:
+    id: int
+    name: str
+    team1: MatchTeamStats
+    team2: MatchTeamStats
+
+
+
+
+@dataclass
 class MatchupProbabilities:
     map_win_probs: list[float]
     ranking_win_prob: float
