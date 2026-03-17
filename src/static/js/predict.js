@@ -4,7 +4,7 @@ const BASE_URL = 'https://api.csapi.de';
 
 // ===== STATE =====
 let selectedA = null, selectedB = null, bestOf = 3;
-let useRankings = true, alpha = 0.3, tau = 0.2, nSim = 10000;
+let useRankings = true, alpha = 0.7, tau = 0.2, nSim = 10000;
 
 // ===== CACHED DOM REFS =====
 const predictBtn      = document.getElementById('predictBtn');

@@ -48,7 +48,7 @@ setup:
         min: 0
         max: 1
         step: 0.01
-        default: 0.30
+        default: 0.80
         display_id: "alphaVal"
       - id: "tauSlider"
         label: "Tau"
