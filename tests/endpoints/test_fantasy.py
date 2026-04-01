@@ -3,7 +3,7 @@ import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
 from src.main import app
-from tests.endpoints.schemas import assert_item, assert_fantasy_response
+from tests.endpoints.schemas import assert_item, assert_fantasy_response, assert_fantasy_item_response
 
 class TestFantasyEndpoints:
 
