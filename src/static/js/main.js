@@ -1,6 +1,15 @@
 const getScoreClass = (a, b) =>
     a > b ? "green-score" : a < b ? "red-score" : "neutral-score";
 
+const formatMatchDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    }).toUpperCase();
+};
+
 const createMatchRow = (m) => {
     const row = document.createElement("div");
     row.className = "match";
@@ -19,7 +28,7 @@ const createMatchRow = (m) => {
     row.innerHTML = `
         <div class="match-meta">
             <span class="match-event">${m.event}</span>
-            <span class="match-date">${m.date}</span>
+            <span class="match-date">${formatMatchDate(m.date)}</span>
         </div>
         <div class="match-scores">
             <div class="team team-left ${m.winner.id === m.team1.id ? 'team-winner' : ''}">
