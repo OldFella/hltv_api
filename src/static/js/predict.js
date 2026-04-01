@@ -96,7 +96,8 @@ rankingsToggle.addEventListener('click', () => {
 // ===== ADVANCED PANEL =====
 // Read the open/close prefix from the element itself so JS doesn't
 // need to know the label text — it's owned by the YAML/template.
-const advBaseLabel = advToggle.textContent.replace(/^[▲▼]\s*/, '').trim();
+const advBaseLabel = advToggle.textContent.replace(/[▲▼]/g, '').trim();
+advToggle.textContent = '▼ ' + advBaseLabel;
 
 advToggle.addEventListener('click', () => {
     const open = advPanel.classList.toggle('open');

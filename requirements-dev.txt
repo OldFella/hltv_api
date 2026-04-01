@@ -3,3 +3,5 @@ httpx
 pytest
 pytest-asyncio
 pytest-dotenv
+ua-parser
+user-agents

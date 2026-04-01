@@ -13,6 +13,7 @@ import os
 class TestDownloadFile:
     def setup_method(self, method):
         os.makedirs("static/downloads", exist_ok=True)
+        os.makedirs("static/downloads/notafile", exist_ok=True)
         with open("static/downloads/test.zip", "wb") as f:
             f.write(b"test content")
 
@@ -26,14 +27,8 @@ class TestDownloadFile:
         response = client.get("/download/test.zip")
         assert "test.zip" in response.headers["content-disposition"]
 
-
-@patch("src.routers.download.Path.is_file", return_value=False)
-@patch("src.routers.download.Path.exists", return_value=False)
-class TestDownloadFileNotFound:
-    def test_not_found(self, mock_exists, mock_is_file):
+    def test_not_found(self):
         assert client.get("/download/nonexistent.zip").status_code == 404
-
-    def test_file_exists_but_not_file(self, mock_exists, mock_is_file):
-        mock_exists.return_value = True
-        mock_is_file.return_value = False
+    
+    def test_file_exists_but_not_file(self):
         assert client.get("/download/notafile").status_code == 404

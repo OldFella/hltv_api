@@ -39,7 +39,7 @@ setup:
     label: "Include VRS"
 
   advanced:
-    toggle_label: "▼ Advanced settings"
+    toggle_label: "Advanced settings"
     fields:
       - id: "alphaSlider"
         label: "Alpha"

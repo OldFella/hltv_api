@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from fastapi.staticfiles import StaticFiles
@@ -99,3 +99,12 @@ async def about(request: Request):
     return templates.TemplateResponse(
         request, "about.html", ctx(request, "about")
     )
+
+@app.get("/robots.txt")
+async def robots():
+    return FileResponse("robots.txt")
+
+@app.get("/apple-touch-icon.png")
+@app.get("/apple-touch-icon-precomposed.png")
+async def apple_touch_icon():
+    return FileResponse("static/icon/apple-touch-icon.png")

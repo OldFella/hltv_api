@@ -44,6 +44,8 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./certs:/etc/letsencrypt
       - ./nginx/html:/var/www/certbot
+      - ./logs/nginx:/var/log/nginx
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - web
     networks:
