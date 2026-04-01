@@ -26,6 +26,7 @@ class TestFantasyEndpoints:
         assert r.status_code == 200
         data = r.json()
         assert data["id"] == fantasy_id
+        print(data)
         assert_fantasy_response(data)
 
     @pytest.mark.asyncio
