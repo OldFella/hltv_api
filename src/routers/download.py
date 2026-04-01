@@ -15,8 +15,6 @@ DOWNLOAD_DIR = Path("static/downloads")
 async def download_file(filename: str):
     file_path = DOWNLOAD_DIR / filename
 
-    print(not file_path.exists(), not file_path.is_file())
-
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="File not found")
 

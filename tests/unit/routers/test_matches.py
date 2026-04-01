@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from fastapi.testclient import TestClient
-from fastapi import HTTPException
+from src.domain.errors import NotFoundError
 from src.main import app
 
 client = TestClient(app)
@@ -36,86 +36,76 @@ MOCK_MATCH_STATS = [
 # GET /matches/
 # ---------------------------------------------------------------------------
 
-@patch("src.routers.matches.format_matches", return_value=[MOCK_MATCH])
-@patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH])
+@patch("src.routers.matches.get_all_matches", return_value=[MOCK_MATCH])
 class TestGetMatches:
-    def test_returns_200(self, mock_eq, mock_fm):
+    def test_returns_200(self,mock_gam):
         assert client.get("/matches/").status_code == 200
 
-    def test_returns_list(self, mock_eq, mock_fm):
+    def test_returns_list(self,mock_gam):
         assert isinstance(client.get("/matches/").json(), list)
 
-    def test_returns_correct_shape(self, mock_eq, mock_fm):
+    def test_returns_correct_shape(self,mock_gam):
         data = client.get("/matches/").json()[0]
         assert all(k in data for k in ["id", "maps", "team1", "team2", "best_of", "winner"])
 
-    def test_pagination(self, mock_eq, mock_fm):
+    def test_pagination(self,mock_gam):
         assert client.get("/matches/?limit=5&offset=0").status_code == 200
-
-
-@patch("src.routers.matches.execute_query", side_effect=HTTPException(status_code=404, detail="Item not found"))
-class TestGetMatchesNotFound:
-    def test_not_found(self, mock_eq):
-        assert client.get("/matches/").status_code == 404
 
 
 # ---------------------------------------------------------------------------
 # GET /matches/latest
 # ---------------------------------------------------------------------------
 
-@patch("src.routers.matches.format_matches", return_value=[MOCK_MATCH])
-@patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH])
+@patch("src.routers.matches.get_all_matches", return_value=[MOCK_MATCH])
 class TestGetLatestMatches:
-    def test_returns_200(self, mock_eq, mock_fm):
+    def test_returns_200(self, mock_gam):
         assert client.get("/matches/latest").status_code == 200
 
-    def test_returns_list(self, mock_eq, mock_fm):
+    def test_returns_list(self, mock_gam):
         assert isinstance(client.get("/matches/latest").json(), list)
 
-    def test_default_limit(self, mock_eq, mock_fm):
+    def test_default_limit(self, mock_gam):
         assert len(client.get("/matches/latest").json()) <= 10
 
 
 # ---------------------------------------------------------------------------
 # GET /matches/{matchid}
 # ---------------------------------------------------------------------------
-@patch("src.routers.matches.format_matches", return_value=[MOCK_MATCH])
-@patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH])
+@patch("src.routers.matches.get_match", return_value=MOCK_MATCH)
 class TestGetMatch:
-    def test_returns_200(self, mock_eq, mock_fm):
+    def test_returns_200(self, mock_gm):
         assert client.get("/matches/1").status_code == 200
 
-    def test_returns_correct_shape(self, mock_eq, mock_fm):
+    def test_returns_correct_shape(self, mock_gm):
         data = client.get("/matches/1").json()
         assert all(k in data for k in ["id", "maps", "team1", "team2", "best_of", "winner"])
 
-    def test_returns_single_object(self, mock_eq, mock_fm):
+    def test_returns_single_object(self, mock_gm):
         data = client.get("/matches/1").json()
         assert isinstance(data, dict)
 
 
-@patch("src.routers.matches.execute_query", side_effect=HTTPException(status_code=404, detail="Match not found"))
+@patch("src.routers.matches.get_match", side_effect=NotFoundError("Match 999999"))
 class TestGetMatchNotFound:
-    def test_not_found(self, mock_eq):
+    def test_not_found(self, mock_gm):
         assert client.get("/matches/999999").status_code == 404
 
 # ---------------------------------------------------------------------------
 # GET /matches/{matchid}/stats
 # ---------------------------------------------------------------------------
-@patch("src.routers.matches.format_match_stats", return_value=MOCK_MATCH_STATS)
-@patch("src.routers.matches.execute_query", return_value=[MOCK_MATCH_STATS])
+@patch("src.routers.matches.get_match_player_stats", return_value=MOCK_MATCH_STATS)
 class TestGetMatchStats:
-    def test_returns_200(self, mock_eq, mock_fms):
+    def test_returns_200(self, mock_gmps):
         assert client.get("/matches/1/stats").status_code == 200
 
-    def test_returns_list(self, mock_eq, mock_fms):
+    def test_returns_list(self, mock_gmps):
         assert isinstance(client.get("/matches/1/stats").json(), list)
 
-    def test_returns_correct_shape(self, mock_eq, mock_fms):
+    def test_returns_correct_shape(self, mock_gmps):
         data = client.get("/matches/1/stats").json()[0]
         assert all(k in data for k in ["id", "name", "team1", "team2"])
 
-    def test_by_map_param(self, mock_eq, mock_fms):
+    def test_by_map_param(self, mock_gmps):
         assert client.get("/matches/1/stats?by_map=true").status_code == 200
 
 
