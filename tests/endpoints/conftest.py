@@ -164,6 +164,8 @@ def setup_test_db():
         con.execute(rankings.__table__.insert().values([
             {"teamid": 1, "points": 1000, "date": "2026-01-01"},
             {"teamid": 2, "points": 850,  "date": "2026-01-01"},
+            {"teamid": 1, "points": 950,  "date": "2025-12-25"},
+            {"teamid": 2, "points": 900,  "date": "2025-12-25"},
         ]))
 
         # --- Fantasy ---
