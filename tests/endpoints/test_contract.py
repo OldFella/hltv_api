@@ -21,7 +21,13 @@ class TestAPIContract:
         "/rankings/",
     ])
     async def test_returns_json_content_type(self, client: AsyncClient, path: str):
+        if "rankings" in path:
+            from src.main import app
+            # If this isn't empty, someone mocked your dependency!
+            print(f"Overrides: {app.dependency_overrides}")
+            
         r = await client.get(path)
+        
         assert r.status_code == 200
         assert "application/json" in r.headers["content-type"]
 
