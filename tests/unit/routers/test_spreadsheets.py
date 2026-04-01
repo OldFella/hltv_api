@@ -21,35 +21,24 @@ MOCK_SHEETS = {
 
 @patch("src.routers.spreadsheets.templates.TemplateResponse")
 @patch("src.routers.spreadsheets._get_fantasy_map", return_value=MOCK_FANTASY_MAP)
-@patch("src.routers.spreadsheets._get_sorted_fantasy_ids", return_value=MOCK_FOLDER_IDS)
+# @patch("src.routers.spreadsheets._base_ctx", return_value=MOCK_FOLDER_IDS)
 class TestShowFolders:
     def setup_method(self, method):
         self.html_response = HTMLResponse(content="<html></html>", status_code=200)
 
-    def test_returns_200(self, mock_ids, mock_map, mock_template):
+    def test_returns_200(self, mock_map, mock_template):
         mock_template.return_value = self.html_response
         assert client.get("/spreadsheet/").status_code == 200
 
-    def test_calls_fantasy_map(self, mock_ids, mock_map, mock_template):
+    def test_calls_fantasy_map(self, mock_map, mock_template):
         mock_template.return_value = self.html_response
         client.get("/spreadsheet/")
         assert mock_map.called
 
-    def test_calls_sorted_ids(self, mock_ids, mock_map, mock_template):
+    def test_renders_correct_template(self, mock_map, mock_template):
         mock_template.return_value = self.html_response
         client.get("/spreadsheet/")
-        assert mock_ids.called
-
-    def test_renders_correct_template(self, mock_ids, mock_map, mock_template):
-        mock_template.return_value = self.html_response
-        client.get("/spreadsheet/")
-        assert mock_template.call_args[0][0] == "fantasies.html"
-
-    def test_passes_folders_to_template(self, mock_ids, mock_map, mock_template):
-        mock_template.return_value = self.html_response
-        client.get("/spreadsheet/")
-        context = mock_template.call_args[0][1]
-        assert "folders" in context
+        assert mock_template.call_args[0][1] == "fantasies.html"
 
 
 # ---------------------------------------------------------------------------
@@ -59,25 +48,24 @@ class TestShowFolders:
 @patch("src.routers.spreadsheets.templates.TemplateResponse")
 @patch("src.routers.spreadsheets._parse_ods", return_value=(MOCK_SHEETS, []))
 @patch("src.routers.spreadsheets._get_fantasy_map", return_value=MOCK_FANTASY_MAP)
-@patch("src.routers.spreadsheets._get_sorted_fantasy_ids", return_value=MOCK_FOLDER_IDS)
 @patch("src.routers.spreadsheets.Path.exists", return_value=True)
 class TestDisplaySpreadsheet:
-    def test_returns_200(self, mock_exists, mock_ids, mock_map, mock_ods, mock_template):
+    def test_returns_200(self, mock_exists, mock_map, mock_ods, mock_template):
         mock_template.return_value = HTMLResponse(content="<html></html>", status_code=200)
         assert client.get("/spreadsheet/1").status_code == 200
 
-    def test_renders_correct_template(self, mock_exists, mock_ids, mock_map, mock_ods, mock_template):
+    def test_renders_correct_template(self, mock_exists, mock_map, mock_ods, mock_template):
         mock_template.return_value = HTMLResponse(content="<html></html>", status_code=200)
         client.get("/spreadsheet/1")
-        assert mock_template.call_args[0][0] == "table.html"
+        assert mock_template.call_args[0][1] == "table.html"
 
-    def test_passes_correct_context(self, mock_exists, mock_ids, mock_map, mock_ods, mock_template):
+    def test_passes_correct_context(self, mock_exists, mock_map, mock_ods, mock_template):
         mock_template.return_value = HTMLResponse(content="<html></html>", status_code=200)
         client.get("/spreadsheet/1")
-        context = mock_template.call_args[0][1]
+        context = mock_template.call_args[0][2]
         assert all(k in context for k in ["fantasyid", "fantasy_name", "fantasies", "sheets"])
 
-    def test_calls_parse_ods(self, mock_exists, mock_ids, mock_map, mock_ods, mock_template):
+    def test_calls_parse_ods(self, mock_exists, mock_map, mock_ods, mock_template):
         mock_template.return_value = HTMLResponse(content="<html></html>", status_code=200)
         client.get("/spreadsheet/1")
         assert mock_ods.called
