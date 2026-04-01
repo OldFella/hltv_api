@@ -55,8 +55,8 @@ MAPS = [Item(id=1, name="Mirage"), Item(id=2, name="Inferno")]
 RANKING = Ranking(
     date=date(2024, 1, 1),
     rankings=[
-        TeamRank(id=1, name="NaVi", rank=1, points=900),
-        TeamRank(id=2, name="FaZe", rank=2, points=850),
+        TeamRank(id=1, name="NaVi", rank=1, rank_diff = 0, points=900, points_diff = 10),
+        TeamRank(id=2, name="FaZe", rank=2, rank_diff = 3, points=850, points_diff = -20),
     ]
 )
 FANTASY_ITEMS = [Item(id=1, name="Fantasy 1"), Item(id=2, name="Fantasy 2")]
