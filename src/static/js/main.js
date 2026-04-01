@@ -101,14 +101,32 @@ const populateHeroStats = () => {
         .catch(() => {});
 };
 
-// Rankings
 const createRankItem = (r) => {
     const item = document.createElement("div");
     item.className = `rank-item ${r.rank <= 3 ? 'top3' : ''}`;
+
+    // Logic: negative rank_diff = improvement (e.g. 5th to 3rd = -2)
+    const isImprovement = r.rank_diff < 0;
+    const isDrop = r.rank_diff > 0;
+    
+    const trendClass = isImprovement ? 'trend-up' : isDrop ? 'trend-down' : 'trend-flat';
+    const trendIcon = isImprovement ? '▲' : isDrop ? '▼' : '•';
+    const absDiff = Math.abs(r.rank_diff);
+
     item.innerHTML = `
         <div class="rank-num">${r.rank}</div>
-        <div class="rank-team">${r.name}</div>
-        <div class="rank-pts">${r.points.toLocaleString()} pts</div>
+        <div class="rank-team">
+            ${r.name}
+            <span class="rank-trend ${trendClass}">
+                ${trendIcon}${absDiff !== 0 ? absDiff : ''}
+            </span>
+        </div>
+        <div class="rank-pts">
+            <span class="pts-main">${r.points.toLocaleString()}</span>
+            <span class="pts-diff ${r.points_diff >= 0 ? 'pos' : 'neg'}">
+                ${r.points_diff >= 0 ? '+' : ''}${r.points_diff}
+            </span>
+        </div>
     `;
     return item;
 };

@@ -106,8 +106,6 @@ class SqlAlchemyRankingsAdapter(RankingsPort):
         grouped_data = [list(group) for _, group in groupby(rows, key=lambda x: x['date'])]
 
         if len(grouped_data) < 2:
-            # Handle case where only one date exists (no diff possible)
-            # You might want to return 0 for diffs here
             current_rows, previous_rows = grouped_data[0], grouped_data[0]
         else:
             current_rows, previous_rows = grouped_data[0], grouped_data[1]

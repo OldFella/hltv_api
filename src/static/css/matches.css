@@ -263,12 +263,50 @@
   text-overflow: ellipsis;
 }
 
-.rank-pts {
+/*  .rank-pts {
   font-family: var(--font-mono);
   font-size: 0.9rem;
   color: var(--muted);
-  white-space: nowrap;
+  white-space: nowrap; 
 }
+ */
+
+.rank-pts {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  align-items: flex-end;
+  justify-content: center; 
+  line-height: 1.1;       
+}
+
+.pts-main {
+  font-size: 0.9rem;
+  color: var(--text-bright);
+  line-height: 1;
+}
+
+.pts-diff {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Color utility for point differences */
+.pts-diff.pos { color: var(--win); }    
+.pts-diff.neg { color: var(--danger); }
+
+/* Trend indicators (the little arrows next to the name) */
+.rank-trend {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.trend-up   { color: var(--win); }
+.trend-down { color: var(--danger); }
+.trend-flat { color: var(--muted); opacity: 0.5; }
 
 /* ===== LEADERBOARD ===== */
 .leaderboard-card {
