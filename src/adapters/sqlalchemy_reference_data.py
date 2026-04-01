@@ -101,6 +101,8 @@ class SqlAlchemyRankingsAdapter(RankingsPort):
 
         if not rows:
             return None
+        
+        print(rows)
 
         from itertools import groupby
         grouped_data = [list(group) for _, group in groupby(rows, key=lambda x: x['date'])]
