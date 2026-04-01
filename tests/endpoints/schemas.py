@@ -137,6 +137,13 @@ def assert_fantasy_team(obj: dict):
         assert_fantasy_player(p)
 
 
+def assert_fantasy_item_response(obj: dict):
+     """{ id: int, name: str, salary_cap: int, currency: str,
+         teams: FantasyTeams[] }"""
+    assert isinstance(obj["id"], int)
+    assert isinstance(obj["name"], str)
+
+    
 def assert_fantasy_response(obj: dict):
     """{ id: int, name: str, salary_cap: int, currency: str,
          teams: FantasyTeams[] }"""

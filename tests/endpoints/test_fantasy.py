@@ -27,7 +27,7 @@ class TestFantasyEndpoints:
         data = r.json()
         assert data["id"] == fantasy_id
         print(data)
-        assert_fantasy_response(data)
+        assert_fantasy_item_response(data)
 
     @pytest.mark.asyncio
     async def test_fantasy_salary_cap_and_costs_are_integers(self, client: AsyncClient):
