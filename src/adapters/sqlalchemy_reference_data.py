@@ -78,7 +78,7 @@ class SqlAlchemyRankingsAdapter(RankingsPort):
         date_sq = (
             select(distinct(rankings.date))
             .where(*date_filter)
-            .order_by(rankings.date.desc()).limit(2).subquery()
+            .order_by(rankings.date.desc()).limit(2).scalar_subquery()
         )
 
         stmnt = (
