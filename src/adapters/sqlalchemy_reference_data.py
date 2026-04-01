@@ -104,7 +104,7 @@ class SqlAlchemyRankingsAdapter(RankingsPort):
 
         from itertools import groupby
         grouped_data = [list(group) for _, group in groupby(rows, key=lambda x: x['date'])]
-
+        print(grouped_data)
         if len(grouped_data) < 2:
             current_rows, previous_rows = grouped_data[0], grouped_data[0]
         else:
