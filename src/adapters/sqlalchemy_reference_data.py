@@ -178,6 +178,7 @@ class SqlAlchemyFantasyAdapter(ReadPort):
                     cost=p['cost']
                     )
             )
+        print(SALARY_CAP, CURRENCY)
         return Fantasy(
             id = row['id'],
             name = row['name'],
