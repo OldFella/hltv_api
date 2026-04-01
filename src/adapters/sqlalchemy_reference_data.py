@@ -72,33 +72,56 @@ class SqlAlchemyRankingsAdapter(RankingsPort):
     conn: Connection
 
     def get_rankings(self, date: date|None = None) -> Ranking | None:
-        if date is None:
-            date_sq = select(func.max(rankings.date)).scalar_subquery()
-        else:
-            date_sq = date
+
+        date_filter = [rankings.date <= date] if date is not None else []
+        # if date is not None:
+        #     date_filter.append(rankings.date <= date)
+
+        date_sq = (
+            select(distinct(rankings.date))
+            .where(*date_filter)
+            .order_by(rankings.date.desc()).limit(2).subquery()
+        )
 
         stmnt = (
             select(
                 rankings.teamid.label('id'),
                 teams.name.label('name'),
-                func.rank().over(order_by=rankings.points.desc()).label('rank'),
+                func.rank().over(partition_by=rankings.date, order_by=rankings.points.desc()).label('rank'),
                 rankings.points.label('points'),
                 rankings.date.label('date')
             )
             .join(teams, teams.teamid == rankings.teamid)
-            .where(rankings.date == date_sq)
-            .order_by(rankings.points.desc())
+            .where(rankings.date.in_(date_sq))
+            .order_by(rankings.date.desc(), rankings.points.desc())
         )
+   
+
         rows = self.conn.execute(stmnt).mappings().all()
+
         if not rows:
             return None
+
+        from itertools import groupby
+        grouped_data = [list(group) for _, group in groupby(rows, key=lambda x: x['date'])]
+
+        if len(grouped_data) < 2:
+            # Handle case where only one date exists (no diff possible)
+            # You might want to return 0 for diffs here
+            current_rows, previous_rows = grouped_data[0], grouped_data[0]
+        else:
+            current_rows, previous_rows = grouped_data[0], grouped_data[1]
+
+
         return Ranking(
-            date=rows[0]['date'],
+            date=current_rows[0]['date'],
             rankings = [TeamRank(
-                id = r['id'], 
-                name = r['name'], 
-                rank = r['rank'], 
-                points = r['points']) for r in rows])
+                id = r1['id'], 
+                name = r1['name'], 
+                rank = r1['rank'],
+                rank_diff = r1['rank'] - r2['rank'],
+                points = r1['points'],
+                points_diff = r1['points'] - r2['points']) for r1,r2 in zip(current_rows, previous_rows)])
 
 @dataclass
 class SqlAlchemyFantasyAdapter(ReadPort):

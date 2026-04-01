@@ -9,7 +9,9 @@ class Item:
 @dataclass()
 class TeamRank(Item):
     rank: int
+    rank_diff: int
     points: int
+    points_diff: int
 
 # --- Rankings ---
 @dataclass
